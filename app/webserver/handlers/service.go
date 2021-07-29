@@ -3,25 +3,25 @@ package handlers
 import (
 	"log"
 	"net/http"
-	"photo-contest/business/data"
+	"photo-contest/business/data/user"
 	"text/template"
 	"time"
 
 	"github.com/gorilla/sessions"
+	"github.com/jmoiron/sqlx"
 )
 
 // Service data struct
 type Service struct {
-	log   *log.Logger
-	store *data.DataStore
-	//readers *string
-	//session *sqlitestore.SqliteStore
+	log     *log.Logger
+	db      *sqlx.DB
 	session *sessions.CookieStore
 	t       *template.Template
+	//session *sqlitestore.SqliteStore
 }
 
 // NewService initializes a new Serivice
-func NewService(l *log.Logger, store *data.DataStore, sessionKey string) *Service {
+func NewService(l *log.Logger, db *sqlx.DB, sessionKey string) *Service {
 	// init template
 	funcMap := template.FuncMap{
 		"dayToDate": func(s string) string {
@@ -42,28 +42,45 @@ func NewService(l *log.Logger, store *data.DataStore, sessionKey string) *Servic
 		panic(err)
 	}*/
 
-	//sessStore.Options = &sessions.Options{HttpOnly: true}
-
 	sessStore.Options = &sessions.Options{
 		HttpOnly: true,
 		Path:     "/",
 		MaxAge:   7 * 86400,
 	}
 
-	return &Service{log: l, store: store, t: templates, session: sessStore}
+	return &Service{log: l, db: db, t: templates, session: sessStore}
+}
+
+// Index - about this site
+func (s *Service) Index(rw http.ResponseWriter, r *http.Request) {
+	var usr *user.AuthUser
+	userV := r.Context().Value("user")
+	if userV != nil {
+		usr = userV.(*user.AuthUser)
+	}
+	data := struct {
+		User    *user.AuthUser
+		Message string
+	}{
+		User:    usr,
+		Message: "",
+	}
+	if err := s.t.ExecuteTemplate(rw, "index.gohtml", data); err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 // About - about this site
 func (s *Service) About(rw http.ResponseWriter, r *http.Request) {
-	var user *data.AuthUser
+	var usr *user.AuthUser
 	userV := r.Context().Value("user")
 	if userV != nil {
-		user = userV.(*data.AuthUser)
+		usr = userV.(*user.AuthUser)
 	}
 	data := struct {
-		User *data.AuthUser
+		User *user.AuthUser
 	}{
-		User: user,
+		User: usr,
 	}
 	if err := s.t.ExecuteTemplate(rw, "about.gohtml", data); err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
@@ -72,12 +89,12 @@ func (s *Service) About(rw http.ResponseWriter, r *http.Request) {
 
 // Settings - display settings page
 func (s *Service) Settings(rw http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(*data.AuthUser)
+	usr := r.Context().Value("user").(*user.AuthUser)
 
 	data := struct {
-		User *data.AuthUser
+		User *user.AuthUser
 	}{
-		User: user,
+		User: usr,
 	}
 
 	log.Printf("data:%v+\n", data)

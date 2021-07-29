@@ -2,28 +2,15 @@ package handlers
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net/http"
-	"photo-contest/business/data"
+	"photo-contest/business/data/user"
+	"photo-contest/foundation/database"
 	"strings"
 
 	"github.com/gorilla/csrf"
 )
-
-/*
-//IsLoggedIn will check if the user has an active session and return True
-func (s *Service) IsLoggedIn(r *http.Request) bool {
-	session, err := s.session.Get(r, "session")
-	if err != nil {
-		s.log.Println("error in IsLoggedIn():", err)
-		return false
-	}
-	if session.Values["logged_in"] == true {
-		return true
-	}
-	return false
-}
-*/
 
 // UserSignUp - handles user signup
 func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
@@ -37,20 +24,19 @@ func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
 		}
 	} else if r.Method == "POST" {
 		r.ParseForm()
-		if err := s.t.ExecuteTemplate(rw, "register.gohtml", formData); err != nil {
-			log.Println(err)
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-		}
 
 		name := strings.Trim(r.Form.Get("name"), " ")
 		email := strings.Trim(r.Form.Get("email"), " ")
 		password := strings.Trim(r.Form.Get("password"), " ")
+		password_confirm := strings.Trim(r.Form.Get("password_confirm"), " ")
 
-		log.Println(email, password)
+		log.Println("trying to find user w:", email, password)
 
-		user, err := s.store.GetUser(email)
+		userGroup := user.NewStore(s.log, s.db)
+
+		_, err := userGroup.QueryByEmail(email)
 		s.log.Println("from GetUser:", err)
-		if user != nil {
+		if err != nil && err != database.ErrNotFound {
 			formData["Message"] = "This email is already in use."
 			if err := s.t.ExecuteTemplate(rw, "register.gohtml", formData); err != nil {
 				http.Error(rw, err.Error(), http.StatusInternalServerError)
@@ -58,17 +44,26 @@ func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		user = &data.AuthUser{
-			Name:  name,
-			Email: email,
-			Pass:  password,
+		newUser := user.NewAuthUser{
+			Name:        name,
+			Email:       email,
+			Pass:        password,
+			PassConfirm: password_confirm,
 		}
 
-		err = s.store.CreateUser(user)
+		usr, err := userGroup.Create(newUser)
+		fmt.Printf("usr = %+v\n", usr)
+		fmt.Printf("err = %+v\t%T\n", err, err)
 		if err != nil {
-			http.Error(rw, "Unable to sign user up", http.StatusInternalServerError)
+			log.Println(err)
+			formData["Message"] = err.Error()
+			if err := s.t.ExecuteTemplate(rw, "register.gohtml", formData); err != nil {
+				//http.Error(rw, err.Error(), http.StatusInternalServerError)
+			}
+			//http.Error(rw, "Unable to sign user up", http.StatusInternalServerError)
+			return
 		} else {
-			s.log.Printf("user: %#v", user)
+			//s.log.Printf("user: %#v", usr)
 			http.Redirect(rw, r, "/login", http.StatusFound)
 		}
 	}
@@ -96,30 +91,32 @@ func (s *Service) UserLogIn(rw http.ResponseWriter, r *http.Request) {
 		email := strings.Trim(r.Form.Get("email"), " ")
 		password := strings.Trim(r.Form.Get("password"), " ")
 
-		user, err := s.store.GetUser(email)
-		if err != nil {
-			//http.Error(rw, err.Error(), http.StatusInternalServerError)
-		} else if user != nil && user.CheckPasswd(password) {
+		userGroup := user.NewStore(s.log, s.db)
+		//if err != nil {
+		//	//http.Error(rw, err.Error(), http.StatusInternalServerError)
+		//} else
+		usr, err := userGroup.Authenticate(email, password)
+		//log.Printf("usr = %+v\n", usr)
+		//log.Printf("err = %+v\n", err)
+		if err == nil && usr != nil {
 			session, err := s.session.Get(r, "session")
 			if err != nil {
 				http.Error(rw, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			//s.log.Printf("user checked OK: %v", user)
-
 			session.Values["logged_in"] = true
-			session.Values["user_id"] = user.ID
-			session.Values["name"] = user.Name
+			session.Values["user_id"] = usr.ID
+			session.Values["name"] = usr.Name
 
-			//readers, _ := s.store.GetUserReaders(user.ID)
-			//session.Values["readers"] = readers //.([]data.Reader)
 			err = session.Save(r, rw)
 			if err != nil {
+				log.Printf("err = %+v\n", err)
 				http.Error(rw, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
+			log.Println("all's good. will be redirecting to / now..")
 			http.Redirect(rw, r, "/", http.StatusFound)
 			return
 		}
@@ -154,7 +151,14 @@ func (s *Service) UserLogOut(rw http.ResponseWriter, r *http.Request) {
 // UserAuth provides middleware functions for authorizing users and setting the user
 // in the request context.
 type Auth struct {
-	Service *Service
+	service *Service
+}
+
+// NewAuth constructs a Auth object store for checking logged in user.
+func NewAuth(s *Service) Auth {
+	return Auth{
+		service: s,
+	}
 }
 
 // UserViaSession will retrieve the current user set by the session cookie
@@ -165,7 +169,7 @@ type Auth struct {
 func (a *Auth) UserViaSession(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		session, err := a.Service.session.Get(r, "session")
+		session, err := a.service.session.Get(r, "session")
 		if err != nil {
 			next.ServeHTTP(w, r)
 			return
@@ -177,7 +181,9 @@ func (a *Auth) UserViaSession(next http.Handler) http.HandlerFunc {
 		}
 
 		user_id, _ := session.Values["user_id"].(int)
-		user, err := a.Service.store.GetUserByID(user_id)
+
+		userGroup := user.NewStore(a.service.log, a.service.db)
+		usr, err := userGroup.QueryByID(user_id)
 		if err != nil {
 			// If you want you can retain the original functionality to call
 			// http.Error if any error aside from app.ErrNotFound is returned,
@@ -187,7 +193,7 @@ func (a *Auth) UserViaSession(next http.Handler) http.HandlerFunc {
 			next.ServeHTTP(w, r)
 			return
 		}
-		r = r.WithContext(context.WithValue(r.Context(), "user", user))
+		r = r.WithContext(context.WithValue(r.Context(), "user", &usr))
 		next.ServeHTTP(w, r)
 	}
 }
@@ -202,7 +208,7 @@ func (a *Auth) RequireUser(next http.Handler) http.HandlerFunc {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
-		if _, ok := tmp.(*data.AuthUser); !ok {
+		if _, ok := tmp.(*user.AuthUser); !ok {
 			// Whatever was set in the user key isn't a user, so we probably need to
 			// sign in.
 			http.Redirect(w, r, "/login", http.StatusFound)

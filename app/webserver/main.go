@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/signal"
 	"photo-contest/app/webserver/handlers"
-	"photo-contest/business/data"
 	"photo-contest/business/web"
 	"photo-contest/foundation/database"
 	"syscall"
@@ -106,31 +105,24 @@ func run(log *log.Logger) error {
 		db.Close()
 	}()
 
-	dataStore := &data.DataStore{DB: db, L: log}
+	//dataStore := &data.DataStore{DB: db, L: log}
 
-	sqliteVersion, _ := dataStore.GetSQLiteVersion()
+	sqliteVersion, _ := database.GetSQLiteVersion(db)
 	log.Println("using SQLite version", sqliteVersion)
 
 	log.Println("about to start server on ", cfg.Web.BindAddress)
 
-	service := handlers.NewService(log, dataStore, cfg.Web.SessionKey)
+	service := handlers.NewService(log, db, cfg.Web.SessionKey)
 
 	// auth midleware...
-	authMw := handlers.Auth{
-		Service: service,
-	}
+	authMw := handlers.NewAuth(service)
 
 	sm := mux.NewRouter()
-	/*getRouter := sm.Methods("GET").Subrouter()
-	getRouter.HandleFunc("/", service.GetReadings)
+	sm.Handle("/", web.WrapMiddleware(service.Index, authMw.UserViaSession))
+	sm.Handle("/about", web.WrapMiddleware(service.About, authMw.UserViaSession))
 
-	postRouter := sm.Methods("POST").Subrouter()
-	postRouter.HandleFunc("/add", service.AddReading)
-	*/
 	sm.Handle("/settings", web.WrapMiddleware(service.Settings, authMw.UserViaSession, authMw.RequireUser))
 	//sm.Handle("/updategroup/{id:[0-9]+}", web.WrapMiddleware(service.UpdateGroup, authMw.UserViaSession, authMw.RequireUser)).Methods("POST").HeadersRegexp("Content-Type", "application/json")
-
-	sm.Handle("/about", web.WrapMiddleware(service.About, authMw.UserViaSession))
 
 	// make sure we set Secure to true for production
 	csrfMiddleware := csrf.Protect([]byte(cfg.Web.CsrfKey), csrf.Secure(false))

@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq" // Calls init function.
+	_ "github.com/mattn/go-sqlite3"
 )
 
 // Set of error variables for CRUD operations.
@@ -56,10 +56,14 @@ func Open(cfg Config) (*sqlx.DB, error) {
 		Path:     cfg.Path,
 		RawQuery: q.Encode(),
 	}
+	conn_str := u.String()
+	if cfg.Path == ":memory:" {
+		conn_str = ":memory:"
+	}
 
-	fmt.Println(u.String())
+	fmt.Println(conn_str)
 
-	db, err := sqlx.Open("sqlite3", u.String())
+	db, err := sqlx.Open("sqlite3", conn_str)
 	if err != nil {
 		return nil, err
 	}
@@ -123,8 +127,8 @@ func NamedQuerySlice(ctx context.Context, db *sqlx.DB, query string, data interf
 
 // NamedQueryStruct is a helper function for executing queries that return a
 // single value to be unmarshalled into a struct type.
-func NamedQueryStruct(ctx context.Context, db *sqlx.DB, query string, data interface{}, dest interface{}) error {
-	rows, err := db.NamedQueryContext(ctx, query, data)
+func NamedQueryStruct(db *sqlx.DB, query string, data interface{}, dest interface{}) error {
+	rows, err := db.NamedQuery(query, data)
 	if err != nil {
 		return err
 	}
@@ -163,4 +167,17 @@ func Log(query string, args ...interface{}) string {
 	query = strings.Replace(query, "\n", " ", -1)
 
 	return fmt.Sprintf("[%s]\n", strings.Trim(query, " "))
+}
+
+// GetSQLiteVersion -
+func GetSQLiteVersion(db *sqlx.DB) (string, error) {
+	const query = `SELECT sqlite_version()`
+
+	//var row *sql.Row
+	row := db.QueryRow(query)
+
+	var version string
+	err := row.Scan(&version)
+
+	return version, err
 }
