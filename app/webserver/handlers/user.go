@@ -173,7 +173,7 @@ func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
 		name := strings.Trim(r.Form.Get("name"), " ")
 		email := strings.Trim(r.Form.Get("email"), " ")
 
-		log.Println("trying to find user w:", email, name)
+		log.Println("trying to update user w:", email, name)
 
 		uu := user.UpdateAuthUser{
 			Name:  name,
@@ -201,6 +201,52 @@ func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
 			return
 		} else {
 			http.Redirect(rw, r, "/profile", http.StatusFound)
+		}
+	}
+}
+
+// UserUpdatePassword - allows profile to be updated
+func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
+	var usr *user.AuthUser
+	userV := r.Context().Value("user")
+	if userV != nil {
+		usr = userV.(*user.AuthUser)
+	}
+	//session, err := s.session.Get(r, "session")
+	formData := map[string]interface{}{
+		csrf.TemplateTag: csrf.TemplateField(r),
+	}
+
+	if r.Method == "GET" {
+		rw.Header().Add("Cache-Control", "no-cache")
+		if err := s.t.ExecuteTemplate(rw, "password.gohtml", formData); err != nil {
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+		}
+	} else if r.Method == "POST" {
+		r.ParseForm()
+
+		password := strings.Trim(r.Form.Get("password"), " ")
+		password_confirm := strings.Trim(r.Form.Get("password_confirm"), " ")
+
+		log.Println("trying to update user password: ", usr.ID)
+
+		up := user.UpdateAuthUserPass{
+			Pass:        password,
+			PassConfirm: password_confirm,
+		}
+		userGroup := user.NewStore(s.log, s.db)
+
+		_, err := userGroup.UpdatePass(usr.ID, up)
+		if err != nil {
+			log.Println(err)
+			formData["Message"] = err.Error()
+			if err := s.t.ExecuteTemplate(rw, "password.gohtml", formData); err != nil {
+				//http.Error(rw, err.Error(), http.StatusInternalServerError)
+			}
+			//http.Error(rw, "Unable to sign user up", http.StatusInternalServerError)
+			return
+		} else {
+			http.Redirect(rw, r, "/", http.StatusFound)
 		}
 	}
 }
