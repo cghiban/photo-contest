@@ -129,6 +129,7 @@ func NamedQuerySlice(ctx context.Context, db *sqlx.DB, query string, data interf
 // single value to be unmarshalled into a struct type.
 func NamedQueryStruct(db *sqlx.DB, query string, data interface{}, dest interface{}) error {
 	rows, err := db.NamedQuery(query, data)
+	defer rows.Close()
 	if err != nil {
 		return err
 	}

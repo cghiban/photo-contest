@@ -20,3 +20,15 @@ type NewAuthUser struct {
 	Pass        string `json:"pass" valdate:"required"`
 	PassConfirm string `json:"pass_confirm" validate:"eqfield=Pass"`
 }
+
+// UpdateAuthUser - struct for updating users
+type UpdateAuthUser struct {
+	Name  string `json:"name" validate:"required"`
+	Email string `json:"email" validate:"required"`
+}
+
+// UpdateAuthUserPass - struct for updating users' passwords
+type UpdateAuthUserPass struct {
+	Pass        string `json:"pass" valdate:"required"`
+	PassConfirm string `json:"pass_confirm" validate:"eqfield=Pass"`
+}

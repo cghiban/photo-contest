@@ -41,6 +41,31 @@ func TestUser(t *testing.T) {
 			}
 			t.Logf("\t%s\tTest %d:\tShould get back the same user.", tests.Success, testID)
 
+			uu := user.UpdateAuthUser{
+				Name:  "Cornel",
+				Email: "ghiban@cshl.edu",
+			}
+			updated_user, err := store.Update(usr.ID, uu)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to update user with ID: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to update user with ID.", tests.Success, testID)
+			if usr.ID != updated_user.ID {
+				t.Fatalf("\t%s\tTest %d:\tShould get back the same user id. %d != %d", tests.Failed, testID, usr.ID, updated_user.ID)
+			}
+
+			up := user.UpdateAuthUserPass{
+				Pass:        "DecentTulipCat",
+				PassConfirm: "DecentTulipCat",
+			}
+			updated_pass_user, err := store.UpdatePass(usr.ID, up)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to update password of user with ID: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to update password of user with ID.", tests.Success, testID)
+			if usr.ID != updated_pass_user.ID {
+				t.Fatalf("\t%s\tTest %d:\tShould get back the same user id. %d != %d", tests.Failed, testID, usr.ID, updated_user.ID)
+			}
 		}
 	}
 }

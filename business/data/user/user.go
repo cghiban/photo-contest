@@ -128,6 +128,72 @@ func (s Store) QueryByID(user_id int) (AuthUser, error) {
 
 }
 
+// Update - update user name and email
+func (s Store) Update(user_id int, uu UpdateAuthUser) (AuthUser, error) {
+
+	if err := validate.Check(uu); err != nil {
+		return AuthUser{}, errors.Wrap(err, "validating data")
+	}
+
+	usr := AuthUser{
+		ID:    user_id,
+		Name:  uu.Name,
+		Email: uu.Email,
+	}
+
+	const query = `
+	UPDATE auth_user SET email = :email
+		AND name = :name WHERE user_id = :user_id`
+
+	s.log.Printf("%s: %s", "user.Update", database.Log(query, usr))
+
+	res, err := s.db.NamedExec(query, usr)
+	if err != nil {
+		return AuthUser{}, errors.Wrap(err, "updating user")
+	}
+
+	rowNum, _ := res.RowsAffected()
+	s.log.Println(" -- updated auth_user: ", rowNum)
+
+	return usr, nil
+
+}
+
+// UpdatePass - update user password
+func (s Store) UpdatePass(user_id int, up UpdateAuthUserPass) (AuthUser, error) {
+
+	if err := validate.Check(up); err != nil {
+		return AuthUser{}, errors.Wrap(err, "validating data")
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(up.Pass), bcrypt.DefaultCost)
+	if err != nil {
+		return AuthUser{}, errors.Wrap(err, "generating password hash")
+	}
+
+	usr := AuthUser{
+		ID:   user_id,
+		Pass: hash,
+	}
+
+	const query = `
+	UPDATE auth_user SET passw = :passw
+		WHERE user_id = :user_id`
+
+	s.log.Printf("%s: %s", "user.UpdatePass", database.Log(query, usr))
+
+	res, err := s.db.NamedExec(query, usr)
+	if err != nil {
+		return AuthUser{}, errors.Wrap(err, "updating user password")
+	}
+
+	rowNum, _ := res.RowsAffected()
+	s.log.Println(" -- updated auth_user password: ", rowNum)
+
+	return usr, nil
+
+}
+
 // Authenticate finds a user by their email and verifies their password. On
 // success it returns the AuthUser instance
 func (s Store) Authenticate(email, password string) (*AuthUser, error) {
