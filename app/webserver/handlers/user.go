@@ -56,7 +56,11 @@ func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
 		fmt.Printf("err = %+v\t%T\n", err, err)
 		if err != nil {
 			log.Println(err)
-			formData["Message"] = err.Error()
+			if strings.Contains(err.Error(), "pass_confirm must be equal to Pass") {
+				formData["Message"] = "Passwords do not match"
+			} else {
+				formData["Message"] = err.Error()
+			}
 			if err := s.t.ExecuteTemplate(rw, "register.gohtml", formData); err != nil {
 				//http.Error(rw, err.Error(), http.StatusInternalServerError)
 			}
@@ -225,28 +229,44 @@ func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "POST" {
 		r.ParseForm()
 
+		old_password := strings.Trim(r.Form.Get("old_password"), " ")
 		password := strings.Trim(r.Form.Get("password"), " ")
 		password_confirm := strings.Trim(r.Form.Get("password_confirm"), " ")
-
-		log.Println("trying to update user password: ", usr.ID)
-
-		up := user.UpdateAuthUserPass{
-			Pass:        password,
-			PassConfirm: password_confirm,
-		}
 		userGroup := user.NewStore(s.log, s.db)
-
-		_, err := userGroup.UpdatePass(usr.ID, up)
+		usr, err := userGroup.Authenticate(usr.Email, old_password)
 		if err != nil {
 			log.Println(err)
-			formData["Message"] = err.Error()
+			formData["Message"] = "Incorrect former password"
 			if err := s.t.ExecuteTemplate(rw, "password.gohtml", formData); err != nil {
 				//http.Error(rw, err.Error(), http.StatusInternalServerError)
 			}
 			//http.Error(rw, "Unable to sign user up", http.StatusInternalServerError)
 			return
-		} else {
-			http.Redirect(rw, r, "/", http.StatusFound)
+		}
+		if err == nil && usr != nil {
+			log.Println("trying to update user password: ", usr.ID)
+
+			up := user.UpdateAuthUserPass{
+				Pass:        password,
+				PassConfirm: password_confirm,
+			}
+
+			_, err := userGroup.UpdatePass(usr.ID, up)
+			if err != nil {
+				log.Println(err)
+				if strings.Contains(err.Error(), "pass_confirm must be equal to Pass") {
+					formData["Message"] = "Passwords do not match"
+				} else {
+					formData["Message"] = err.Error()
+				}
+				if err := s.t.ExecuteTemplate(rw, "password.gohtml", formData); err != nil {
+					//http.Error(rw, err.Error(), http.StatusInternalServerError)
+				}
+				//http.Error(rw, "Unable to sign user up", http.StatusInternalServerError)
+				return
+			} else {
+				http.Redirect(rw, r, "/", http.StatusFound)
+			}
 		}
 	}
 }
