@@ -154,12 +154,8 @@ func (s *Service) UserLogOut(rw http.ResponseWriter, r *http.Request) {
 
 // UserUpdateProfile - allows profile to be updated
 func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
-	var usr *user.AuthUser
-	userV := r.Context().Value("user")
-	if userV != nil {
-		usr = userV.(*user.AuthUser)
-	}
-	//session, err := s.session.Get(r, "session")
+	usr := r.Context().Value("user").(*user.AuthUser)
+
 	formData := map[string]interface{}{
 		"name":           usr.Name,
 		"email":          usr.Email,
@@ -199,24 +195,19 @@ func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			formData["Message"] = err.Error()
 			if err := s.t.ExecuteTemplate(rw, "profile.gohtml", formData); err != nil {
-				//http.Error(rw, err.Error(), http.StatusInternalServerError)
+				http.Error(rw, err.Error(), http.StatusInternalServerError)
 			}
-			//http.Error(rw, "Unable to sign user up", http.StatusInternalServerError)
 			return
-		} else {
-			http.Redirect(rw, r, "/profile", http.StatusFound)
 		}
+
+		http.Redirect(rw, r, "/profile", http.StatusFound)
 	}
 }
 
 // UserUpdatePassword - allows profile to be updated
 func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
-	var usr *user.AuthUser
-	userV := r.Context().Value("user")
-	if userV != nil {
-		usr = userV.(*user.AuthUser)
-	}
-	//session, err := s.session.Get(r, "session")
+	usr := r.Context().Value("user").(*user.AuthUser)
+
 	formData := map[string]interface{}{
 		csrf.TemplateTag: csrf.TemplateField(r),
 	}
@@ -238,12 +229,12 @@ func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
 			log.Println(err)
 			formData["Message"] = "Incorrect former password"
 			if err := s.t.ExecuteTemplate(rw, "password.gohtml", formData); err != nil {
-				//http.Error(rw, err.Error(), http.StatusInternalServerError)
+				http.Error(rw, err.Error(), http.StatusInternalServerError)
 			}
-			//http.Error(rw, "Unable to sign user up", http.StatusInternalServerError)
 			return
 		}
-		if err == nil && usr != nil {
+
+		if usr != nil {
 			log.Println("trying to update user password: ", usr.ID)
 
 			up := user.UpdateAuthUserPass{
@@ -260,13 +251,12 @@ func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
 					formData["Message"] = err.Error()
 				}
 				if err := s.t.ExecuteTemplate(rw, "password.gohtml", formData); err != nil {
-					//http.Error(rw, err.Error(), http.StatusInternalServerError)
+					http.Error(rw, err.Error(), http.StatusInternalServerError)
 				}
-				//http.Error(rw, "Unable to sign user up", http.StatusInternalServerError)
 				return
-			} else {
-				http.Redirect(rw, r, "/", http.StatusFound)
 			}
+
+			http.Redirect(rw, r, "/", http.StatusFound)
 		}
 	}
 }
@@ -279,9 +269,7 @@ type Auth struct {
 
 // NewAuth constructs a Auth object store for checking logged in user.
 func NewAuth(s *Service) Auth {
-	return Auth{
-		service: s,
-	}
+	return Auth{service: s}
 }
 
 // UserViaSession will retrieve the current user set by the session cookie

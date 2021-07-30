@@ -131,8 +131,8 @@ func run(log *log.Logger) error {
 	userRouter.HandleFunc("/register", service.UserSignUp)
 	userRouter.HandleFunc("/login", service.UserLogIn)
 	userRouter.HandleFunc("/logout", service.UserLogOut)
-	sm.Handle("/profile", web.WrapMiddleware(service.UserUpdateProfile, authMw.UserViaSession, authMw.RequireUser))
-	sm.Handle("/password", web.WrapMiddleware(service.UserUpdatePassword, authMw.UserViaSession, authMw.RequireUser))
+	userRouter.Handle("/profile", web.WrapMiddleware(service.UserUpdateProfile, authMw.UserViaSession, authMw.RequireUser))
+	userRouter.Handle("/password", web.WrapMiddleware(service.UserUpdatePassword, authMw.UserViaSession, authMw.RequireUser))
 
 	sm.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("var/static/"))))
 
