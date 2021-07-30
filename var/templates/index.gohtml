@@ -10,8 +10,10 @@
     </head>
   <body>
     <div class="welcome-center">
+        <a href="/">Home</a>
         <a href="/about">About</a>
         {{if .User}}
+        <a href="/profile">Update Profile</a>
         <a href="/logout">Logout</a>
         {{else}}
         <a href="/register">Register</a>

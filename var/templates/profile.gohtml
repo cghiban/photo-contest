@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/static/styles.css">
+
+        <title>Update Profile - Photo Contest</title>
+    </head>
+  <body>
+    <div class="welcome-center">
+        <a href="/">Home</a>
+        <a href="/about">About</a>
+        <a href="/profile">Update Profile</a>
+        <a href="/logout">Logout</a>
+        <h1>Update Profile</h1>
+    </div>
+
+    {{if .Message}}
+    <div class="message">{{.Message}}</div>
+    {{end}}
+
+    <form method="POST" action="/profile">
+        {{ .csrfField }}
+        <div>
+            <label>Your Name</label>
+            <input type="text" name="name" value="{{ .name }}" required>
+        </div>
+        <div>
+            <label>Email</label>
+            <input type="text" name="email" value="{{ .email }}" required>
+        </div>
+        <div>
+            <label></label>
+            <button>Update</button>
+        </div>
+    </form>
+  </body>
+</html>

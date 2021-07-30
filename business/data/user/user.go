@@ -142,8 +142,7 @@ func (s Store) Update(user_id int, uu UpdateAuthUser) (AuthUser, error) {
 	}
 
 	const query = `
-	UPDATE auth_user SET email = :email
-		AND name = :name WHERE user_id = :user_id`
+	UPDATE auth_user SET email = :email, name = :name WHERE user_id = :user_id`
 
 	s.log.Printf("%s: %s", "user.Update", database.Log(query, usr))
 

@@ -148,6 +148,63 @@ func (s *Service) UserLogOut(rw http.ResponseWriter, r *http.Request) {
 	http.Redirect(rw, r, "/", http.StatusFound)
 }
 
+// UserUpdateProfile - allows profile to be updated
+func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
+	var usr *user.AuthUser
+	userV := r.Context().Value("user")
+	if userV != nil {
+		usr = userV.(*user.AuthUser)
+	}
+	//session, err := s.session.Get(r, "session")
+	formData := map[string]interface{}{
+		"name":           usr.Name,
+		"email":          usr.Email,
+		csrf.TemplateTag: csrf.TemplateField(r),
+	}
+
+	if r.Method == "GET" {
+		rw.Header().Add("Cache-Control", "no-cache")
+		if err := s.t.ExecuteTemplate(rw, "profile.gohtml", formData); err != nil {
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+		}
+	} else if r.Method == "POST" {
+		r.ParseForm()
+
+		name := strings.Trim(r.Form.Get("name"), " ")
+		email := strings.Trim(r.Form.Get("email"), " ")
+
+		log.Println("trying to find user w:", email, name)
+
+		uu := user.UpdateAuthUser{
+			Name:  name,
+			Email: email,
+		}
+		userGroup := user.NewStore(s.log, s.db)
+
+		u, _ := userGroup.QueryByEmail(email)
+		if u.ID != 0 && u.ID != usr.ID {
+			formData["Message"] = "This email is already in use."
+			if err := s.t.ExecuteTemplate(rw, "profile.gohtml", formData); err != nil {
+				http.Error(rw, err.Error(), http.StatusInternalServerError)
+			}
+			return
+		}
+
+		_, err := userGroup.Update(usr.ID, uu)
+		if err != nil {
+			log.Println(err)
+			formData["Message"] = err.Error()
+			if err := s.t.ExecuteTemplate(rw, "profile.gohtml", formData); err != nil {
+				//http.Error(rw, err.Error(), http.StatusInternalServerError)
+			}
+			//http.Error(rw, "Unable to sign user up", http.StatusInternalServerError)
+			return
+		} else {
+			http.Redirect(rw, r, "/profile", http.StatusFound)
+		}
+	}
+}
+
 // UserAuth provides middleware functions for authorizing users and setting the user
 // in the request context.
 type Auth struct {
