@@ -3,7 +3,6 @@ package handlers
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
 	"photo-contest/business/data/user"
 	"photo-contest/foundation/database"
@@ -30,7 +29,7 @@ func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
 		password := strings.Trim(r.Form.Get("password"), " ")
 		password_confirm := strings.Trim(r.Form.Get("password_confirm"), " ")
 
-		log.Println("trying to find user w:", email, password)
+		s.log.Println("trying to find user w:", email, password)
 
 		userGroup := user.NewStore(s.log, s.db)
 
@@ -55,19 +54,14 @@ func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
 		fmt.Printf("usr = %+v\n", usr)
 		fmt.Printf("err = %+v\t%T\n", err, err)
 		if err != nil {
-			log.Println(err)
-			if strings.Contains(err.Error(), "pass_confirm must be equal to Pass") {
-				formData["Message"] = "Passwords do not match"
-			} else {
-				formData["Message"] = err.Error()
-			}
+			s.log.Println(err)
+			formData["Message"] = err.Error()
 			if err := s.t.ExecuteTemplate(rw, "register.gohtml", formData); err != nil {
 				//http.Error(rw, err.Error(), http.StatusInternalServerError)
 			}
-			//http.Error(rw, "Unable to sign user up", http.StatusInternalServerError)
+			http.Error(rw, "Unable to sign user up", http.StatusInternalServerError)
 			return
 		} else {
-			//s.log.Printf("user: %#v", usr)
 			http.Redirect(rw, r, "/login", http.StatusFound)
 		}
 	}
@@ -96,12 +90,7 @@ func (s *Service) UserLogIn(rw http.ResponseWriter, r *http.Request) {
 		password := strings.Trim(r.Form.Get("password"), " ")
 
 		userGroup := user.NewStore(s.log, s.db)
-		//if err != nil {
-		//	//http.Error(rw, err.Error(), http.StatusInternalServerError)
-		//} else
 		usr, err := userGroup.Authenticate(email, password)
-		//log.Printf("usr = %+v\n", usr)
-		//log.Printf("err = %+v\n", err)
 		if err == nil && usr != nil {
 			session, err := s.session.Get(r, "session")
 			if err != nil {
@@ -115,12 +104,12 @@ func (s *Service) UserLogIn(rw http.ResponseWriter, r *http.Request) {
 
 			err = session.Save(r, rw)
 			if err != nil {
-				log.Printf("err = %+v\n", err)
+				s.log.Printf("err = %+v\n", err)
 				http.Error(rw, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			log.Println("all's good. will be redirecting to / now..")
+			s.log.Println("all's good. will be redirecting to / now..")
 			http.Redirect(rw, r, "/", http.StatusFound)
 			return
 		}
@@ -173,7 +162,7 @@ func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
 		name := strings.Trim(r.Form.Get("name"), " ")
 		email := strings.Trim(r.Form.Get("email"), " ")
 
-		log.Println("trying to update user w:", email, name)
+		s.log.Println("trying to update user w:", email, name)
 
 		uu := user.UpdateAuthUser{
 			Name:  name,
@@ -192,7 +181,7 @@ func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
 
 		_, err := userGroup.Update(usr.ID, uu)
 		if err != nil {
-			log.Println(err)
+			s.log.Println(err)
 			formData["Message"] = err.Error()
 			if err := s.t.ExecuteTemplate(rw, "profile.gohtml", formData); err != nil {
 				http.Error(rw, err.Error(), http.StatusInternalServerError)
@@ -223,10 +212,11 @@ func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
 		old_password := strings.Trim(r.Form.Get("old_password"), " ")
 		password := strings.Trim(r.Form.Get("password"), " ")
 		password_confirm := strings.Trim(r.Form.Get("password_confirm"), " ")
+
 		userGroup := user.NewStore(s.log, s.db)
 		usr, err := userGroup.Authenticate(usr.Email, old_password)
 		if err != nil {
-			log.Println(err)
+			s.log.Println(err)
 			formData["Message"] = "Incorrect former password"
 			if err := s.t.ExecuteTemplate(rw, "password.gohtml", formData); err != nil {
 				http.Error(rw, err.Error(), http.StatusInternalServerError)
@@ -235,7 +225,7 @@ func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
 		}
 
 		if usr != nil {
-			log.Println("trying to update user password: ", usr.ID)
+			s.log.Println("trying to update user password: ", usr.ID)
 
 			up := user.UpdateAuthUserPass{
 				Pass:        password,
@@ -244,12 +234,8 @@ func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
 
 			_, err := userGroup.UpdatePass(usr.ID, up)
 			if err != nil {
-				log.Println(err)
-				if strings.Contains(err.Error(), "pass_confirm must be equal to Pass") {
-					formData["Message"] = "Passwords do not match"
-				} else {
-					formData["Message"] = err.Error()
-				}
+
+				formData["Message"] = err.Error()
 				if err := s.t.ExecuteTemplate(rw, "password.gohtml", formData); err != nil {
 					http.Error(rw, err.Error(), http.StatusInternalServerError)
 				}

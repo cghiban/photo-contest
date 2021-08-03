@@ -1,7 +1,6 @@
 package validate
 
 import (
-	"encoding/json"
 	"errors"
 )
 
@@ -43,6 +42,7 @@ type FieldError struct {
 // FieldErrors represents a collection of field errors.
 type FieldErrors []FieldError
 
+/*
 // Error implments the error interface.
 func (fe FieldErrors) Error() string {
 	d, err := json.Marshal(fe)
@@ -50,4 +50,14 @@ func (fe FieldErrors) Error() string {
 		return err.Error()
 	}
 	return string(d)
+}
+*/
+
+// Error implments the error interface.
+func (fe FieldErrors) Error() string {
+	out := ""
+	for _, e := range fe {
+		out += "<div>" + e.Error + "</div>\n"
+	}
+	return out
 }

@@ -57,8 +57,8 @@ func (s Store) Create(nu NewAuthUser) (AuthUser, error) {
 		return AuthUser{}, errors.Wrap(err, "inserting user")
 	}
 
-	rowNum, _ := res.RowsAffected()
-	s.log.Println(" -- added to auth_user: ", rowNum)
+	//rowNum, _ := res.RowsAffected()
+	//s.log.Println(" -- added to auth_user: ", rowNum)
 
 	id, err := res.LastInsertId()
 	if err != nil {
@@ -146,13 +146,14 @@ func (s Store) Update(user_id int, uu UpdateAuthUser) (AuthUser, error) {
 
 	s.log.Printf("%s: %s", "user.Update", database.Log(query, usr))
 
-	res, err := s.db.NamedExec(query, usr)
+	_, err := s.db.NamedExec(query, usr)
 	if err != nil {
 		return AuthUser{}, errors.Wrap(err, "updating user")
 	}
 
-	rowNum, _ := res.RowsAffected()
-	s.log.Println(" -- updated auth_user: ", rowNum)
+	// res, err := s.db.NamedExec(...)
+	//rowNum, _ := res.RowsAffected()
+	//s.log.Println(" -- updated auth_user: ", rowNum)
 
 	return usr, nil
 
@@ -181,13 +182,13 @@ func (s Store) UpdatePass(user_id int, up UpdateAuthUserPass) (AuthUser, error) 
 
 	s.log.Printf("%s: %s", "user.UpdatePass", database.Log(query, usr))
 
-	res, err := s.db.NamedExec(query, usr)
+	_, err = s.db.NamedExec(query, usr)
 	if err != nil {
 		return AuthUser{}, errors.Wrap(err, "updating user password")
 	}
 
-	rowNum, _ := res.RowsAffected()
-	s.log.Println(" -- updated auth_user password: ", rowNum)
+	//rowNum, _ := res.RowsAffected()
+	//s.log.Println(" -- updated auth_user password: ", rowNum)
 
 	return usr, nil
 

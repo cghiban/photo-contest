@@ -17,18 +17,18 @@ type AuthUser struct {
 type NewAuthUser struct {
 	Name        string `json:"name" validate:"required"`
 	Email       string `json:"email" validate:"required"`
-	Pass        string `json:"pass" valdate:"required"`
+	Pass        string `json:"pass" validate:"required"`
 	PassConfirm string `json:"pass_confirm" validate:"eqfield=Pass"`
 }
 
 // UpdateAuthUser - struct for updating users
 type UpdateAuthUser struct {
 	Name  string `json:"name" validate:"required"`
-	Email string `json:"email" validate:"required"`
+	Email string `json:"email" validate:"required,email"`
 }
 
 // UpdateAuthUserPass - struct for updating users' passwords
 type UpdateAuthUserPass struct {
-	Pass        string `json:"pass" valdate:"required"`
+	Pass        string `json:"pass" validate:"required"`
 	PassConfirm string `json:"pass_confirm" validate:"eqfield=Pass"`
 }

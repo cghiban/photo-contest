@@ -65,6 +65,31 @@ func Check(val interface{}) error {
 	return nil
 }
 
+// Validate validates the provided model against it's declared tags.
+func Validate(val interface{}) FieldErrors {
+	if err := validate.Struct(val); err != nil {
+
+		// Use a type assertion to get the real error value.
+		verrors, ok := err.(validator.ValidationErrors)
+		if !ok {
+			return nil
+		}
+
+		var fields FieldErrors
+		for _, verror := range verrors {
+			field := FieldError{
+				Field: verror.Field(),
+				Error: verror.Translate(translator),
+			}
+			fields = append(fields, field)
+		}
+
+		return fields
+	}
+
+	return nil
+}
+
 // GenerateID generate a unique id for entities.
 func GenerateID() string {
 	return uuid.New().String()
