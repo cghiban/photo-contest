@@ -61,3 +61,61 @@ func (s Store) Create(np NewPhoto) (Photo, error) {
 
 	return pht, nil
 }
+
+// QueryByID - return given photo
+func (s Store) QueryByID(photoID string) (Photo, error) {
+
+	if err := validate.CheckID(photoID); err != nil {
+		return Photo{}, database.ErrInvalidID
+	}
+
+	data := struct {
+		PhotoID string `db:"photo_id"`
+	}{
+		PhotoID: photoID,
+	}
+	const query = `
+        SELECT photo_id, owner_id, title, description, created_on, updated_on, updated_by
+		FROM photos
+		WHERE photo_id = :photo_id`
+
+	s.log.Printf("%s %s", "photo.QueryByID", database.Log(query, data))
+
+	var pht Photo
+	if err := database.NamedQueryStruct(s.db, query, data, &pht); err != nil {
+		if err == database.ErrNotFound {
+			return Photo{}, database.ErrNotFound
+		}
+		return Photo{}, errors.Wrapf(err, "selecting photo %q", data.PhotoID)
+	}
+
+	return pht, nil
+}
+
+// QueryByOwnerID - return a list of photos
+func (s Store) QueryByOwnerID(ownerID int) ([]Photo, error) {
+
+	data := struct {
+		OwnerID int `db:"owner_id"`
+	}{
+		OwnerID: ownerID,
+	}
+	const query = `
+        SELECT photo_id, owner_id, title, description, created_on, updated_on, updated_by
+		FROM photos
+		WHERE owner_id = :owner_id`
+
+	s.log.Printf("%s %s", "photo.QueryByOwnerID", database.Log(query, data))
+
+	var photos []Photo
+	if err := database.NamedQuerySlice(s.db, query, data, &photos); err != nil {
+		/*s.log.Printf("ERR: %s\n", err)
+		if err == database.ErrNotFound {
+			s.log.Printf("ERR: %s\n", err)
+			return nil, database.ErrNotFound
+		}*/
+		return nil, errors.Wrapf(err, "selecting photos by owner_id %q", data.OwnerID)
+	}
+
+	return photos, nil
+}

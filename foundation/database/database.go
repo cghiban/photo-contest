@@ -102,13 +102,13 @@ func StatusCheck(ctx context.Context, db *sqlx.DB) error {
 
 // NamedQuerySlice is a helper function for executing queries that return a
 // collection of data to be unmarshaled into a slice.
-func NamedQuerySlice(ctx context.Context, db *sqlx.DB, query string, data interface{}, dest interface{}) error {
+func NamedQuerySlice(db *sqlx.DB, query string, data interface{}, dest interface{}) error {
 	val := reflect.ValueOf(dest)
 	if val.Kind() != reflect.Ptr || val.Elem().Kind() != reflect.Slice {
 		return errors.New("must provide a pointer to a slice")
 	}
 
-	rows, err := db.NamedQueryContext(ctx, query, data)
+	rows, err := db.NamedQuery(query, data)
 	if err != nil {
 		return err
 	}
