@@ -83,4 +83,23 @@ CREATE INDEX cp_contest_id_ndx ON contest_photos(contest_id);
 CREATE INDEX cp_photo_id_ndx ON contest_photos(photo_id);
 CREATE INDEX cp_status_ndx ON contest_photos(status);
 
+-- Version: 1.5
+-- Description: Create table contest_photo_votes
+CREATE TABLE contest_photo_votes (
+    v_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    v_contest_id INTEGER NOT NULL DEFAULT 0,
+    v_photo_id TEXT NOT NULL, --uuid
+    v_user_id INTEGER NOT NULL,
+    v_score INTEGER NOT NULL DEFAULT 1,
+    v_created_on DATETIME NOT NULL,
+    FOREIGN KEY(v_photo_id) REFERENCES photos(photo_id),
+    FOREIGN KEY(v_user_id) REFERENCES auth_user(user_id),
+    FOREIGN KEY(v_contest_id) REFERENCES contests(contest_id)
+);
+
+CREATE INDEX cpv_id_ndx ON contest_photo_votes(v_id);
+CREATE INDEX cpv_contest_id_ndx ON contest_photo_votes(v_contest_id);
+CREATE INDEX cpv_photo_id_ndx ON contest_photo_votes(v_photo_id);
+CREATE UNIQUE INDEX cpv_unique_ndx ON contest_photo_votes(v_id, v_contest_id, v_photo_id, v_user_id);
+
 
