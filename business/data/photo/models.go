@@ -31,10 +31,25 @@ type UpdatePhoto struct {
 	UpdatedBy   string `db:"updated_by" json:"updated_by"`
 }
 
+type fileSize struct {
+	w uint16
+	h uint16
+}
+
+// PhotoFileSize - map with allowed photp_file sizes
+type PhotoFileSize map[string]fileSize
+
+var allowedPhotoSizes = PhotoFileSize{
+	"thumb":  fileSize{200, 200},
+	"small":  fileSize{400, 400},
+	"medium": fileSize{800, 800},
+	"large":  fileSize{1200, 1200},
+}
+
 // PhotoFile - photo_file type
 type PhotoFile struct {
 	ID        string    `db:"file_id" json:"id"`
-	PhotoID   int       `db:"owner_id" json:"owner_id"`
+	PhotoID   string    `db:"photo_id" json:"owner_id"`
 	FilePath  string    `db:"filepath" json:"filepath"`
 	Size      string    `db:"size" json:"size"`
 	Width     uint16    `db:"w" json:"width"`
@@ -47,11 +62,11 @@ type PhotoFile struct {
 
 // NewPhotoFile - type used for creating a new photo_file
 type NewPhotoFile struct {
-	PhotoID   int       `db:"owner_id" json:"owner_id"`
-	FilePath  string    `db:"filepath" json:"filepath"`
-	Size      string    `db:"size" json:"size"`
-	Width     uint16    `db:"w" json:"width"`
-	Height    uint16    `db:"h" json:"height"`
+	PhotoID  string `db:"owner_id" json:"owner_id"`
+	FilePath string `db:"filepath" json:"filepath"`
+	Size     string `db:"size" json:"size"`
+	//Width     uint16    `db:"w" json:"width"`
+	//Height    uint16    `db:"h" json:"height"`
 	CreatedOn time.Time `db:"created_on" json:"created_on"`
 	UpdatedBy string    `db:"updated_by" json:"updated_by"`
 }

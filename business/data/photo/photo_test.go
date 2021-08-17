@@ -2,6 +2,7 @@ package photo_test
 
 import (
 	"context"
+	"fmt"
 	"photo-contest/business/data/photo"
 	"photo-contest/business/data/schema"
 	"photo-contest/business/data/tests"
@@ -96,6 +97,43 @@ func TestPhoto(t *testing.T) {
 
 			t.Logf("\t%s\tTest %d:\tShould NOT retrieve photos by non-existing user.", tests.Success, testID)
 
+			//-------------------------------------------------------------------------------
+			photoSizes := []string{"thumb", "small", "medium", "large"}
+			for _, size := range photoSizes {
+				npf := photo.NewPhotoFile{
+					PhotoID:   pht.ID,
+					FilePath:  fmt.Sprintf("/tmp/photo1-%s-%s.jpg", pht.ID, size),
+					Size:      "small",
+					UpdatedBy: usr.Name,
+				}
+				_, err := photoStore.CreateFile(npf)
+				if err != nil {
+					t.Fatalf("\t%s\tTest %d:\tShould be able to create %s photo file: %s.", tests.Failed, testID, size, err)
+				}
+				t.Logf("\t%s\tTest %d:\tShould be able to create %s photo file.", tests.Success, testID, size)
+			}
+			//-------------------------------------------------------------------------------
+			npf := photo.NewPhotoFile{
+				PhotoID:   pht.ID,
+				FilePath:  fmt.Sprintf("/tmp/photo1-%s-%s.jpg", pht.ID, "ioio90909090"),
+				Size:      "ioio90909090",
+				UpdatedBy: usr.Name,
+			}
+			if _, err = photoStore.CreateFile(npf); err == nil {
+				t.Fatalf("\t%s\tTest %d:\tShould NOT be able to create photo file w/ invalid size: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould NOT be able to create photo file w/ invalid size.", tests.Success, testID)
+			//-------------------------------------------------------------------------------
+			photoFiles, err := photoStore.QueryPhotoFiles(pht.ID)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to retrieve photo files: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to retrieve photo files.", tests.Success, testID)
+			//-------------------------------------------------------------------------------
+			if len(photoSizes) != len(photoFiles) {
+				t.Fatalf("\t%s\tTest %d:\tShould retrieve the same number of photo files. Got %d insted of %d", tests.Failed, testID, len(photoFiles), len(photoSizes))
+			}
+			t.Logf("\t%s\tTest %d:\tShould retrieve %d photo files.", tests.Success, testID, len(photoSizes))
 			//-------------------------------------------------------------------------------
 		}
 	}

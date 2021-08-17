@@ -1,6 +1,7 @@
 package photo
 
 import (
+	"fmt"
 	"log"
 	"photo-contest/business/sys/validate"
 	"photo-contest/foundation/database"
@@ -44,20 +45,17 @@ func (s Store) Create(np NewPhoto) (Photo, error) {
 	}
 
 	const query = `
-	INSERT INTO photos 
+	INSERT INTO photos
 		(photo_id, owner_id, title, description, deleted, created_on, updated_on, updated_by)
-	VALUES 
+	VALUES
 		(:photo_id, :owner_id, :title, :description, :deleted, :created_on, :updated_on, :updated_by)`
 
-	s.log.Printf("%s: %s", "user.Create", database.Log(query, pht))
+	s.log.Printf("%s: %s", "photo.Create", database.Log(query, pht))
 
-	res, err := s.db.NamedExec(query, pht)
+	_, err := s.db.NamedExec(query, pht)
 	if err != nil {
 		return Photo{}, errors.Wrap(err, "inserting photo")
 	}
-
-	rowNum, _ := res.RowsAffected()
-	s.log.Println(" -- added to photos: ", rowNum)
 
 	return pht, nil
 }
@@ -118,4 +116,76 @@ func (s Store) QueryByOwnerID(ownerID int) ([]Photo, error) {
 	}
 
 	return photos, nil
+}
+
+// CreateFile - add new photo into db
+func (s Store) CreateFile(npf NewPhotoFile) (PhotoFile, error) {
+
+	if err := validate.Check(npf); err != nil {
+		return PhotoFile{}, errors.Wrap(err, "validating data")
+	}
+	if err := validate.CheckID(npf.PhotoID); err != nil {
+		return PhotoFile{}, database.ErrInvalidID
+	}
+
+	photoSize, ok := allowedPhotoSizes[npf.Size]
+	if !ok {
+		return PhotoFile{}, fmt.Errorf("received invalid size: %s", npf.Size)
+	}
+
+	now := time.Now()
+
+	phFile := PhotoFile{
+		ID:        validate.GenerateID(),
+		PhotoID:   npf.PhotoID,
+		FilePath:  npf.FilePath,
+		Size:      npf.Size,
+		Width:     photoSize.w,
+		Height:    photoSize.h,
+		CreatedOn: now,
+		UpdatedOn: now,
+		UpdatedBy: npf.UpdatedBy,
+	}
+
+	const query = `
+	INSERT INTO photo_files
+		(file_id, photo_id, filepath, size, w, h, created_on, updated_on, updated_by)
+	VALUES
+		(:file_id, :photo_id, :filepath, :size, :w, :h, :created_on, :updated_on, :updated_by)`
+
+	_, err := s.db.NamedExec(query, phFile)
+	if err != nil {
+		s.log.Printf("%s: %s", "photo.Createfile", database.Log(query, phFile))
+		return PhotoFile{}, errors.Wrap(err, "inserting photo file")
+	}
+
+	return phFile, nil
+}
+
+// QueryPhotoFiles - return a list of photos
+func (s Store) QueryPhotoFiles(photoID string) ([]PhotoFile, error) {
+
+	data := struct {
+		PhotoID string `db:"photo_id"`
+	}{
+		PhotoID: photoID,
+	}
+	const query = `
+        SELECT file_id, photo_id, filepath, size, w, h, created_on, updated_on, updated_by
+		FROM photo_files
+		WHERE photo_id = :photo_id`
+
+	s.log.Printf("%s %s", "photo.QueryPhotoFiles", database.Log(query, data))
+
+	var files []PhotoFile
+	if err := database.NamedQuerySlice(s.db, query, data, &files); err != nil {
+		/*s.log.Printf("ERR: %s\n", err)
+		if err == database.ErrNotFound {
+			s.log.Printf("ERR: %s\n", err)
+			return nil, database.ErrNotFound
+		}*/
+		return nil, errors.Wrapf(err, "selecting files for photo_id %s", data.PhotoID)
+	}
+
+	return files, nil
 }
