@@ -75,7 +75,7 @@ func TestPhoto(t *testing.T) {
 
 			// should have exactly one pohoto
 			if len(userPhotos) != 1 {
-				t.Fatalf("\t%s\tTest %d:\tShould have received extactly one photo from this owner: %s.", tests.Failed, testID, err)
+				t.Fatalf("\t%s\tTest %d:\tShould have received exactly one photo from this owner: %s.", tests.Failed, testID, err)
 			}
 			t.Logf("\t%s\tTest %d:\tRetrieved exactly one photo from this owner.", tests.Success, testID)
 

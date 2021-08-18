@@ -69,7 +69,6 @@ CREATE TABLE contest_photos (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     contest_id INTEGER NOT NULL DEFAULT 0,
     photo_id TEXT NOT NULL, --uuid
-    filepath TEXT NOT NULL,
     status TEXT NOT NULL, -- regex='^(active|eliminated|withdrawn|flagged)$')
     created_on DATETIME NOT NULL,
     updated_on DATETIME NOT NULL,

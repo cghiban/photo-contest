@@ -88,7 +88,7 @@ func (s Store) Update(photoID string, up UpdatePhoto) error {
 	const query = `
 	UPDATE
 		photos
-	SET 
+	SET
 		title = :title,
 		description = :description,
 		deleted = :deleted,
