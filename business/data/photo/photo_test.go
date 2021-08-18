@@ -27,11 +27,14 @@ func TestPhoto(t *testing.T) {
 
 	t.Log("Given the need to work with Photo records.")
 	{
+		var pht photo.Photo
+		var usr user.AuthUser
 		testID := 0
 		t.Logf("\tTest %d:\tWhen handling a single photo.", testID)
 		{
+			var err error
 			// using data in schema/seed.sql
-			usr, err := userStore.QueryByID(1)
+			usr, err = userStore.QueryByID(1)
 			if err != nil {
 				t.Fatalf("\t%s\tTest %d:\tShould be able to retrieve user by ID: %s.", tests.Failed, testID, err)
 			}
@@ -42,7 +45,7 @@ func TestPhoto(t *testing.T) {
 				Description: "Hopa Hopa Penelopa",
 				UpdatedBy:   usr.Name,
 			}
-			pht, err := photoStore.Create(np)
+			pht, err = photoStore.Create(np)
 			if err != nil {
 				t.Fatalf("\t%s\tTest %d:\tShould be able to create photo : %s.", tests.Failed, testID, err)
 			}
@@ -97,6 +100,42 @@ func TestPhoto(t *testing.T) {
 
 			t.Logf("\t%s\tTest %d:\tShould NOT retrieve photos by non-existing user.", tests.Success, testID)
 
+		}
+		{
+			testID++
+			t.Logf("\tTest %d:\tWhen updating photo.", testID)
+			//-------------------------------------------------------------------------------
+			upd := photo.UpdatePhoto{
+				Title:     tests.StringPointer("Updated photo title"),
+				UpdatedBy: tests.StringPointer("System Updater"),
+			}
+			if err := photoStore.Update(pht.ID, upd); err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to update photo : %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to update photo.", tests.Success, testID)
+
+			saved, err := photoStore.QueryByID(pht.ID)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to retrieve photo by ID: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to retrieve photo by ID.", tests.Success, testID)
+
+			if saved.Title != *upd.Title {
+				t.Errorf("\t%s\tTest %d:\tShould be able to see updates to Title.", tests.Failed, testID)
+				t.Logf("\t\tTest %d:\tGot: %v", testID, saved.Title)
+				t.Logf("\t\tTest %d:\tExpected: %v", testID, *upd.Title)
+			}
+			//-------------------------------------------------------------------------------
+			if saved.Description != pht.Description {
+				t.Errorf("\t%s\tTest %d:\tShould NOT see updates to Description.", tests.Failed, testID)
+				t.Logf("\t\tTest %d:\tGot: %v", testID, saved.Description)
+				t.Logf("\t\tTest %d:\tExpected: %v", testID, pht.Description)
+			}
+			//-------------------------------------------------------------------------------
+		}
+		{
+			testID++
+			t.Logf("\tTest %d:\tWhen handling photo files.", testID)
 			//-------------------------------------------------------------------------------
 			photoSizes := []string{"thumb", "small", "medium", "large"}
 			for _, size := range photoSizes {
@@ -119,7 +158,7 @@ func TestPhoto(t *testing.T) {
 				Size:      "ioio90909090",
 				UpdatedBy: usr.Name,
 			}
-			if _, err = photoStore.CreateFile(npf); err == nil {
+			if _, err := photoStore.CreateFile(npf); err == nil {
 				t.Fatalf("\t%s\tTest %d:\tShould NOT be able to create photo file w/ invalid size: %s.", tests.Failed, testID, err)
 			}
 			t.Logf("\t%s\tTest %d:\tShould NOT be able to create photo file w/ invalid size.", tests.Success, testID)
@@ -135,6 +174,38 @@ func TestPhoto(t *testing.T) {
 			}
 			t.Logf("\t%s\tTest %d:\tShould retrieve %d photo files.", tests.Success, testID, len(photoSizes))
 			//-------------------------------------------------------------------------------
+		}
+		{
+			testID++
+			t.Logf("\tTest %d:\tWhen deleting a photo.", testID)
+			//-------------------------------------------------------------------------------
+			if err := photoStore.Delete(pht.ID); err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to delete photo : %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to delete photo.", tests.Success, testID)
+
+			dPht, err := photoStore.QueryByID(pht.ID)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to retrieve photo by ID: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to retrieve photo by ID.", tests.Success, testID)
+
+			if dPht.Deleted != true {
+				t.Errorf("\t%s\tTest %d:\tShould be able to see updates to Deleted.", tests.Failed, testID)
+				t.Logf("\t\tTest %d:\tGot: %v", testID, dPht.Deleted)
+				t.Logf("\t\tTest %d:\tExpected: %v", testID, false)
+			}
+			//-------------------------------------------------------------------------------
+			photoFiles, err := photoStore.QueryPhotoFiles(pht.ID)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to retrieve photo files: %s.", tests.Failed, testID, err)
+			}
+
+			if len(photoFiles) > 0 {
+				t.Fatalf("\t%s\tTest %d:\tShould NOT be able to retrieve any photo file for this photo.", tests.Failed, testID)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to delete photo files.", tests.Success, testID)
+
 		}
 	}
 }

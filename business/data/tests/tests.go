@@ -81,3 +81,10 @@ func StringPointer(s string) *string {
 func IntPointer(i int) *int {
 	return &i
 }
+
+// BoolPointer is a helper to get a *bool from a bool. It is in the tests
+// package because we normally don't want to deal with pointers to basic types
+// but it's useful in some tests.
+func BoolPointer(b bool) *bool {
+	return &b
+}

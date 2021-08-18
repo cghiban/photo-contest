@@ -24,11 +24,10 @@ type NewPhoto struct {
 
 //UpdatePhoto - type fore creating a new photo
 type UpdatePhoto struct {
-	OwnerID     int    `db:"owner_id" json:"owner_id"`
-	Title       string `db:"title" json:"title"`
-	Description string `db:"description" json:"description"`
-	Deleted     bool   `db:"deleted" json:"deleted"`
-	UpdatedBy   string `db:"updated_by" json:"updated_by"`
+	Title       *string `db:"title"  validate:"omitempty"`
+	Description *string `db:"description"  validate:"omitempty"`
+	Deleted     *bool   `db:"deleted" validate:"omitempty"`
+	UpdatedBy   *string `db:"updated_by", validate:"required"`
 }
 
 type fileSize struct {

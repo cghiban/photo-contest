@@ -3,6 +3,7 @@ package photo
 import (
 	"fmt"
 	"log"
+	"photo-contest/business/data/tests"
 	"photo-contest/business/sys/validate"
 	"photo-contest/foundation/database"
 	"time"
@@ -60,6 +61,80 @@ func (s Store) Create(np NewPhoto) (Photo, error) {
 	return pht, nil
 }
 
+// Update - update photo
+func (s Store) Update(photoID string, up UpdatePhoto) error {
+	if err := validate.CheckID(photoID); err != nil {
+		return database.ErrInvalidID
+	}
+	if err := validate.Check(up); err != nil {
+		return errors.Wrap(err, "validating data")
+	}
+	pht, err := s.QueryByID(photoID)
+	if err != nil {
+		return errors.Wrap(err, "updating photo")
+	}
+
+	if up.Title != nil {
+		pht.Title = *up.Title
+	}
+	if up.Description != nil {
+		pht.Description = *up.Description
+	}
+	if up.Deleted != nil {
+		pht.Deleted = *up.Deleted
+	}
+	pht.UpdatedOn = time.Now()
+
+	const query = `
+	UPDATE
+		photos
+	SET 
+		title = :title,
+		description = :description,
+		deleted = :deleted,
+		updated_on = :updated_on,
+		updated_by = :updated_by
+	WHERE
+		photo_id = :photo_id`
+
+	s.log.Printf("%s: %s", "photo.Update", database.Log(query, pht))
+
+	if _, err = s.db.NamedExec(query, pht); err != nil {
+		return errors.Wrapf(err, "updating photo %s", pht.ID)
+	}
+
+	return nil
+}
+
+// Delete - delete photo from db (and its files)
+func (s Store) Delete(photoID string) error {
+	if err := validate.CheckID(photoID); err != nil {
+		return database.ErrInvalidID
+	}
+	pht, err := s.QueryByID(photoID)
+	if err != nil {
+		return errors.Wrap(err, "deleting photo")
+	}
+	upd := UpdatePhoto{
+		Deleted: tests.BoolPointer(true),
+	}
+
+	if err := s.Update(pht.ID, upd); err != nil {
+		return errors.Wrapf(err, "deleting photo %s", pht.ID)
+	}
+
+	const query = "DELETE FROM photo_files WHERE photo_id = ?"
+
+	res, err := s.db.Exec(query, pht.ID)
+	if err != nil {
+		return errors.Wrapf(err, "deleting photo %s", pht.ID)
+	}
+	numRows, _ := res.RowsAffected()
+	s.log.Println(" -- deleted from photo_files: ", numRows)
+
+	return nil
+}
+
 // QueryByID - return given photo
 func (s Store) QueryByID(photoID string) (Photo, error) {
 
@@ -73,7 +148,7 @@ func (s Store) QueryByID(photoID string) (Photo, error) {
 		PhotoID: photoID,
 	}
 	const query = `
-        SELECT photo_id, owner_id, title, description, created_on, updated_on, updated_by
+        SELECT photo_id, owner_id, title, description, deleted, created_on, updated_on, updated_by
 		FROM photos
 		WHERE photo_id = :photo_id`
 
