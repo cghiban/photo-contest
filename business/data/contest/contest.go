@@ -93,7 +93,7 @@ func (s Store) QueryByID(contestID int) (Contest, error) {
 	return c, nil
 }
 
-// QueryByID - return given contest details
+// QueryBySlug - return given contest details
 func (s Store) QueryBySlug(slug string) (Contest, error) {
 
 	data := struct {
@@ -119,16 +119,16 @@ func (s Store) QueryBySlug(slug string) (Contest, error) {
 	return c, nil
 }
 
-// CreateContestPhoto - add new contest photo
-func (s Store) CreateContestPhoto(ncp NewContestPhoto) (ContestPhoto, error) {
+// CreateContestEntry - add new contest photo
+func (s Store) CreateContestEntry(ncp NewContestEntry) (ContestEntry, error) {
 
 	if err := validate.Check(ncp); err != nil {
-		return ContestPhoto{}, errors.Wrap(err, "validating data")
+		return ContestEntry{}, errors.Wrap(err, "validating data")
 	}
 
 	now := time.Now().Truncate(time.Second)
 
-	cPhoto := ContestPhoto{
+	cPhoto := ContestEntry{
 		ContestID: ncp.ContestID,
 		PhotoID:   ncp.PhotoID,
 		Status:    ncp.Status,
@@ -147,20 +147,20 @@ func (s Store) CreateContestPhoto(ncp NewContestPhoto) (ContestPhoto, error) {
 
 	res, err := s.db.NamedExec(query, cPhoto)
 	if err != nil {
-		return ContestPhoto{}, errors.Wrap(err, "inserting contest")
+		return ContestEntry{}, errors.Wrap(err, "inserting contest")
 	}
 
 	id, err := res.LastInsertId()
 	if err != nil {
-		return ContestPhoto{}, err
+		return ContestEntry{}, err
 	}
 	cPhoto.ID = int(id)
 
 	return cPhoto, nil
 }
 
-// QueryContestPhotos - return a list of photos
-func (s Store) QueryContestPhotos(contestID int) ([]ContestPhoto, error) {
+// QueryContestEntrys - return a list of photos
+func (s Store) QueryContestEntrys(contestID int) ([]ContestEntry, error) {
 
 	data := struct {
 		ContestID int `db:"contest_id"`
@@ -172,9 +172,9 @@ func (s Store) QueryContestPhotos(contestID int) ([]ContestPhoto, error) {
 	FROM contest_photos
 	WHERE contest_id = :contest_id`
 
-	s.log.Printf("%s %s", "contest.QueryContestPhotos", database.Log(query, data))
+	s.log.Printf("%s %s", "contest.QueryContestEntrys", database.Log(query, data))
 
-	var cPhotos []ContestPhoto
+	var cPhotos []ContestEntry
 	if err := database.NamedQuerySlice(s.db, query, data, &cPhotos); err != nil {
 		/*s.log.Printf("ERR: %s\n", err)
 		if err == database.ErrNotFound {

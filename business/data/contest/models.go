@@ -25,8 +25,8 @@ type NewContest struct {
 	UpdatedBy   string    `db:"updated_by" json:"updated_by"`
 }
 
-//ContentPhoto
-type ContestPhoto struct {
+//ContestEntry - contest entry type
+type ContestEntry struct {
 	ID        int       `db:"id" json:"id"`
 	ContestID int       `db:"contest_id" json:"contest_id"`
 	PhotoID   string    `db:"photo_id" json:"photo_id"`
@@ -36,10 +36,14 @@ type ContestPhoto struct {
 	UpdatedBy string    `db:"updated_by" json:"updated_by"`
 }
 
-//NewContestPhoto type for adding phtos to a content
-type NewContestPhoto struct {
+//NewContestEntry type for adding phtos to a content
+type NewContestEntry struct {
 	ContestID int    `json:"contest_id" validate:"required"`
 	PhotoID   string `json:"photo_id" validate:"required"`
 	Status    string `json:"status" validate:"required,oneof=active eliminated withdrawn flagged"`
 	UpdatedBy string `json:"updated_by" validate:"required"`
 }
+
+//ContestPhoto
+//type ContestPhoto struct {
+//}

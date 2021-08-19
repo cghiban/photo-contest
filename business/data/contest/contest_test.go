@@ -27,7 +27,7 @@ func TestPhoto(t *testing.T) {
 		log.Fatal("Can't seed data:", err)
 	}
 
-	t.Log("Given the need to work with Contest and ContestPhoto records.")
+	t.Log("Given the need to work with Contest and ContestEntry records.")
 	{
 		//var pht photo.Photo
 		var photos []photo.Photo
@@ -104,32 +104,32 @@ func TestPhoto(t *testing.T) {
 		}
 
 		testID++
-		t.Logf("\tTest %d:\tWhen handling a single contest photo.", testID)
+		t.Logf("\tTest %d:\tWhen handling contest entries.", testID)
 		{
 			//-------------------------------------------------------------------------------
-			ncp := contest.NewContestPhoto{
+			ncp := contest.NewContestEntry{
 				ContestID: c.ID,
 				PhotoID:   photos[0].ID,
 				Status:    "active",
 				UpdatedBy: "Gopher Tester",
 			}
-			cp, err := contestStore.CreateContestPhoto(ncp)
+			cp, err := contestStore.CreateContestEntry(ncp)
 			if err != nil {
-				t.Fatalf("\t%s\tTest %d:\tShould be able to create contest photo: %s.", tests.Failed, testID, err)
+				t.Fatalf("\t%s\tTest %d:\tShould be able to create contest entry: %s.", tests.Failed, testID, err)
 			}
-			t.Logf("\t%s\tTest %d:\tShould be able to create contest photo.", tests.Success, testID)
+			t.Logf("\t%s\tTest %d:\tShould be able to create contest entry.", tests.Success, testID)
 			//fmt.Printf("cp = %+v\n", cp)
 			//-------------------------------------------------------------------------------
 			// TODO check contest photo
-			cPhotos, err := contestStore.QueryContestPhotos(c.ID)
+			cPhotos, err := contestStore.QueryContestEntrys(c.ID)
 			if err != nil {
-				t.Fatalf("\t%s\tTest %d:\tShould be able to query contest photos: %s.", tests.Failed, testID, err)
+				t.Fatalf("\t%s\tTest %d:\tShould be able to query contest entries: %s.", tests.Failed, testID, err)
 			}
-			t.Logf("\t%s\tTest %d:\tShould be able to query contest  photos.", tests.Success, testID)
+			t.Logf("\t%s\tTest %d:\tShould be able to query contest entries.", tests.Success, testID)
 			if diff := cmp.Diff(cp, cPhotos[0]); diff != "" {
-				t.Fatalf("\t%s\tTest %d:\tShould get back the same contest photos. Diff:\n%s", tests.Failed, testID, diff)
+				t.Fatalf("\t%s\tTest %d:\tShould get back the same contest entries. Diff:\n%s", tests.Failed, testID, diff)
 			}
-			t.Logf("\t%s\tTest %d:\tShould get back the same contest photos.", tests.Success, testID)
+			t.Logf("\t%s\tTest %d:\tShould get back the same contest entries.", tests.Success, testID)
 			//-------------------------------------------------------------------------------
 			// TODO update contest photo
 			//-------------------------------------------------------------------------------
