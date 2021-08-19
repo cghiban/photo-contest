@@ -5,6 +5,7 @@ go 1.16
 require (
 	github.com/ardanlabs/conf v1.4.0
 	github.com/ardanlabs/darwin v1.2.0
+	github.com/avelino/slugify v0.0.0-20180501145920-855f152bd774
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
 	github.com/dimfeld/httptreemux/v5 v5.3.0

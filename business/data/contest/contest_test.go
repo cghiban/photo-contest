@@ -2,13 +2,15 @@ package contest_test
 
 import (
 	"context"
-	"fmt"
 	"photo-contest/business/data/contest"
 	"photo-contest/business/data/photo"
 	"photo-contest/business/data/schema"
 	"photo-contest/business/data/tests"
 	"testing"
 	"time"
+
+	"github.com/avelino/slugify"
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestPhoto(t *testing.T) {
@@ -60,13 +62,45 @@ func TestPhoto(t *testing.T) {
 			t.Logf("\t%s\tTest %d:\tShould be able to create contest.", tests.Success, testID)
 
 			//-------------------------------------------------------------------------------
-			// this should fail
+			// this should fail - duplicate slug
+			_, err = contestStore.Create(nc)
+			if err == nil {
+				t.Fatalf("\t%s\tTest %d:\tShould NOT be able to add two contest w/ same slug: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould NOT be able to add two contests w/ same slug.", tests.Success, testID)
+			//-------------------------------------------------------------------------------
+			// this should fail as well
 			nc.EndDate = now.Add(-24 * time.Hour)
 			_, err = contestStore.Create(nc)
 			if err == nil {
 				t.Fatalf("\t%s\tTest %d:\tShould NOT be able to set StartDate after EndDate: %s.", tests.Failed, testID, err)
 			}
 			t.Logf("\t%s\tTest %d:\tShould NOT be able to set StartDate after EndDate.", tests.Success, testID)
+			//-------------------------------------------------------------------------------
+			saved, err := contestStore.QueryByID(c.ID)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to query contest : %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to query contest.", tests.Success, testID)
+			//log.Printf("saved = %+v\n", saved)
+			if diff := cmp.Diff(c, saved); diff != "" {
+				t.Fatalf("\t%s\tTest %d:\tShould get back the same contest. Diff:\n%s", tests.Failed, testID, diff)
+			}
+			t.Logf("\t%s\tTest %d:\tShould get back the same contest.", tests.Success, testID)
+
+			//-------------------------------------------------------------------------------
+			// query contest by slug
+			slug := slugify.Slugify(nc.Title)
+			saved, err = contestStore.QueryBySlug(slug)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to query contest by slug: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to query contest by slug.", tests.Success, testID)
+			log.Printf("saved = %+v\n", saved)
+			if diff := cmp.Diff(c, saved); diff != "" {
+				t.Fatalf("\t%s\tTest %d:\tShould get back the same contest. Diff:\n%s", tests.Failed, testID, diff)
+			}
+			t.Logf("\t%s\tTest %d:\tShould get back the same contest.", tests.Success, testID)
 		}
 
 		testID++
@@ -84,9 +118,18 @@ func TestPhoto(t *testing.T) {
 				t.Fatalf("\t%s\tTest %d:\tShould be able to create contest photo: %s.", tests.Failed, testID, err)
 			}
 			t.Logf("\t%s\tTest %d:\tShould be able to create contest photo.", tests.Success, testID)
-			fmt.Printf("cp = %+v\n", cp)
+			//fmt.Printf("cp = %+v\n", cp)
 			//-------------------------------------------------------------------------------
 			// TODO check contest photo
+			cPhotos, err := contestStore.QueryContestPhotos(c.ID)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to query contest photos: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to query contest  photos.", tests.Success, testID)
+			if diff := cmp.Diff(cp, cPhotos[0]); diff != "" {
+				t.Fatalf("\t%s\tTest %d:\tShould get back the same contest photos. Diff:\n%s", tests.Failed, testID, diff)
+			}
+			t.Logf("\t%s\tTest %d:\tShould get back the same contest photos.", tests.Success, testID)
 			//-------------------------------------------------------------------------------
 			// TODO update contest photo
 			//-------------------------------------------------------------------------------
