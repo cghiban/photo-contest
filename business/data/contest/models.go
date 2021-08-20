@@ -1,6 +1,8 @@
 package contest
 
-import "time"
+import (
+	"time"
+)
 
 //Contest - contest type
 type Contest struct {
@@ -27,7 +29,7 @@ type NewContest struct {
 
 //ContestEntry - contest entry type
 type ContestEntry struct {
-	ID        int       `db:"id" json:"id"`
+	EntryID   int       `db:"entry_id" json:"entry_id"`
 	ContestID int       `db:"contest_id" json:"contest_id"`
 	PhotoID   string    `db:"photo_id" json:"photo_id"`
 	Status    string    `db:"status" json:"status"`
@@ -44,6 +46,24 @@ type NewContestEntry struct {
 	UpdatedBy string `json:"updated_by" validate:"required"`
 }
 
-//ContestPhoto
-//type ContestPhoto struct {
-//}
+//ContestPhotoEntry - contest entry with photos and votes totals/scores
+type ContestPhotoEntry struct {
+	EntryID   int    `db:"entry_id" json:"entry_id"`
+	ContestID int    `db:"contest_id" json:"contest_id"`
+	PhotoID   string `db:"photo_id" json:"photo_id"`
+	Title     string `db:"title" json:"title"`
+	Status    string `db:"status" json:"status"`
+	Filepath  string `db:"filepath" json:"filepath"`
+	Author    string `db:"author" json:"author"`
+	Score     int    `db:"score" json:"score"`
+}
+
+//ContestPhotoVote
+type ContestPhotoVote struct {
+	EntryID   int       `db:"v_entry_id" json:"entry_id" validate:"required"`
+	ContestID int       `db:"v_contest_id" json:"contest_id" validate:"required"`
+	PhotoID   string    `db:"v_photo_id" json:"photo_id" validate:"required"`
+	VoterID   int       `db:"v_user_id" json:"voter_id" validate:"required"`
+	Score     int       `db:"v_score" json:"score" validate:"min=1,max=2"`
+	CreatedOn time.Time `db:"v_created_on" json:"created_on"`
+}

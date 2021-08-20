@@ -2,6 +2,7 @@ package contest_test
 
 import (
 	"context"
+	"fmt"
 	"photo-contest/business/data/contest"
 	"photo-contest/business/data/photo"
 	"photo-contest/business/data/schema"
@@ -30,16 +31,16 @@ func TestPhoto(t *testing.T) {
 	t.Log("Given the need to work with Contest and ContestEntry records.")
 	{
 		//var pht photo.Photo
+		var userID int = 2 // user w/ id=2 added via schema/sql/seed.sql
 		var photos []photo.Photo
 		var c contest.Contest
-		//var usr user.AuthUser
+		var err error
 
 		testID := 0
 		t.Logf("\tTest %d:\tWhen handling a single contest.", testID)
 		{
-			var err error
 
-			photos, err = photoStore.QueryByOwnerID(2) // user w/ id=2 added via schema/sql/seed.sql
+			photos, err = photoStore.QueryByOwnerID(userID)
 			if err != nil {
 				t.Fatalf("\t%s\tTest %d:\tShould be able to retrieve user photos: %s.", tests.Failed, testID, err)
 			}
@@ -105,6 +106,7 @@ func TestPhoto(t *testing.T) {
 
 		testID++
 		t.Logf("\tTest %d:\tWhen handling contest entries.", testID)
+		var cp contest.ContestEntry
 		{
 			//-------------------------------------------------------------------------------
 			ncp := contest.NewContestEntry{
@@ -113,26 +115,52 @@ func TestPhoto(t *testing.T) {
 				Status:    "active",
 				UpdatedBy: "Gopher Tester",
 			}
-			cp, err := contestStore.CreateContestEntry(ncp)
+			cp, err = contestStore.CreateContestEntry(ncp)
 			if err != nil {
 				t.Fatalf("\t%s\tTest %d:\tShould be able to create contest entry: %s.", tests.Failed, testID, err)
 			}
 			t.Logf("\t%s\tTest %d:\tShould be able to create contest entry.", tests.Success, testID)
 			//fmt.Printf("cp = %+v\n", cp)
 			//-------------------------------------------------------------------------------
-			// TODO check contest photo
-			cPhotos, err := contestStore.QueryContestEntrys(c.ID)
+			cEntries, err := contestStore.QueryContestEntries(c.ID)
 			if err != nil {
 				t.Fatalf("\t%s\tTest %d:\tShould be able to query contest entries: %s.", tests.Failed, testID, err)
 			}
 			t.Logf("\t%s\tTest %d:\tShould be able to query contest entries.", tests.Success, testID)
-			if diff := cmp.Diff(cp, cPhotos[0]); diff != "" {
+			if diff := cmp.Diff(cp, cEntries[0]); diff != "" {
 				t.Fatalf("\t%s\tTest %d:\tShould get back the same contest entries. Diff:\n%s", tests.Failed, testID, diff)
 			}
 			t.Logf("\t%s\tTest %d:\tShould get back the same contest entries.", tests.Success, testID)
 			//-------------------------------------------------------------------------------
-			// TODO update contest photo
+
+		}
+		testID++
+		t.Logf("\tTest %d:\tWhen handling contest entry votes.", testID)
+		{
+			vote := contest.ContestPhotoVote{
+				EntryID:   cp.EntryID,
+				ContestID: c.ID,
+				PhotoID:   cp.PhotoID,
+				VoterID:   userID,
+				Score:     1,
+				CreatedOn: time.Now().Truncate(time.Second),
+			}
+			err := contestStore.CreateContestPhotoVote(vote)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to log vote: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to log vote.", tests.Success, testID)
+
 			//-------------------------------------------------------------------------------
+			cPhotos, err := contestStore.QueryContestPhotos(c.ID)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to query contest photos: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to query contest photos.", tests.Success, testID)
+			fmt.Printf("cPhotos = %+v\n", cPhotos)
+			if len(cPhotos) == 0 {
+				t.Fatalf("\t%s\tTest %d:\tShould have retrieve at least one photo entry.", tests.Failed, testID)
+			}
 			//-------------------------------------------------------------------------------
 
 		}

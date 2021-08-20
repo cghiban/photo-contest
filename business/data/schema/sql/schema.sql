@@ -64,9 +64,9 @@ CREATE INDEX photo_files_file_id_ndx ON photo_files(file_id);
 CREATE INDEX photo_files_photo_id_ndx ON photo_files(photo_id);
 
 -- Version: 1.4
--- Description: Create table contest_photos
-CREATE TABLE contest_photos (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
+-- Description: Create table contest_entries
+CREATE TABLE contest_entries (
+    entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
     contest_id INTEGER NOT NULL DEFAULT 0,
     photo_id TEXT NOT NULL, --uuid
     status TEXT NOT NULL, -- regex='^(active|eliminated|withdrawn|flagged)$')
@@ -77,28 +77,32 @@ CREATE TABLE contest_photos (
     FOREIGN KEY(contest_id) REFERENCES contests(contest_id)
 );
 
-CREATE INDEX cp_id_ndx ON contest_photos(id);
-CREATE INDEX cp_contest_id_ndx ON contest_photos(contest_id);
-CREATE INDEX cp_photo_id_ndx ON contest_photos(photo_id);
-CREATE INDEX cp_status_ndx ON contest_photos(status);
+CREATE INDEX cp_id_ndx ON contest_entries(entry_id);
+CREATE INDEX cp_contest_id_ndx ON contest_entries(contest_id);
+CREATE INDEX cp_photo_id_ndx ON contest_entries(photo_id);
+CREATE INDEX cp_status_ndx ON contest_entries(status);
 
 -- Version: 1.5
--- Description: Create table contest_photo_votes
-CREATE TABLE contest_photo_votes (
+-- Description: Create table contest_entry_votes
+CREATE TABLE contest_entry_votes (
     v_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    v_entry_id INTEGER NOT NULL DEFAULT 0,
     v_contest_id INTEGER NOT NULL DEFAULT 0,
     v_photo_id TEXT NOT NULL, --uuid
     v_user_id INTEGER NOT NULL,
     v_score INTEGER NOT NULL DEFAULT 1,
     v_created_on DATETIME NOT NULL,
+    FOREIGN KEY(v_entry_id) REFERENCES contest_entries(entry_id),
     FOREIGN KEY(v_photo_id) REFERENCES photos(photo_id),
     FOREIGN KEY(v_user_id) REFERENCES auth_user(user_id),
     FOREIGN KEY(v_contest_id) REFERENCES contests(contest_id)
 );
 
-CREATE INDEX cpv_id_ndx ON contest_photo_votes(v_id);
-CREATE INDEX cpv_contest_id_ndx ON contest_photo_votes(v_contest_id);
-CREATE INDEX cpv_photo_id_ndx ON contest_photo_votes(v_photo_id);
-CREATE UNIQUE INDEX cpv_unique_ndx ON contest_photo_votes(v_id, v_contest_id, v_photo_id, v_user_id);
+CREATE INDEX cev_id_ndx ON contest_entry_votes(v_id);
+CREATE INDEX cev_entry_id_ndx ON contest_entry_votes(v_entry_id);
+CREATE INDEX cev_contest_id_ndx ON contest_entry_votes(v_contest_id);
+CREATE INDEX cev_photo_id_ndx ON contest_entry_votes(v_photo_id);
+CREATE UNIQUE INDEX cev_unique_ndx ON contest_entry_votes(v_contest_id, v_photo_id, v_user_id);
+CREATE UNIQUE INDEX cev_unique_entry_ndx ON contest_entry_votes(v_entry_id, v_user_id);
 
 
