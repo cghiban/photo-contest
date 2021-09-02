@@ -40,6 +40,7 @@ func run(log *log.Logger) error {
 			BindAddress  string        `conf:"default:0.0.0.0:8080"`
 			SessionKey   string        `conf:"default:abc123XYZ"`
 			CsrfKey      string        `conf:"default:abcqwertxyz"`
+			CsrfSecure   bool          `conf:"default:false"`
 			IdleTimeout  time.Duration `conf:"default:5s"`
 			ReadTimeout  time.Duration `conf:"default:5s"`
 			WriteTimeout time.Duration `conf:"default:5s"`
@@ -124,8 +125,8 @@ func run(log *log.Logger) error {
 	sm.Handle("/settings", web.WrapMiddleware(service.Settings, authMw.UserViaSession, authMw.RequireUser))
 	//sm.Handle("/updategroup/{id:[0-9]+}", web.WrapMiddleware(service.UpdateGroup, authMw.UserViaSession, authMw.RequireUser)).Methods("POST").HeadersRegexp("Content-Type", "application/json")
 
-	// make sure we set Secure to true for production
-	csrfMiddleware := csrf.Protect([]byte(cfg.Web.CsrfKey), csrf.Secure(false))
+	// TODO make sure we set Secure to true for production
+	csrfMiddleware := csrf.Protect([]byte(cfg.Web.CsrfKey), csrf.Secure(cfg.Web.CsrfSecure))
 	userRouter := sm.Methods("POST", "GET").Subrouter()
 	userRouter.Use(csrfMiddleware)
 	userRouter.HandleFunc("/register", service.UserSignUp)
