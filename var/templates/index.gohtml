@@ -1,32 +1,11 @@
-<!DOCTYPE html>
+{{define "title"}}
+Photo contest @ DNAL NYC
+{{end}}
 
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="/static/styles.css">
+{{define "header"}}
+Home
+{{end}}
 
-        <title>Photo contest @ DNAL NYC</title>
-    </head>
-  <body>
-    <div class="welcome-center">
-        <a href="/">Home</a>
-        <a href="/about">About</a>
-        {{if .User}}
-        <a href="/profile">Update Profile</a>
-        <a href="/password">Change Password</a>
-        <a href="/logout">Logout</a>
-        {{else}}
-        <a href="/register">Register</a>
-        <a href="/login">Login</a>
-        {{end}}
-        <h1>Home</h1>
-    </div>
-
-    {{if .Message}}
-    <div class="message">{{.Message}}</div>
-    {{end}}
-
-
-  </body>
-</html>
+{{define "content"}}
+This is home
+{{end}}

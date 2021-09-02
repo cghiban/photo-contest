@@ -1,30 +1,13 @@
-<!DOCTYPE html>
+{{define "title"}}
+About - Photo contest @ DNALC NYC
+{{end}}
 
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="/static/styles.css">
+{{define "header"}}
+About this site
+{{end}}
 
-        <title>About - Photo contest @ DNALC NYC</title>
-    </head>
-  <body>
-    <div class="welcome-center">
-        <a href="/">Home</a>
-        <a href="/about">About</a>
-        {{if .User}}
-        <a href="/profile">Update Profile</a>
-        <a href="/password">Change Password</a>
-        <a href="/logout">Logout</a>
-        {{else}}
-        <a href="/register">Register</a>
-        <a href="/login">Login</a>
-        {{end}}
-        <h1>About this site</h1>
-    </div>
-
+{{define "content"}}
     <div>
     This is a space where you can upload an amazing image to our contest. Who knows, you might win some $$..
     </div>
-  </body>
-</html>
+{{end}}

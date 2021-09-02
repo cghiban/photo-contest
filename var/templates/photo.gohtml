@@ -1,0 +1,21 @@
+{{define "title"}}
+Photo
+{{end}}
+
+{{define "header"}}
+Upload Photo Form
+{{end}}
+
+{{define "content"}}
+    <form method="POST" action="/photo">
+        {{ .csrfField }}
+        <div>
+            <label>File</label>
+            <input type="file" name="file" required>
+        </div>
+        <br>
+        <div>
+            <button>Upload</button>
+        </div>
+    </form>
+{{end}}

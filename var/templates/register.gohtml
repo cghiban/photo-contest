@@ -1,24 +1,12 @@
-<!DOCTYPE html>
+{{define "title"}}
+Photo contest @ DNALC NYC
+{{end}}
 
-<html>
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="/static/styles.css">
+{{define "header"}}
+Sign Up
+{{end}}
 
-        <title>Photo contest @ DNALC NYC</title>
-    </head>
-  <body>
-    <div class="welcome-center">
-        <a href="/">Home</a>
-        <a href="/about">About</a>
-        <h1>Sign Up</h1>
-    </div>
-
-    {{if .Message}}
-    <div class="message">{{.Message}}</div>
-    {{end}}
-
+{{define "content"}}
     <form method="POST" action="/register">
 		{{ .csrfField }}
         <div>
@@ -44,5 +32,4 @@
     </form>
 
     <div>Already have an account? <a href="/login">Login</a>.</div>
-  </body>
-</html>
+{{end}}

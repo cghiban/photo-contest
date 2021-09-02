@@ -65,7 +65,10 @@ func (s *Service) Index(rw http.ResponseWriter, r *http.Request) {
 		User:    usr,
 		Message: "",
 	}
-	if err := s.t.ExecuteTemplate(rw, "index.gohtml", data); err != nil {
+	if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/index.gohtml"); err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+	}
+	if err := s.t.ExecuteTemplate(rw, "base", data); err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -78,11 +81,15 @@ func (s *Service) About(rw http.ResponseWriter, r *http.Request) {
 		usr = userV.(*user.AuthUser)
 	}
 	data := struct {
-		User *user.AuthUser
+		User    *user.AuthUser
+		Message string
 	}{
 		User: usr,
 	}
-	if err := s.t.ExecuteTemplate(rw, "about.gohtml", data); err != nil {
+	if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/about.gohtml"); err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+	}
+	if err := s.t.ExecuteTemplate(rw, "base", data); err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 	}
 }

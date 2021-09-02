@@ -141,8 +141,8 @@ func TestPhoto(t *testing.T) {
 			for _, size := range photoSizes {
 				npf := photo.NewPhotoFile{
 					PhotoID:   pht.ID,
-					FilePath:  fmt.Sprintf("/tmp/photo1-%s-%s.jpg", pht.ID, size),
-					Size:      "small",
+					FilePath:  fmt.Sprintf("/tmp/photo%s-%s.jpg", pht.ID, size),
+					Size:      size,
 					UpdatedBy: usr.Name,
 				}
 				_, err := photoStore.CreateFile(npf)
