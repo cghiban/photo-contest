@@ -7,15 +7,20 @@ Upload Photo Form
 {{end}}
 
 {{define "content"}}
-    <form method="POST" action="/photo">
+    <form enctype="multipart/form-data" method="POST" action="/photo">
         {{ .csrfField }}
-        <div>
+        <div class="mb-3">
+            <label>Title</label>
+            <input type="text" name="title" required>
+        </div>
+        <div class="mb-3">
+            <label>Description</label>
+            <input type="description" name="description" required>
+        </div>
+        <div class="mb-3">
             <label>File</label>
-            <input type="file" name="file" required>
+            <input type="file" accept="image/png,image/jpeg" name="file" required>
         </div>
-        <br>
-        <div>
-            <button>Upload</button>
-        </div>
+        <button class="btn btn-primary">Upload</button>
     </form>
 {{end}}

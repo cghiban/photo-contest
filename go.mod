@@ -7,8 +7,6 @@ require (
 	github.com/ardanlabs/darwin v1.2.0
 	github.com/avelino/slugify v0.0.0-20180501145920-855f152bd774
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/dgrijalva/jwt-go/v4 v4.0.0-preview1
-	github.com/dimfeld/httptreemux/v5 v5.3.0
 	github.com/go-playground/locales v0.13.0
 	github.com/go-playground/universal-translator v0.17.0
 	github.com/go-playground/validator/v10 v10.8.0
@@ -17,6 +15,7 @@ require (
 	github.com/gorilla/csrf v1.7.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/sessions v1.2.1
+	github.com/h2non/bimg v1.1.5 // indirect
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.2 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6

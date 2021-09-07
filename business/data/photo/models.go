@@ -39,10 +39,11 @@ type fileSize struct {
 type PhotoFileSize map[string]fileSize
 
 var allowedPhotoSizes = PhotoFileSize{
-	"thumb":  fileSize{200, 200},
-	"small":  fileSize{400, 400},
-	"medium": fileSize{800, 800},
-	"large":  fileSize{1200, 1200},
+	"thumb":    fileSize{200, 200},
+	"small":    fileSize{400, 400},
+	"medium":   fileSize{800, 800},
+	"large":    fileSize{1200, 1200},
+	"original": fileSize{0, 0},
 }
 
 // PhotoFile - photo_file type

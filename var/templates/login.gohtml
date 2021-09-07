@@ -9,18 +9,15 @@ Login
 {{define "content"}}
     <form method="POST" action="/login">
         {{ .csrfField }}
-        <div>
+        <div class="mb-3">
             <label>Email</label>
             <input type="text" name="email" required>
         </div>
-        <div>
+        <div class="mb-3">
             <label>Password</label>
             <input type="password" name="password" required>
         </div>
-        <div>
-            <label></label>
-            <button>submit</button>
-        </div>
+        <button class="btn btn-primary">Submit</button>
     </form>
     <div>Don't have an account? <a href="/register">Register</a> to log your readings.</div>
 {{end}}

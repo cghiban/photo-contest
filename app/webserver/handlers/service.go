@@ -4,6 +4,7 @@ import (
 	"log"
 	"net/http"
 	"photo-contest/business/data/user"
+	"strings"
 	"text/template"
 	"time"
 
@@ -31,6 +32,7 @@ func NewService(l *log.Logger, db *sqlx.DB, sessionKey string) *Service {
 			}
 			return t.Format("Jan 2, 2006")
 		},
+		"replaceEnd": func(input, from, to string) string { return strings.TrimSuffix(input, from) + to },
 		"dateISOish": func(t time.Time) string { return t.Format("2006-01-02 3:04pm") },
 	}
 	templates := template.Must(template.New("tmpls").Funcs(funcMap).ParseGlob("var/templates/*.gohtml"))
