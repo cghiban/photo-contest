@@ -51,6 +51,24 @@ func NewService(l *log.Logger, db *sqlx.DB, sessionKey string) *Service {
 	return &Service{log: l, db: db, t: templates, session: sessStore}
 }
 
+func (s *Service) ExecuteTemplateWithBase(rw http.ResponseWriter, data interface{}, fileName string) {
+	if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/"+fileName); err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+	}
+	if err := s.t.ExecuteTemplate(rw, "base", data); err != nil {
+		http.Error(rw, err.Error(), http.StatusInternalServerError)
+	}
+}
+
+func (s *Service) ExecuteTemplateWithBaseNoServerError(rw http.ResponseWriter, data interface{}, fileName string) {
+	if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/"+fileName); err != nil {
+		//http.Error(rw, err.Error(), http.StatusInternalServerError)
+	}
+	if err := s.t.ExecuteTemplate(rw, "base", data); err != nil {
+		//http.Error(rw, err.Error(), http.StatusInternalServerError)
+	}
+}
+
 // Index - about this site
 func (s *Service) Index(rw http.ResponseWriter, r *http.Request) {
 	var usr *user.AuthUser
@@ -65,12 +83,7 @@ func (s *Service) Index(rw http.ResponseWriter, r *http.Request) {
 		User:    usr,
 		Message: "",
 	}
-	if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/index.gohtml"); err != nil {
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-	}
-	if err := s.t.ExecuteTemplate(rw, "base", data); err != nil {
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-	}
+	s.ExecuteTemplateWithBase(rw, data, "index.gohtml")
 }
 
 // About - about this site
@@ -86,12 +99,7 @@ func (s *Service) About(rw http.ResponseWriter, r *http.Request) {
 	}{
 		User: usr,
 	}
-	if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/about.gohtml"); err != nil {
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-	}
-	if err := s.t.ExecuteTemplate(rw, "base", data); err != nil {
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-	}
+	s.ExecuteTemplateWithBase(rw, data, "about.gohtml")
 }
 
 // Settings - display settings page

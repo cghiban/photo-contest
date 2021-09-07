@@ -18,12 +18,7 @@ func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
 		csrf.TemplateTag: csrf.TemplateField(r),
 	}
 	if r.Method == "GET" {
-		if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/register.gohtml"); err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-		}
-		if err := s.t.ExecuteTemplate(rw, "base", formData); err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-		}
+		s.ExecuteTemplateWithBase(rw, formData, "register.gohtml")
 	} else if r.Method == "POST" {
 		r.ParseForm()
 
@@ -40,12 +35,7 @@ func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
 		s.log.Println("from GetUser:", err)
 		if err != nil && err != database.ErrNotFound {
 			formData["Message"] = "This email is already in use."
-			if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/register.gohtml"); err != nil {
-				http.Error(rw, err.Error(), http.StatusInternalServerError)
-			}
-			if err := s.t.ExecuteTemplate(rw, "base", formData); err != nil {
-				http.Error(rw, err.Error(), http.StatusInternalServerError)
-			}
+			s.ExecuteTemplateWithBase(rw, formData, "register.gohtml")
 			return
 		}
 
@@ -62,12 +52,7 @@ func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			s.log.Println(err)
 			formData["Message"] = err.Error()
-			if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/register.gohtml"); err != nil {
-				//http.Error(rw, err.Error(), http.StatusInternalServerError)
-			}
-			if err := s.t.ExecuteTemplate(rw, "base", formData); err != nil {
-				//http.Error(rw, err.Error(), http.StatusInternalServerError)
-			}
+			s.ExecuteTemplateWithBaseNoServerError(rw, formData, "register.gohtml")
 			http.Error(rw, "Unable to sign user up", http.StatusInternalServerError)
 			return
 		} else {
@@ -85,12 +70,7 @@ func (s *Service) UserLogIn(rw http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 
 		rw.Header().Add("Cache-Control", "no-cache")
-		if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/login.gohtml"); err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-		}
-		if err := s.t.ExecuteTemplate(rw, "base", formData); err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-		}
+		s.ExecuteTemplateWithBase(rw, formData, "login.gohtml")
 	} else if r.Method == "POST" {
 
 		if err := r.ParseForm(); err != nil {
@@ -127,12 +107,7 @@ func (s *Service) UserLogIn(rw http.ResponseWriter, r *http.Request) {
 		}
 
 		formData["Message"] = "Invalid email or password!"
-		if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/login.gohtml"); err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-		}
-		if err := s.t.ExecuteTemplate(rw, "base", formData); err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-		}
+		s.ExecuteTemplateWithBase(rw, formData, "login.gohtml")
 	}
 }
 
@@ -169,12 +144,7 @@ func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		rw.Header().Add("Cache-Control", "no-cache")
-		if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/profile.gohtml"); err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-		}
-		if err := s.t.ExecuteTemplate(rw, "base", formData); err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-		}
+		s.ExecuteTemplateWithBase(rw, formData, "profile.gohtml")
 	} else if r.Method == "POST" {
 		r.ParseForm()
 
@@ -192,12 +162,7 @@ func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
 		u, _ := userGroup.QueryByEmail(email)
 		if u.ID != 0 && u.ID != usr.ID {
 			formData["Message"] = "This email is already in use."
-			if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/profile.gohtml"); err != nil {
-				http.Error(rw, err.Error(), http.StatusInternalServerError)
-			}
-			if err := s.t.ExecuteTemplate(rw, "base", formData); err != nil {
-				http.Error(rw, err.Error(), http.StatusInternalServerError)
-			}
+			s.ExecuteTemplateWithBase(rw, formData, "profile.gohtml")
 			return
 		}
 
@@ -205,12 +170,7 @@ func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			s.log.Println(err)
 			formData["Message"] = err.Error()
-			if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/profile.gohtml"); err != nil {
-				http.Error(rw, err.Error(), http.StatusInternalServerError)
-			}
-			if err := s.t.ExecuteTemplate(rw, "base", formData); err != nil {
-				http.Error(rw, err.Error(), http.StatusInternalServerError)
-			}
+			s.ExecuteTemplateWithBase(rw, formData, "profile.gohtml")
 			return
 		}
 
@@ -229,12 +189,7 @@ func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
 
 	if r.Method == "GET" {
 		rw.Header().Add("Cache-Control", "no-cache")
-		if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/password.gohtml"); err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-		}
-		if err := s.t.ExecuteTemplate(rw, "base", formData); err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-		}
+		s.ExecuteTemplateWithBase(rw, formData, "password.gohtml")
 	} else if r.Method == "POST" {
 		r.ParseForm()
 
@@ -247,12 +202,7 @@ func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			s.log.Println(err)
 			formData["Message"] = "Incorrect former password"
-			if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/password.gohtml"); err != nil {
-				http.Error(rw, err.Error(), http.StatusInternalServerError)
-			}
-			if err := s.t.ExecuteTemplate(rw, "base", formData); err != nil {
-				http.Error(rw, err.Error(), http.StatusInternalServerError)
-			}
+			s.ExecuteTemplateWithBase(rw, formData, "password.gohtml")
 			return
 		}
 
@@ -268,12 +218,7 @@ func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
 			if err != nil {
 
 				formData["Message"] = err.Error()
-				if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/password.gohtml"); err != nil {
-					http.Error(rw, err.Error(), http.StatusInternalServerError)
-				}
-				if err := s.t.ExecuteTemplate(rw, "base", formData); err != nil {
-					http.Error(rw, err.Error(), http.StatusInternalServerError)
-				}
+				s.ExecuteTemplateWithBase(rw, formData, "password.gohtml")
 				return
 			}
 
