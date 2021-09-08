@@ -145,11 +145,16 @@ func TestPhoto(t *testing.T) {
 					Size:      size,
 					UpdatedBy: usr.Name,
 				}
-				_, err := photoStore.CreateFile(npf)
+				phf, err := photoStore.CreateFile(npf)
 				if err != nil {
 					t.Fatalf("\t%s\tTest %d:\tShould be able to create %s photo file: %s.", tests.Failed, testID, size, err)
 				}
 				t.Logf("\t%s\tTest %d:\tShould be able to create %s photo file.", tests.Success, testID, size)
+				photoFile, err := photoStore.QueryPhotoFile(pht.ID, size)
+				if err != nil || photoFile.ID != phf.ID {
+					t.Fatalf("\t%s\tTest %d:\tShould be able to retrieve %s photo file: %s.", tests.Failed, testID, size, err)
+				}
+				t.Logf("\t%s\tTest %d:\tShould be able to retrieve %s photo file.", tests.Success, testID, size)
 			}
 			//-------------------------------------------------------------------------------
 			npf := photo.NewPhotoFile{

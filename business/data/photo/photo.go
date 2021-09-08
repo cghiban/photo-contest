@@ -174,7 +174,7 @@ func (s Store) QueryByOwnerID(ownerID int) ([]Photo, error) {
 		OwnerID: ownerID,
 	}
 	const query = `
-        SELECT photo_id, owner_id, title, description, created_on, updated_on, updated_by
+        SELECT photo_id, owner_id, title, description, deleted, created_on, updated_on, updated_by
 		FROM photos
 		WHERE owner_id = :owner_id`
 
@@ -263,4 +263,34 @@ func (s Store) QueryPhotoFiles(photoID string) ([]PhotoFile, error) {
 	}
 
 	return files, nil
+}
+
+// QueryPhotoFile - return a photo file of designated size
+func (s Store) QueryPhotoFile(photoID string, size string) (PhotoFile, error) {
+
+	data := struct {
+		PhotoID string `db:"photo_id"`
+		Size    string `db:"size"`
+	}{
+		PhotoID: photoID,
+		Size:    size,
+	}
+	const query = `
+        SELECT file_id, photo_id, filepath, size, w, h, created_on, updated_on, updated_by
+		FROM photo_files
+		WHERE photo_id = :photo_id AND size = :size`
+
+	s.log.Printf("%s %s", "photo.QueryPhotoFile", database.Log(query, data))
+
+	var files []PhotoFile
+	if err := database.NamedQuerySlice(s.db, query, data, &files); err != nil {
+		/*s.log.Printf("ERR: %s\n", err)
+		if err == database.ErrNotFound {
+			s.log.Printf("ERR: %s\n", err)
+			return nil, database.ErrNotFound
+		}*/
+		return PhotoFile{}, errors.Wrapf(err, "selecting files for photo_id %s", data.PhotoID)
+	}
+
+	return files[0], nil
 }

@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"io/ioutil"
+	"io"
+	"log"
 	"os"
 	"path"
 
@@ -30,9 +31,11 @@ func (s *Service) UserPhotos(rw http.ResponseWriter, r *http.Request) {
 		userPhotos, err := photoStore.QueryByOwnerID(usr.ID)
 		var thumbPhotos []PhotoInfo
 		for _, photo := range userPhotos {
-			photoFiles, _ := photoStore.QueryPhotoFiles(photo.ID)
-			photoInfo := PhotoInfo{FilePath: photoFiles[1].FilePath, PhotoId: photo.ID, Title: photo.Title, Description: photo.Description}
-			thumbPhotos = append(thumbPhotos, photoInfo)
+			if !photo.Deleted {
+				photoFile, _ := photoStore.QueryPhotoFile(photo.ID, "thumb")
+				photoInfo := PhotoInfo{FilePath: photoFile.FilePath, PhotoId: photo.ID, Title: photo.Title, Description: photo.Description}
+				thumbPhotos = append(thumbPhotos, photoInfo)
+			}
 		}
 		formData := map[string]interface{}{
 			"Photos": thumbPhotos,
@@ -48,44 +51,37 @@ func (s *Service) UserPhotos(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func uploadFile(w http.ResponseWriter, r *http.Request, id string) {
-	fmt.Println("File Upload Endpoint Hit")
-
+func handleFileUpload(r *http.Request, photoID string) error {
 	// Parse our multipart form, 10 << 20 specifies a maximum
 	// upload of 10 MB files.
 	r.ParseMultipartForm(10 << 20)
 	// FormFile returns the first file for the given key `file`
 	// it also returns the FileHeader so we can get the Filename,
 	// the Header and the size of the file
-	file, handler, err := r.FormFile("file")
+	file, fileInfo, err := r.FormFile("file")
 	if err != nil {
-		fmt.Println("Error Retrieving the File")
-		fmt.Println(err)
-		return
+		return err
 	}
 	defer file.Close()
-	fmt.Printf("Uploaded File: %+v\n", handler.Filename)
-	fmt.Printf("File Size: %+v\n", handler.Size)
-	fmt.Printf("MIME Header: %+v\n", handler.Header)
+	fmt.Printf("Uploaded File: %+v\n", fileInfo.Filename)
+	fmt.Printf("File Size: %+v\n", fileInfo.Size)
+	fmt.Printf("Content Type: %+v\n", fileInfo.Header["Content-Type"][0])
+	if fileInfo.Header["Content-Type"][0] != "image/jpeg" && fileInfo.Header["Content-Type"][0] != "image/png" {
+		return fmt.Errorf("Invalid Content Type: %s", fileInfo.Header["Content-Type"][0])
+	}
 
-	// read all of the contents of our uploaded file into a
-	// byte array
-	fileBytes, err := ioutil.ReadAll(file)
+	// copy all of the contents of our uploaded file into a
+	// new file
+	new_file, err := os.Create(fmt.Sprintf("tmp/photo-%s-original.jpg", photoID))
 	if err != nil {
-		fmt.Println(err)
+		return err
 	}
-	// Create a temporary file within our temp-images directory that follows
-	// a particular naming pattern
-	err = ioutil.WriteFile(fmt.Sprintf("tmp/photo-%s-original.jpg", id), fileBytes, os.ModePerm)
-	if err != nil {
-		fmt.Println(err)
-	}
-	// return that we have successfully uploaded our file!
-	//fmt.Fprintf(w, "Successfully Uploaded File\n")
+	_, err = io.Copy(new_file, file)
+	return err
 }
 
 // Create a resized image from the full size image
-func makeThumbnail(id string, s string, pixels int) {
+func makeThumbnail(id string, s string, pixels uint16, l *log.Logger) error {
 	// Get the full path to the full size image and the full path to the location to save the thumbnail
 	fullPathToThumbnail := fmt.Sprintf("tmp/photo-%s-%s.jpg", id, s)
 	file := fmt.Sprintf("tmp/photo-%s-original.jpg", id)
@@ -94,28 +90,31 @@ func makeThumbnail(id string, s string, pixels int) {
 	// Make all layers of directory that are needed, assuming they do not exist; when they do exist, this function does nothing
 	err := os.MkdirAll(fullDirectory, os.ModePerm)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		return err
 	}
 	// Read the image from its location
 	buffer, err := bimg.Read(file)
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		return err
 	}
 	// Use the bimg Thumbnail function, which resizes and crops the image, with a quality of 95%, using libvips
-	newImage, err := bimg.NewImage(buffer).Thumbnail(pixels)
+	newImage, err := bimg.NewImage(buffer).Thumbnail(int(pixels))
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		return err
 	}
 	size, err := bimg.NewImage(newImage).Size()
 	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
+		return err
 	}
-	// Make sure the crop function created an image of the proper size; not sure why it wouldn't but this was in the example docs
-	if size.Width != pixels || size.Height != pixels {
-		fmt.Fprintln(os.Stderr, "Invalid image size: %dx%d", pixels, pixels)
+	// Make sure the crop function created an image of the proper size; enlarge it if not
+	if size.Width != int(pixels) || size.Height != int(pixels) {
+		newImage, err = bimg.NewImage(buffer).EnlargeAndCrop(int(pixels), int(pixels))
+		if err != nil {
+			return err
+		}
 	}
 	// Write the thumbnail to the proper location
-	bimg.Write(fullPathToThumbnail, newImage)
+	return bimg.Write(fullPathToThumbnail, newImage)
 }
 
 // UserPhotoUpload - upload user photos (req auth)
@@ -156,11 +155,26 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 		}
 		_, err = photoStore.CreateFile(npf)
 		if err != nil {
+			err = photoStore.Delete(pht.ID)
+			if err != nil {
+				fmt.Println("Could not delete: " + err.Error())
+			}
 			formData["Message"] = "Could not upload photo"
 			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 			return
 		}
-		uploadFile(rw, r, pht.ID)
+		err = handleFileUpload(r, pht.ID)
+		if err != nil {
+			err = photoStore.Delete(pht.ID)
+			if err != nil {
+				fmt.Println("Could not delete: " + err.Error())
+			} else {
+				fmt.Println("Deleted?")
+			}
+			formData["Message"] = "Could not upload photo"
+			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+			return
+		}
 		photoSizes := []string{"thumb", "small", "medium", "large"}
 		for _, size := range photoSizes {
 			npf := photo.NewPhotoFile{
@@ -171,13 +185,26 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 			}
 			phf, err := photoStore.CreateFile(npf)
 			if err != nil {
+				err = photoStore.Delete(pht.ID)
+				if err != nil {
+					fmt.Println("Could not delete: " + err.Error())
+				}
 				formData["Message"] = "Could not upload photo"
 				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 				return
 			}
-			makeThumbnail(pht.ID, size, int(phf.Width))
+			err = makeThumbnail(pht.ID, size, phf.Width, s.log)
+			if err != nil {
+				err = photoStore.Delete(pht.ID)
+				if err != nil {
+					fmt.Println("Could not delete: " + err.Error())
+				}
+				formData["Message"] = "Could not upload photo"
+				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+				return
+			}
 		}
-		formData["Message"] = "Added the image and other sizes"
+		formData["Message"] = "Uploaded the image"
 		s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 	}
 }
