@@ -54,19 +54,13 @@ func NewService(l *log.Logger, db *sqlx.DB, sessionKey string) *Service {
 }
 
 func (s *Service) ExecuteTemplateWithBase(rw http.ResponseWriter, data interface{}, fileName string) {
-	if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/"+fileName); err != nil {
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-	}
-	if err := s.t.ExecuteTemplate(rw, "base", data); err != nil {
+	if err := s.t.ExecuteTemplate(rw, fileName, data); err != nil {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 	}
 }
 
 func (s *Service) ExecuteTemplateWithBaseNoServerError(rw http.ResponseWriter, data interface{}, fileName string) {
-	if _, err := s.t.ParseFiles("var/templates/base.gohtml", "var/templates/"+fileName); err != nil {
-		//http.Error(rw, err.Error(), http.StatusInternalServerError)
-	}
-	if err := s.t.ExecuteTemplate(rw, "base", data); err != nil {
+	if err := s.t.ExecuteTemplate(rw, fileName, data); err != nil {
 		//http.Error(rw, err.Error(), http.StatusInternalServerError)
 	}
 }
@@ -116,7 +110,5 @@ func (s *Service) Settings(rw http.ResponseWriter, r *http.Request) {
 
 	log.Printf("data:%v+\n", data)
 
-	if err := s.t.ExecuteTemplate(rw, "settings.gohtml", data); err != nil {
-		http.Error(rw, err.Error(), http.StatusInternalServerError)
-	}
+	s.ExecuteTemplateWithBase(rw, data, "settings.gohtml")
 }

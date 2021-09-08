@@ -1,56 +1,59 @@
-{{define "title"}}
-Gallery
-{{end}}
 
-{{define "header"}}
-Photo Gallery
-{{end}}
-
-{{define "content"}}
-<style>
-a.active {
-    color: black;
-    text-decoration: none;
-    cursor: default;
-    pointer-events: none;
-}
-</style>
-<script>
-function resizeImage(size) {
-    for (const resize of document.getElementsByName("resize")) {
-        resize.removeAttribute("class");
+<!DOCTYPE html>
+<html>
+    <head>
+    {{template "header_head" .}}
+    <title>Gallery</title>
+    <style>
+    a.active {
+      color: black;
+      text-decoration: none;
+      cursor: default;
+      pointer-events: none;
     }
-    document.getElementById(size).className = "active";
-    for (const img of document.getElementsByTagName("img")) {
-        img.src = img.src.replace(/-[^-]*$/, ("-" + size + ".jpg"));
-        img.parentNode.previousElementSibling.style.maxWidth = "";
+    </style>
+    </head>
+    <body>
+    {{template "header_body" .}}
+    <h1>Photo Gallery</h1>
+    <div>
+        Switch size:
+        <a id="thumb" name="resize" class="active" href="javascript:resizeImage('thumb');">Thumbnail</a>
+        &nbsp;
+        <a id="small" name="resize" href="javascript:resizeImage('small');">Small</a>
+        &nbsp;
+        <a id="medium" name="resize" href="javascript:resizeImage('medium');">Medium</a>
+        &nbsp;
+        <a id="large" name="resize" href="javascript:resizeImage('large');">Large</a>
+        &nbsp;
+        <a id="original" name="resize" href="javascript:resizeImage('original');">Original</a>
+        <br>
+        {{ range $photo := .Photos }}
+        <div style="display: inline-block">
+            <span style="width: 200px; text-align: center;">
+                <figure>
+                    <h2 style="word-wrap: break-word; max-width: 200px;">{{html $photo.Title}}</h2>
+                    <a target="_blank" href="{{replaceEnd $photo.FilePath "-thumb.jpg" "-original.jpg"}}">
+                        <img alt="{{html $photo.Title}}" src="{{$photo.FilePath}}">
+                    </a>
+                    <figcaption>{{html $photo.Description}}</figcaption>
+                </figure>
+            <span>
+        </div>
+        {{end}}
+    </div>
+    {{template "footer" .}}
+    <script>
+    function resizeImage(size) {
+        for (const resize of document.getElementsByName("resize")) {
+            resize.removeAttribute("class");
+        }
+        document.getElementById(size).className = "active";
+        for (const img of document.getElementsByTagName("img")) {
+            img.src = img.src.replace(/-[^-]*$/, ("-" + size + ".jpg"));
+            img.parentNode.previousElementSibling.style.maxWidth = "";
+        }
     }
-}
-</script>
-<div>
-    Switch size:
-    <a id="thumb" name="resize" class="active" href="javascript:resizeImage('thumb');">Thumbnail</a>
-    &nbsp;
-    <a id="small" name="resize" href="javascript:resizeImage('small');">Small</a>
-    &nbsp;
-    <a id="medium" name="resize" href="javascript:resizeImage('medium');">Medium</a>
-    &nbsp;
-    <a id="large" name="resize" href="javascript:resizeImage('large');">Large</a>
-    &nbsp;
-    <a id="original" name="resize" href="javascript:resizeImage('original');">Original</a>
-    <br>
-{{ range $photo := .Photos }}
-<div style="display: inline-block">
-    <span style="width: 200px; text-align: center;">
-        <figure>
-            <h2 style="word-wrap: break-word; max-width: 200px;">{{html $photo.Title}}</h2>
-            <a target="_blank" href="{{replaceEnd $photo.FilePath "-thumb.jpg" "-original.jpg"}}">
-                <img alt="{{html $photo.Title}}" src="{{$photo.FilePath}}">
-            </a>
-            <figcaption>{{html $photo.Description}}</figcaption>
-        </figure>
-    <span>
-</div>
-{{end}}
-</div>
-{{end}}
+    </script>
+    </body>
+</html>

@@ -1,12 +1,12 @@
-{{define "title"}}
-Photo
-{{end}}
-
-{{define "header"}}
-Upload Photo Form
-{{end}}
-
-{{define "content"}}
+<!DOCTYPE html>
+<html>
+    <head>
+    {{template "header_head" .}}
+    <title>Photo</title>
+    </head>
+    <body>
+    {{template "header_body" .}}
+    <h1>Upload Photo Form</h1>
     <form enctype="multipart/form-data" method="POST" action="/photo">
         {{ .csrfField }}
         <div class="mb-3">
@@ -23,4 +23,6 @@ Upload Photo Form
         </div>
         <button class="btn btn-primary">Upload</button>
     </form>
-{{end}}
+    {{template "footer" .}}
+    </body>
+</html>

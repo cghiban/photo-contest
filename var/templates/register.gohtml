@@ -1,12 +1,12 @@
-{{define "title"}}
-Photo contest @ DNALC NYC
-{{end}}
-
-{{define "header"}}
-Sign Up
-{{end}}
-
-{{define "content"}}
+<!DOCTYPE html>
+<html>
+    <head>
+    {{template "header_head" .}}
+    <title>Photo contest @ DNALC NYC</title>
+    </head>
+    <body>
+    {{template "header_body" .}}
+    <h1>Sign Up</h1>
     <form method="POST" action="/register">
 		{{ .csrfField }}
         <div class="mb-3">
@@ -29,4 +29,6 @@ Sign Up
     </form>
 
     <div>Already have an account? <a href="/login">Login</a>.</div>
-{{end}}
+    {{template "footer" .}}
+    </body>
+</html>

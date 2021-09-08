@@ -1,12 +1,12 @@
-{{define "title"}}
-Login - Photo Contest
-{{end}}
-
-{{define "header"}}
-Login
-{{end}}
-
-{{define "content"}}
+<!DOCTYPE html>
+<html>
+    <head>
+    {{template "header_head" .}}
+    <title>Login - Photo Contest</title>
+    </head>
+    <body>
+    {{template "header_body" .}}
+    <h1>Login</h1>
     <form method="POST" action="/login">
         {{ .csrfField }}
         <div class="mb-3">
@@ -20,4 +20,6 @@ Login
         <button class="btn btn-primary">Submit</button>
     </form>
     <div>Don't have an account? <a href="/register">Register</a> to log your readings.</div>
-{{end}}
+    {{template "footer" .}}
+    </body>
+</html>

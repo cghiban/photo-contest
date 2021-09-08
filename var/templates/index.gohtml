@@ -1,11 +1,13 @@
-{{define "title"}}
-Photo contest @ DNAL NYC
-{{end}}
-
-{{define "header"}}
-Home
-{{end}}
-
-{{define "content"}}
-This is home
-{{end}}
+<!DOCTYPE html>
+<html>
+    <head>
+    {{template "header_head" .}}
+    <title>About - Photo contest @ DNALC NYC</title>
+    </head>
+    <body>
+    {{template "header_body" .}}
+    <h1>About this site</h1>
+    This is home
+    {{template "footer" .}}
+    </body>
+</html>

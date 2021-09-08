@@ -1,12 +1,12 @@
-{{define "title"}}
-Update Profile - Photo Contest
-{{end}}
-
-{{define "header"}}
-Update Profile
-{{end}}
-
-{{define "content"}}
+<!DOCTYPE html>
+<html>
+    <head>
+    {{template "header_head" .}}
+    <title>Update Profile - Photo Contest</title>
+    </head>
+    <body>
+    {{template "header_body" .}}
+    <h1>Update Profile</h1>
     <form method="POST" action="/profile">
         {{ .csrfField }}
         <div class="mb-3">
@@ -19,4 +19,6 @@ Update Profile
         </div>
         <button class="btn btn-primary">Update</button>
     </form>
-{{end}}
+    {{template "footer" .}}
+    </body>
+</html>

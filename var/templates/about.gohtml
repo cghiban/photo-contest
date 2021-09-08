@@ -1,13 +1,15 @@
-{{define "title"}}
-About - Photo contest @ DNALC NYC
-{{end}}
-
-{{define "header"}}
-About this site
-{{end}}
-
-{{define "content"}}
+<!DOCTYPE html>
+<html>
+    <head>
+    {{template "header_head" .}}
+    <title>About</title>
+    </head>
+    <body>
+    {{template "header_body" .}}
+    <h1>About</h1>
     <div>
     This is a space where you can upload an amazing image to our contest. Who knows, you might win some $$..
     </div>
-{{end}}
+    {{template "footer" .}}
+    </body>
+</html>
