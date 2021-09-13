@@ -5,7 +5,7 @@ jobs:
   build:
     working_directory: ~/repo
     docker:
-      - image: $DOCKERHUB_USERNAME/go_with_libvips:0.0.1
+      - image: danielhjacobs/go_with_libvips:0.0.1
         auth:
           username: $DOCKERHUB_USERNAME
           password: $DOCKERHUB_PASSWORD
