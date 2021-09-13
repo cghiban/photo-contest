@@ -19,7 +19,7 @@ jobs:
           command: sudo apt-get update
       - run:
           name: Install libvips dependencies
-          command: sudo apt-get install -y libglib2.0-dev libexpat1-dev libtiff5-dev libjpeg-turbo8-dev libgsf-1-dev libpng-dev gtk-doc-tools gobject-introspection
+          command: sudo apt-get install -y libglib2.0-dev libexpat1-dev libtiff5-dev libjpeg62-turbo-dev libgsf-1-dev libpng-dev gtk-doc-tools gobject-introspection
       - run:
           name: Install libvips
           command: ./install-vips.sh
