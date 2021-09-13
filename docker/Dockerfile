@@ -4,7 +4,7 @@ MAINTAINER Daniel Jacobs <jacobs@cshl.edu>
 ENV _APP Photo Contest With libvips
 ENV _AUTHOR Daniel Jacobs
 ENV _VERSION 0.0.1
-ENV PKG_CONFIG_PATH="/usr/bin/" 
+ENV PKG_CONFIG_PATH="/usr/lib/x86_64-linux-gnu/pkgconfig/" 
 
 WORKDIR ~/repo
 
@@ -13,8 +13,7 @@ COPY sleep.sh /opt/bin/
 
 RUN sudo apt-get update \
 	&& sudo apt-get install -y \
-	&& sudo apt-get install -y libvips \
-	&& sudo apt-get install libvips-tools \
+	&& sudo apt-get install -y libvips-dev \
 	&& sudo apt-get autoremove -y \
     && sudo apt-get clean \
     && sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
