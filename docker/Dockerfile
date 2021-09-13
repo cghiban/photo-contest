@@ -8,13 +8,16 @@ ENV _VERSION 0.0.1
 WORKDIR ~/repo
 
 RUN sudo mkdir -p /opt/bin
-COPY install-vips.sh sleep.sh /opt/bin/
+COPY set_environment_variables.sh sleep.sh /opt/bin/
 
 RUN sudo apt-get update \
 	&& sudo apt-get install -y \
 	&& sudo apt-get install -y libvips \
+	&& sudo apt-get install libvips-tools \
 	&& sudo apt-get autoremove -y \
     && sudo apt-get clean \
     && sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+RUN echo 'a' && /opt/bin/set_environment_variables.sh
 
 ENTRYPOINT /opt/bin/sleep.sh
