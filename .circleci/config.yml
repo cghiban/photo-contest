@@ -15,7 +15,6 @@ jobs:
           keys:
             - go-mod-v4-{{ checksum "go.sum" }}
       - run:
-        run:
           name: Install apt-get
           command: sudo apt-get update
       - run:
