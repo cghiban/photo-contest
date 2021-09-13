@@ -5,24 +5,15 @@ jobs:
   build:
     working_directory: ~/repo
     docker:
-      - image: circleci/golang:1.16.5
-    environment:
-      VIPS_VERSION: 8.11.3
-      PKG_CONFIG_PATH: /home/circleci/vips/lib/pkgconfig:$PKG_CONFIG_PATH
+      - image: $DOCKERHUB_USERNAME/go_with_libvips:0.0.1
+        auth:
+          username: $DOCKERHUB_USERNAME
+          password: $DOCKERHUB_PASSWORD
     steps:
       - checkout
       - restore_cache:
           keys:
             - go-mod-v4-{{ checksum "go.sum" }}
-      - run:
-          name: Install apt-get
-          command: sudo apt-get update
-      - run:
-          name: Install libvips dependencies
-          command: sudo apt-get install -y libglib2.0-dev libexpat1-dev libtiff5-dev libjpeg62-turbo-dev libgsf-1-dev libpng-dev gtk-doc-tools gobject-introspection
-      - run:
-          name: Install libvips
-          command: ./install-vips.sh
       - run:
           name: Install Dependencies
           command: go mod download
