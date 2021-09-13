@@ -8,7 +8,7 @@ jobs:
       - image: circleci/golang:1.16.5
     environment:
       VIPS_VERSION: 8.11.3
-      PKG_CONFIG_PATH: $HOME/vips/lib/pkgconfig:$PKG_CONFIG_PATH
+      PKG_CONFIG_PATH: /home/circleci/vips/lib/pkgconfig:$PKG_CONFIG_PATH
     steps:
       - checkout
       - restore_cache:
