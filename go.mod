@@ -15,6 +15,7 @@ require (
 	github.com/gorilla/csrf v1.7.0
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/sessions v1.2.1
+	github.com/h2non/bimg v1.1.5 // indirect
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.2 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6

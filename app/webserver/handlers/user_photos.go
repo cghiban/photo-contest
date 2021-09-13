@@ -1,14 +1,11 @@
 package handlers
 
 import (
-	"bytes"
 	"fmt"
-	"io/ioutil"
 	"net/http"
-	"strings"
 
-	"encoding/json"
 	"io"
+	"log"
 	"os"
 	"path"
 
@@ -16,6 +13,7 @@ import (
 	"photo-contest/business/data/user"
 
 	"github.com/gorilla/csrf"
+	"github.com/h2non/bimg"
 )
 
 type PhotoInfo struct {
@@ -23,11 +21,6 @@ type PhotoInfo struct {
 	Title       string
 	Description string
 	PhotoId     string
-}
-
-type ThumbnailResponse struct {
-	Status  string
-	Message string
 }
 
 // UserPhotos - lists user photos (req auth)
@@ -79,10 +72,6 @@ func handleFileUpload(r *http.Request, photoID string) error {
 
 	// copy all of the contents of our uploaded file into a
 	// new file
-	err = os.MkdirAll("tmp", os.ModePerm)
-	if err != nil {
-		return err
-	}
 	new_file, err := os.Create(fmt.Sprintf("tmp/photo-%s-original.jpg", photoID))
 	if err != nil {
 		return err
@@ -92,10 +81,10 @@ func handleFileUpload(r *http.Request, photoID string) error {
 }
 
 // Create a resized image from the full size image
-func makeThumbnail(hostName string, id string, s string, pixels uint16) error {
+func makeThumbnail(id string, s string, pixels uint16, l *log.Logger) error {
 	// Get the full path to the full size image and the full path to the location to save the thumbnail
 	fullPathToThumbnail := fmt.Sprintf("tmp/photo-%s-%s.jpg", id, s)
-	fileURL := fmt.Sprintf("%s/tmp/photo-%s-original.jpg", hostName, id)
+	file := fmt.Sprintf("tmp/photo-%s-original.jpg", id)
 	// The full path to the directory that needs to be created to save the thumbnail properly
 	fullDirectory := path.Dir(fullPathToThumbnail)
 	// Make all layers of directory that are needed, assuming they do not exist; when they do exist, this function does nothing
@@ -104,32 +93,28 @@ func makeThumbnail(hostName string, id string, s string, pixels uint16) error {
 		return err
 	}
 	// Read the image from its location
-	requestParams := make(map[string]interface{})
-	requestParams["image"] = fileURL
-	requestParams["pixels"] = pixels
-	jsonValue, err := json.Marshal(requestParams)
+	buffer, err := bimg.Read(file)
 	if err != nil {
 		return err
 	}
-	resp, err := http.Post(hostName[0:strings.LastIndex(hostName, ":")]+":8000", "application/json", bytes.NewBuffer(jsonValue))
+	// Use the bimg Thumbnail function, which resizes and crops the image, with a quality of 95%, using libvips
+	newImage, err := bimg.NewImage(buffer).Thumbnail(int(pixels))
 	if err != nil {
 		return err
 	}
-	var tr ThumbnailResponse
-	var newImage []byte
-	if resp.Header.Get("Content-Type") == "application/json" {
-		json.NewDecoder(resp.Body).Decode(&tr)
-		if tr.Status == "error" {
-			return fmt.Errorf("%s", tr.Message)
-		}
-	} else {
-		newImage, err = ioutil.ReadAll(resp.Body)
+	size, err := bimg.NewImage(newImage).Size()
+	if err != nil {
+		return err
+	}
+	// Make sure the crop function created an image of the proper size; enlarge it if not
+	if size.Width != int(pixels) || size.Height != int(pixels) {
+		newImage, err = bimg.NewImage(buffer).EnlargeAndCrop(int(pixels), int(pixels))
 		if err != nil {
 			return err
 		}
 	}
 	// Write the thumbnail to the proper location
-	return os.WriteFile(fullPathToThumbnail, newImage, os.ModePerm)
+	return bimg.Write(fullPathToThumbnail, newImage)
 }
 
 // UserPhotoUpload - upload user photos (req auth)
@@ -159,7 +144,6 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 		pht, err := photoStore.Create(np)
 		if err != nil {
 			formData["Message"] = "Could not upload photo"
-			s.log.Println(err.Error())
 			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 			return
 		}
@@ -171,10 +155,8 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 		}
 		_, err = photoStore.CreateFile(npf)
 		if err != nil {
-			s.log.Println(err.Error())
 			err = photoStore.Delete(pht.ID)
 			if err != nil {
-				s.log.Println(err.Error())
 				fmt.Println("Could not delete: " + err.Error())
 			}
 			formData["Message"] = "Could not upload photo"
@@ -183,10 +165,8 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 		}
 		err = handleFileUpload(r, pht.ID)
 		if err != nil {
-			s.log.Println(err.Error())
 			err = photoStore.Delete(pht.ID)
 			if err != nil {
-				s.log.Println(err.Error())
 				fmt.Println("Could not delete: " + err.Error())
 			} else {
 				fmt.Println("Deleted?")
@@ -205,28 +185,18 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 			}
 			phf, err := photoStore.CreateFile(npf)
 			if err != nil {
-				s.log.Println(err.Error())
 				err = photoStore.Delete(pht.ID)
 				if err != nil {
-					s.log.Println(err.Error())
 					fmt.Println("Could not delete: " + err.Error())
 				}
 				formData["Message"] = "Could not upload photo"
 				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 				return
 			}
-			hostName := ""
-			if r.TLS == nil {
-				hostName = "http://" + r.Host
-			} else {
-				hostName = "https://" + r.Host
-			}
-			err = makeThumbnail(hostName, pht.ID, size, phf.Width)
+			err = makeThumbnail(pht.ID, size, phf.Width, s.log)
 			if err != nil {
-				s.log.Println(err.Error())
 				err = photoStore.Delete(pht.ID)
 				if err != nil {
-					s.log.Println(err.Error())
 					fmt.Println("Could not delete: " + err.Error())
 				}
 				formData["Message"] = "Could not upload photo"
