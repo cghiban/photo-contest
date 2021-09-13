@@ -4,10 +4,6 @@ MAINTAINER Daniel Jacobs <jacobs@cshl.edu>
 ENV _APP Photo Contest With libvips
 ENV _AUTHOR Daniel Jacobs
 ENV _VERSION 0.0.1
-ARG VIPS_VERSION="8.11.3"
-ARG PKG_CONFIG_PATH="/home/circleci/vips/lib/pkgconfig"
-ENV VIPS_VERSION $VIPS_VERSION
-ENV PKG_CONFIG_PATH $PKG_CONFIG_PATH
 
 WORKDIR ~/repo
 

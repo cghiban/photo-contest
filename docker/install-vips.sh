@@ -1,5 +1,5 @@
 #!/bin/bash 
-# Copy of https://github.com/libvips/php-vips/blob/master/install-vips.sh
+# Inspired by https://github.com/libvips/php-vips/blob/master/install-vips.sh
 
 version="8.11.3"
 HOME="/home/circleci/"
