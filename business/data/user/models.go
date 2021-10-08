@@ -6,25 +6,52 @@ import (
 
 // AuthUser - user
 type AuthUser struct {
-	ID        int       `db:"user_id" json:"id"`
-	Name      string    `db:"name" json:"name"`
-	Email     string    `db:"email" json:"email"`
-	Pass      []byte    `db:"passw" json:"-"`
-	CreatedOn time.Time `db:"created" json:"date_created"`
+	ID             int       `db:"user_id" json:"id"`
+	Name           string    `db:"name" json:"name"`
+	Email          string    `db:"email" json:"email"`
+	Pass           []byte    `db:"passw" json:"-"`
+	CreatedOn      time.Time `db:"created" json:"date_created"`
+	Street         string    `db:"street" json:"street"`
+	City           string    `db:"city" json:"city"`
+	State          string    `db:"state" json:"state"`
+	Zip            string    `db:"zip" json:"zip"`
+	Phone          string    `db:"phone" json:"phone"`
+	Age            int       `db:"age" json:"age"`
+	Gender         string    `db:"gender" json:"gender"`
+	Ethnicity      string    `db:"ethnicity" json:"ethnicity"`
+	OtherEthnicity string    `db:"other_ethnicity" json:"other_ethnicity"`
 }
 
 // NewAuthUser - struct for creating new users
 type NewAuthUser struct {
-	Name        string `json:"name" validate:"required"`
-	Email       string `json:"email" validate:"required"`
-	Pass        string `json:"pass" validate:"required"`
-	PassConfirm string `json:"pass_confirm" validate:"eqfield=Pass"`
+	Name           string `json:"name" validate:"required"`
+	Email          string `json:"email" validate:"required"`
+	Pass           string `json:"pass" validate:"required"`
+	PassConfirm    string `json:"pass_confirm" validate:"eqfield=Pass"`
+	Street         string `json:"street" validate:"required"`
+	City           string `json:"city" validate:"required"`
+	State          string `json:"state" validate:"required"`
+	Zip            string `json:"zip" validate:"required"`
+	Phone          string `json:"phone" validate:"required"`
+	Age            int    `json:"age" validate:"required"`
+	Gender         string `json:"gender" validate:"required"`
+	Ethnicity      string `json:"ethnicity" validate:"required"`
+	OtherEthnicity string `json:"other_ethnicity"`
 }
 
 // UpdateAuthUser - struct for updating users
 type UpdateAuthUser struct {
-	Name  string `json:"name" validate:"required"`
-	Email string `json:"email" validate:"required,email"`
+	Name           string `json:"name" validate:"required"`
+	Email          string `json:"email" validate:"required,email"`
+	Street         string `json:"street" validate:"required"`
+	City           string `json:"city" validate:"required"`
+	State          string `json:"state" validate:"required"`
+	Zip            string `json:"zip" validate:"required"`
+	Phone          string `json:"phone" validate:"required"`
+	Age            int    `json:"age" validate:"required"`
+	Gender         string `json:"gender" validate:"required"`
+	Ethnicity      string `json:"ethnicity" validate:"required"`
+	OtherEthnicity string `json:"other_ethnicity"`
 }
 
 // UpdateAuthUserPass - struct for updating users' passwords

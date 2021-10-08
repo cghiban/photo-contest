@@ -38,17 +38,26 @@ func (s Store) Create(nu NewAuthUser) (AuthUser, error) {
 	}
 
 	usr := AuthUser{
-		Name:      nu.Name,
-		Email:     nu.Email,
-		Pass:      hash,
-		CreatedOn: time.Now(),
+		Name:           nu.Name,
+		Email:          nu.Email,
+		Pass:           hash,
+		CreatedOn:      time.Now(),
+		Street:         nu.Street,
+		City:           nu.City,
+		State:          nu.State,
+		Zip:            nu.Zip,
+		Phone:          nu.Phone,
+		Age:            nu.Age,
+		Gender:         nu.Gender,
+		Ethnicity:      nu.Ethnicity,
+		OtherEthnicity: nu.OtherEthnicity,
 	}
 
 	const query = `
 	INSERT INTO auth_user 
-		(email, name, passw, created)
+		(email, name, passw, created, street, city, state, zip, phone, age, gender, ethnicity, other_ethnicity)
 	VALUES 
-		(:email, :name, :passw, :created)`
+		(:email, :name, :passw, :created, :street, :city, :state, :zip, :phone, :age, :gender, :ethnicity, :other_ethnicity)`
 
 	s.log.Printf("%s: %s", "user.Create", database.Log(query, usr))
 
@@ -81,7 +90,7 @@ func (s Store) QueryByEmail(email string) (AuthUser, error) {
 	}
 	const query = `
         SELECT
-			user_id, name, email, passw, created
+			user_id, name, email, passw, created, street, city, state, zip, phone, age, gender, ethnicity, other_ethnicity
 		FROM 
 			auth_user
 		WHERE email = :email`
@@ -110,7 +119,7 @@ func (s Store) QueryByID(user_id int) (AuthUser, error) {
 		UserID: user_id,
 	}
 	const query = `
-        SELECT user_id, name, email, passw, created
+        SELECT user_id, name, email, passw, created, street, city, state, zip, phone, age, gender, ethnicity, other_ethnicity
 		FROM auth_user
 		WHERE user_id = :user_id`
 
@@ -136,13 +145,22 @@ func (s Store) Update(user_id int, uu UpdateAuthUser) (AuthUser, error) {
 	}
 
 	usr := AuthUser{
-		ID:    user_id,
-		Name:  uu.Name,
-		Email: uu.Email,
+		ID:             user_id,
+		Name:           uu.Name,
+		Email:          uu.Email,
+		Street:         uu.Street,
+		City:           uu.City,
+		State:          uu.State,
+		Zip:            uu.Zip,
+		Phone:          uu.Phone,
+		Age:            uu.Age,
+		Gender:         uu.Gender,
+		Ethnicity:      uu.Ethnicity,
+		OtherEthnicity: uu.OtherEthnicity,
 	}
 
 	const query = `
-	UPDATE auth_user SET email = :email, name = :name WHERE user_id = :user_id`
+	UPDATE auth_user SET email = :email, name = :name, street = :street, city = :city, state = :state, zip = :zip, phone = :phone, age = :age, gender = :gender, ethnicity = :ethnicity, other_ethnicity = :other_ethnicity WHERE user_id = :user_id`
 
 	s.log.Printf("%s: %s", "user.Update", database.Log(query, usr))
 

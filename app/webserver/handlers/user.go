@@ -6,6 +6,9 @@ import (
 	"net/http"
 	"photo-contest/business/data/user"
 	"photo-contest/foundation/database"
+	"photo-contest/foundation/utils"
+	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/gorilla/csrf"
@@ -13,25 +16,85 @@ import (
 
 // UserSignUp - handles user signup
 func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
-
+	states := utils.USStates()
+	state_keys := utils.StateKeys(states)
+	ethnicities := utils.Ethnicities()
+	ethnicity_keys := utils.EthnicitiesKeys()
+	genders := utils.Genders()
+	gender_keys := utils.GenderKeys()
+	sort.Sort(state_keys)
 	formData := map[string]interface{}{
 		csrf.TemplateTag: csrf.TemplateField(r),
+		"states":         states,
+		"state_keys":     state_keys,
+		"ethnicities":    ethnicities,
+		"ethnicity_keys": ethnicity_keys,
+		"genders":        genders,
+		"gender_keys":    gender_keys,
 	}
 	if r.Method == "GET" {
 		s.ExecuteTemplateWithBase(rw, formData, "register.gohtml")
 	} else if r.Method == "POST" {
 		r.ParseForm()
 
-		name := strings.Trim(r.Form.Get("name"), " ")
-		email := strings.Trim(r.Form.Get("email"), " ")
-		password := strings.Trim(r.Form.Get("password"), " ")
-		password_confirm := strings.Trim(r.Form.Get("password_confirm"), " ")
-
+		name := strings.TrimSpace(r.Form.Get("name"))
+		email := strings.TrimSpace(r.Form.Get("email"))
+		password := strings.TrimSpace(r.Form.Get("password"))
+		password_confirm := strings.TrimSpace(r.Form.Get("password_confirm"))
+		street := strings.TrimSpace(r.Form.Get("street"))
+		city := strings.TrimSpace(r.Form.Get("city"))
+		state := strings.TrimSpace(r.Form.Get("state"))
+		zip := strings.TrimSpace(r.Form.Get("zip"))
+		phone := strings.TrimSpace(r.Form.Get("phone"))
+		age_string := strings.TrimSpace(r.Form.Get("age"))
+		age, err := strconv.Atoi(age_string)
+		if err != nil {
+			formData["Message"] = "Age must be a number."
+			s.ExecuteTemplateWithBase(rw, formData, "register.gohtml")
+			return
+		}
+		if age < 0 || age > 255 {
+			formData["Message"] = "Age must be a positive number."
+			s.ExecuteTemplateWithBase(rw, formData, "register.gohtml")
+			return
+		}
+		gender := strings.TrimSpace(r.Form.Get("gender"))
+		ethnicities := r.Form["ethnicity"]
+		ethnicity := ""
+		for _, eth := range ethnicities {
+			if utils.InStringSlice(ethnicity_keys, eth) {
+				ethnicity = ethnicity + eth
+				ethnicity = ethnicity + ";"
+			}
+		}
+		ethnicity = strings.TrimSuffix(ethnicity, ";")
+		other_ethnicity := strings.TrimSpace(r.Form.Get("other_ethnicity"))
+		valid_state := false
+		for _, s := range state_keys {
+			if s == state {
+				valid_state = true
+			}
+		}
+		if !valid_state {
+			formData["Message"] = "Invalid state."
+			s.ExecuteTemplateWithBase(rw, formData, "register.gohtml")
+			return
+		}
+		if !utils.InStringSlice(gender_keys, gender) {
+			formData["Message"] = "Invalid gender."
+			s.ExecuteTemplateWithBase(rw, formData, "register.gohtml")
+			return
+		}
+		if password != password_confirm {
+			formData["Message"] = "The passwords must match."
+			s.ExecuteTemplateWithBase(rw, formData, "register.gohtml")
+			return
+		}
 		s.log.Println("trying to find user w:", email, password)
 
 		userGroup := user.NewStore(s.log, s.db)
 
-		_, err := userGroup.QueryByEmail(email)
+		_, err = userGroup.QueryByEmail(email)
 		s.log.Println("from GetUser:", err)
 		if err != nil && err != database.ErrNotFound {
 			formData["Message"] = "This email is already in use."
@@ -40,10 +103,19 @@ func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
 		}
 
 		newUser := user.NewAuthUser{
-			Name:        name,
-			Email:       email,
-			Pass:        password,
-			PassConfirm: password_confirm,
+			Name:           name,
+			Email:          email,
+			Pass:           password,
+			PassConfirm:    password_confirm,
+			Street:         street,
+			City:           city,
+			State:          state,
+			Zip:            zip,
+			Phone:          phone,
+			Age:            age,
+			Gender:         gender,
+			Ethnicity:      ethnicity,
+			OtherEthnicity: other_ethnicity,
 		}
 
 		usr, err := userGroup.Create(newUser)
@@ -134,12 +206,33 @@ func (s *Service) UserLogOut(rw http.ResponseWriter, r *http.Request) {
 // UserUpdateProfile - allows profile to be updated
 func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
 	usr := r.Context().Value("user").(*user.AuthUser)
-
+	states := utils.USStates()
+	state_keys := utils.StateKeys(states)
+	ethnicities := utils.Ethnicities()
+	ethnicity_keys := utils.EthnicitiesKeys()
+	genders := utils.Genders()
+	gender_keys := utils.GenderKeys()
+	sort.Sort(state_keys)
 	formData := map[string]interface{}{
-		"name":           usr.Name,
-		"email":          usr.Email,
-		csrf.TemplateTag: csrf.TemplateField(r),
-		"User":           "Exists",
+		"name":            usr.Name,
+		"email":           usr.Email,
+		"street":          usr.Street,
+		"city":            usr.City,
+		"state":           usr.State,
+		"zip":             usr.Zip,
+		"phone":           usr.Phone,
+		"age":             usr.Age,
+		"gender":          usr.Gender,
+		"ethnicity":       usr.Ethnicity,
+		"other_ethnicity": usr.OtherEthnicity,
+		csrf.TemplateTag:  csrf.TemplateField(r),
+		"User":            "Exists",
+		"states":          states,
+		"state_keys":      state_keys,
+		"ethnicities":     ethnicities,
+		"ethnicity_keys":  ethnicity_keys,
+		"genders":         genders,
+		"gender_keys":     gender_keys,
 	}
 
 	if r.Method == "GET" {
@@ -150,12 +243,64 @@ func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
 
 		name := strings.Trim(r.Form.Get("name"), " ")
 		email := strings.Trim(r.Form.Get("email"), " ")
-
+		street := strings.TrimSpace(r.Form.Get("street"))
+		city := strings.TrimSpace(r.Form.Get("city"))
+		state := strings.TrimSpace(r.Form.Get("state"))
+		zip := strings.TrimSpace(r.Form.Get("zip"))
+		phone := strings.TrimSpace(r.Form.Get("phone"))
+		age_string := strings.TrimSpace(r.Form.Get("age"))
+		age, err := strconv.Atoi(age_string)
+		if err != nil {
+			formData["Message"] = "Age must be a number."
+			s.ExecuteTemplateWithBase(rw, formData, "profile.gohtml")
+			return
+		}
+		if age < 0 || age > 255 {
+			formData["Message"] = "Age must be a positive number."
+			s.ExecuteTemplateWithBase(rw, formData, "profile.gohtml")
+			return
+		}
+		gender := strings.TrimSpace(r.Form.Get("gender"))
+		ethnicities := r.Form["ethnicity"]
+		ethnicity := ""
+		for _, eth := range ethnicities {
+			if utils.InStringSlice(ethnicity_keys, eth) {
+				ethnicity = ethnicity + eth
+				ethnicity = ethnicity + ";"
+			}
+		}
+		ethnicity = strings.TrimSuffix(ethnicity, ";")
+		other_ethnicity := strings.TrimSpace(r.Form.Get("other_ethnicity"))
+		valid_state := false
+		for _, s := range state_keys {
+			if s == state {
+				valid_state = true
+			}
+		}
+		if !valid_state {
+			formData["Message"] = "Invalid state."
+			s.ExecuteTemplateWithBase(rw, formData, "profile.gohtml")
+			return
+		}
+		if !utils.InStringSlice(gender_keys, gender) {
+			formData["Message"] = "Invalid gender."
+			s.ExecuteTemplateWithBase(rw, formData, "profile.gohtml")
+			return
+		}
 		s.log.Println("trying to update user w:", email, name)
 
 		uu := user.UpdateAuthUser{
-			Name:  name,
-			Email: email,
+			Name:           name,
+			Email:          email,
+			Street:         street,
+			City:           city,
+			State:          state,
+			Zip:            zip,
+			Phone:          phone,
+			Age:            age,
+			Gender:         gender,
+			Ethnicity:      ethnicity,
+			OtherEthnicity: other_ethnicity,
 		}
 		userGroup := user.NewStore(s.log, s.db)
 
@@ -166,7 +311,7 @@ func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		_, err := userGroup.Update(usr.ID, uu)
+		_, err = userGroup.Update(usr.ID, uu)
 		if err != nil {
 			s.log.Println(err)
 			formData["Message"] = err.Error()

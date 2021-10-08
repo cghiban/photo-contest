@@ -34,6 +34,15 @@ func NewService(l *log.Logger, db *sqlx.DB, sessionKey string) *Service {
 		},
 		"replaceEnd": func(input, from, to string) string { return strings.TrimSuffix(input, from) + to },
 		"dateISOish": func(t time.Time) string { return t.Format("2006-01-02 3:04pm") },
+		"substringInStringWithSeparator": func(full_string, substring, separator string) bool {
+			substrs := strings.Split(full_string, separator)
+			for _, s := range substrs {
+				if s == substring {
+					return true
+				}
+			}
+			return false
+		},
 	}
 	templates := template.Must(template.New("tmpls").Funcs(funcMap).ParseGlob("var/templates/*.gohtml"))
 	//templates = templates.Funcs(funcMap)

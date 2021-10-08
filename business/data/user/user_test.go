@@ -24,6 +24,14 @@ func TestUser(t *testing.T) {
 				Email:       "ghiban@cshl.edu",
 				Pass:        "HopaHopaPenelopa",
 				PassConfirm: "HopaHopaPenelopa",
+				Street:      "334 Main St",
+				City:        "Cold Spring Harbor",
+				State:       "NY",
+				Zip:         "11724",
+				Phone:       "(516)367-5170",
+				Age:         30,
+				Gender:      "M",
+				Ethnicity:   "wh",
 			}
 			usr, err := store.Create(nu)
 			if err != nil {
@@ -42,8 +50,16 @@ func TestUser(t *testing.T) {
 			t.Logf("\t%s\tTest %d:\tShould get back the same user.", tests.Success, testID)
 
 			uu := user.UpdateAuthUser{
-				Name:  "Cornel",
-				Email: "ghiban@cshl.edu",
+				Name:      "Cornel",
+				Email:     "ghiban@cshl.edu",
+				Street:    "334 Main St",
+				City:      "Cold Spring Harbor",
+				State:     "NY",
+				Zip:       "11724",
+				Phone:     "(516)367-5170",
+				Age:       30,
+				Gender:    "M",
+				Ethnicity: "wh",
 			}
 			updated_user, err := store.Update(usr.ID, uu)
 			if err != nil {

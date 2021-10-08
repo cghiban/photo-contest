@@ -9,13 +9,21 @@
     <h1>Login</h1>
     <form method="POST" action="/login">
         {{ .csrfField }}
-        <div class="mb-3">
-            <label>Email</label>
-            <input type="text" name="email" required>
+        <div class="mb-3 row">
+            <div class="col-sm-1">
+                <label for="email" class="fw-bold">Email Address</label>
+            </div>
+            <div class="col-sm-11">
+                <input type="email" name="email" required>
+            </div>
         </div>
-        <div class="mb-3">
-            <label>Password</label>
-            <input type="password" name="password" required>
+        <div class="mb-3 row">
+            <div class="col-sm-1">
+                <label for="password" class="fw-bold">Password</label>
+            </div>
+            <div class="col-sm-11">
+                <input type="password" name="password" required>
+            </div>
         </div>
         <button class="btn btn-primary">Submit</button>
     </form>

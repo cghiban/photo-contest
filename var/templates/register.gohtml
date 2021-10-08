@@ -9,26 +9,155 @@
     <h1>Sign Up</h1>
     <form method="POST" action="/register">
 		{{ .csrfField }}
-        <div class="mb-3">
-            <label>Your Name</label>
-            <input type="text" name="name" required>
+        <div class="mb-3 row">
+            <div class="col-sm-1">
+                <label for="name" class="fw-bold">Name</label>
+            </div>
+            <div class="col-sm-11">
+                <input type="text" name="name" required>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-sm-1">
+                <label for="email" class="fw-bold">Email Address</label>
+            </div>
+            <div class="col-sm-11">
+                <input type="email" name="email" required>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-sm-1">
+                <label for="password" class="fw-bold">Password</label>
+            </div>
+            <div class="col-sm-11">
+                <input type="password" name="password" required>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-sm-1">
+                <label for="password_confirm" class="fw-bold">Confirm Password</label>
+            </div>
+            <div class="col-sm-11">
+                <input type="password" name="password_confirm" required>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-sm-1">
+                <label for="street" class="fw-bold">Street</label>
+            </div>
+            <div class="col-sm-11">
+                <input type="text" name="street" required>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-sm-1">
+                <label for="city" class="fw-bold">City</label>
+            </div>
+            <div class="col-sm-11">
+                <input type="text" name="city" required>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-sm-1">
+                <label for="state" class="fw-bold">State</label>
+            </div>
+            <div class="col-sm-11" style="max-width: 247px;">
+                <select class="form-select" name="state" required>
+                    {{$states := .states}}
+                    <option value="">--Select a State--</option>
+                    {{range $key := .state_keys}}
+                    <option value="{{ $key }}">{{ index $states $key }}</option>
+                    {{end}}
+                </select>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-sm-1">
+                <label for="zip" class="fw-bold">Zip Code</label>
+            </div>
+            <div class="col-sm-11">
+                <input type="text" name="zip" required>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-sm-1">
+                <label for="phone" class="fw-bold">Phone Number</label>
+            </div>
+            <div class="col-sm-11">
+                <input type="tel" name="phone" required>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-sm-1">
+                <label for="age" class="fw-bold">Age</label>
+            </div>
+            <div class="col-sm-11">
+                <input type="number" min="0" name="age" required>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-sm-1">
+                <label for="gender" class="fw-bold">Gender</label>
+            </div>
+            <div class="col-sm-11">
+                {{$genders := .genders}}
+                {{range $key := .gender_keys}}
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" id="gender_{{ $key }}" type="radio" name="gender" value="{{ $key }}" required>
+                    <label class="form-check-label" for="gender_{{ $key }}">{{ index $genders $key }}</label>
+                </div>
+                {{end}}
+            </div>
         </div>
         <div class="mb-3">
-            <label>Email</label>
-            <input type="text" name="email" required>
+            <label for="ethnicity" class="fw-bold">Ethnicity or race (Select all that apply)</label>
+            <div class="row">
+                <div class="col-sm-1">
+                    &nbsp;
+                </div>
+                <div class="col-sm-11">
+                    {{$ethnicities := .ethnicities}}
+                    {{range $key := .ethnicity_keys}}
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="ethnicity" id="ethnicity_{{ $key }}" value="{{ $key }}">
+                        <label class="form-check-label" for="ethnicity_{{ $key }}">{{ index $ethnicities $key }}</label>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
         </div>
-        <div class="mb-3">
-            <label>Password</label>
-            <input type="password" name="password" required>
+        <div id="other_ethnicity_div" class="d-none mb-3 row">
+            <div class="col-sm-1">
+                <label for="other_ethnicity" class="fw-bold">Other Ethnicity</label>
+            </div>
+            <div class="col-sm-11">
+                <input type="text" id="other_ethnicity" name="other_ethnicity">
+            </div>
         </div>
-        <div class="mb-3">
-            <label>Password confirm</label>
-            <input type="password" name="password_confirm" required>
-        </div>
-        <button class="btn btn-primary">Submit</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 
     <div>Already have an account? <a href="/login">Login</a>.</div>
     {{template "footer" .}}
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            const other_ethnicity_div = document.getElementById("other_ethnicity_div");
+            const other_ethnicity = document.getElementById("other_ethnicity");
+            const other_checkbox = document.getElementById("ethnicity_oo");
+            other_checkbox.addEventListener('change', function() {
+                if (this.checked) {
+                    other_ethnicity.required = true;
+                    other_ethnicity_div.className = "mb-3 row";
+                } else {
+                    other_ethnicity.required = false;
+                    other_ethnicity.value = "";
+                    other_ethnicity_div.className = "d-none mb-3 row";
+                }
+            });
+            if (other_checkbox.checked) {
+                other_checkbox.dispatchEvent(new Event("change"));
+            }
+        });
+    </script>
     </body>
 </html>

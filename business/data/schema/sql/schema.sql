@@ -105,4 +105,15 @@ CREATE INDEX cev_photo_id_ndx ON contest_entry_votes(v_photo_id);
 CREATE UNIQUE INDEX cev_unique_ndx ON contest_entry_votes(v_contest_id, v_photo_id, v_user_id);
 CREATE UNIQUE INDEX cev_unique_entry_ndx ON contest_entry_votes(v_entry_id, v_user_id);
 
+-- Version: 1.6
+-- Description: Add more information for authorized users
 
+ALTER TABLE auth_user ADD COLUMN street TEXT NOT NULL DEFAULT "";
+ALTER TABLE auth_user ADD COLUMN city TEXT NOT NULL DEFAULT "";
+ALTER TABLE auth_user ADD COLUMN state TEXT NOT NULL DEFAULT "OO";
+ALTER TABLE auth_user ADD COLUMN zip TEXT NOT NULL DEFAULT "";
+ALTER TABLE auth_user ADD COLUMN phone TEXT NOT NULL DEFAULT "";
+ALTER TABLE auth_user ADD COLUMN age INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE auth_user ADD COLUMN gender TEXT NOT NULL DEFAULT "-";
+ALTER TABLE auth_user ADD COLUMN ethnicity TEXT NOT NULL DEFAULT "pn";
+ALTER TABLE auth_user ADD COLUMN other_ethnicity TEXT NOT NULL DEFAULT "";
