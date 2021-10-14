@@ -117,3 +117,14 @@ ALTER TABLE auth_user ADD COLUMN age INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE auth_user ADD COLUMN gender TEXT NOT NULL DEFAULT "-";
 ALTER TABLE auth_user ADD COLUMN ethnicity TEXT NOT NULL DEFAULT "pn";
 ALTER TABLE auth_user ADD COLUMN other_ethnicity TEXT NOT NULL DEFAULT "";
+
+-- Version: 1.7
+-- Description: Add information about subject to contest_entries
+
+ALTER TABLE contest_entries ADD COLUMN sname TEXT NOT NULL DEFAULT "";
+ALTER TABLE contest_entries ADD COLUMN sage TEXT NOT NULL DEFAULT "0";
+ALTER TABLE contest_entries ADD COLUMN scountry TEXT NOT NULL DEFAULT "US";
+ALTER TABLE contest_entries ADD COLUMN sorigin TEXT NOT NULL DEFAULT "";
+ALTER TABLE contest_entries ADD COLUMN location TEXT NOT NULL DEFAULT "";
+ALTER TABLE contest_entries ADD COLUMN sbiography TEXT NOT NULL DEFAULT "";
+ALTER TABLE contest_entries ADD COLUMN release_mime_type TEXT NOT NULL DEFAULT "application/pdf";

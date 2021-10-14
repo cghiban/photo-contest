@@ -29,21 +29,35 @@ type NewContest struct {
 
 //ContestEntry - contest entry type
 type ContestEntry struct {
-	EntryID   int       `db:"entry_id" json:"entry_id"`
-	ContestID int       `db:"contest_id" json:"contest_id"`
-	PhotoID   string    `db:"photo_id" json:"photo_id"`
-	Status    string    `db:"status" json:"status"`
-	CreatedOn time.Time `db:"created_on" json:"created_on"`
-	UpdatedOn time.Time `db:"updated_on" json:"updated_on"`
-	UpdatedBy string    `db:"updated_by" json:"updated_by"`
+	EntryID          int       `db:"entry_id" json:"entry_id"`
+	ContestID        int       `db:"contest_id" json:"contest_id"`
+	PhotoID          string    `db:"photo_id" json:"photo_id"`
+	SubjectName      string    `db:"sname" json:"sname"`
+	SubjectAge       string    `db:"sage" json:"sage"`
+	SubjectCountry   string    `db:"scountry" json:"scountry"`
+	SubjectOrigin    string    `db:"sorigin" json:"sorigin"`
+	Location         string    `db:"location" json:"location"`
+	SubjectBiography string    `db:"sbiography" json:"sbiography"`
+	ReleaseMimeType  string    `db:"release_mime_type" json:"release_mime_type"`
+	Status           string    `db:"status" json:"status"`
+	CreatedOn        time.Time `db:"created_on" json:"created_on"`
+	UpdatedOn        time.Time `db:"updated_on" json:"updated_on"`
+	UpdatedBy        string    `db:"updated_by" json:"updated_by"`
 }
 
 //NewContestEntry type for adding phtos to a content
 type NewContestEntry struct {
-	ContestID int    `json:"contest_id" validate:"required"`
-	PhotoID   string `json:"photo_id" validate:"required"`
-	Status    string `json:"status" validate:"required,oneof=active eliminated withdrawn flagged"`
-	UpdatedBy string `json:"updated_by" validate:"required"`
+	ContestID        int    `json:"contest_id" validate:"required"`
+	PhotoID          string `json:"photo_id" validate:"required"`
+	Status           string `json:"status" validate:"required,oneof=active eliminated withdrawn flagged"`
+	UpdatedBy        string `json:"updated_by" validate:"required"`
+	SubjectName      string `json:"sname" validate:"required"`
+	SubjectAge       string `json:"sage" validate:"required"`
+	SubjectCountry   string `json:"scountry" validate:"required"`
+	SubjectOrigin    string `json:"sorigin" validate:"omitempty"`
+	Location         string `json:"location" validate:"required"`
+	SubjectBiography string `json:"sbiography" validate:"required"`
+	ReleaseMimeType  string `json:"release_mime_type" validate:"required"`
 }
 
 //ContestPhotoEntry - contest entry with photos and votes totals/scores

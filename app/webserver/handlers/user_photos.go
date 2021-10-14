@@ -3,12 +3,14 @@ package handlers
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"io"
 	"log"
 	"os"
 	"path"
 
+	"photo-contest/business/data/contest"
 	"photo-contest/business/data/photo"
 	"photo-contest/business/data/user"
 
@@ -80,6 +82,44 @@ func handleFileUpload(r *http.Request, photoID string) error {
 	return err
 }
 
+func handleModelReleaseUpload(r *http.Request, photoID string) (string, error) {
+	// Parse our multipart form, 10 << 20 specifies a maximum
+	// upload of 10 MB files.
+	r.ParseMultipartForm(10 << 20)
+	// FormFile returns the first file for the given key `release`
+	// it also returns the FileHeader so we can get the Filename,
+	// the Header and the size of the file
+	file, fileInfo, err := r.FormFile("release")
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+	modelReleaseTypes := map[string]bool{
+		"application/pdf":    true,
+		"application/msword": true,
+		"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true,
+	}
+	mimeType := fileInfo.Header["Content-Type"][0]
+	if !modelReleaseTypes[mimeType] {
+		return "", fmt.Errorf("Invalid Content Type: %s", mimeType)
+	}
+
+	// copy all of the contents of our uploaded file into a
+	// new file
+	extension := "docx"
+	if mimeType == "application/pdf" {
+		extension = "pdf"
+	} else if mimeType == "application/msword" {
+		extension = "doc"
+	}
+	new_file, err := os.Create(fmt.Sprintf("tmp/release-%s.%s", photoID, extension))
+	if err != nil {
+		return "", err
+	}
+	_, err = io.Copy(new_file, file)
+	return mimeType, err
+}
+
 // Create a resized image from the full size image
 func makeThumbnail(id string, s string, pixels uint16, l *log.Logger) error {
 	// Get the full path to the full size image and the full path to the location to save the thumbnail
@@ -132,9 +172,24 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "POST" {
 		usr := r.Context().Value("user").(*user.AuthUser)
 		r.ParseMultipartForm(10 << 20)
-		title := r.Form.Get("title")
-		description := r.Form.Get("description")
+		//title := strings.TrimSpace(r.Form.Get("title"))
+		//description := strings.TrimSpace(r.Form.Get("description"))
+		title := ""
+		description := ""
+		subject_name := strings.TrimSpace(r.Form.Get("sname"))
+		subject_age := strings.TrimSpace(r.Form.Get("sage"))
+		subject_country := strings.TrimSpace(r.Form.Get("scountry"))
+		subject_origin := strings.TrimSpace(r.Form.Get("sorigin"))
+		location := strings.TrimSpace(r.Form.Get("location"))
+		subject_biography := strings.TrimSpace(r.Form.Get("sbiography"))
+		signature := strings.TrimSpace(r.Form.Get("signature"))
+		if usr.Name != signature {
+			formData["Message"] = "Digital Signature (" + signature + ") must exactly match the name in your account (" + usr.Name + "). If the name in your account is not a legal name, update your profile."
+			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+			return
+		}
 		photoStore := photo.NewStore(s.log, s.db)
+		contestStore := contest.NewStore(s.log, s.db)
 		np := photo.NewPhoto{
 			OwnerID:     usr.ID,
 			Title:       title,
@@ -144,6 +199,35 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 		pht, err := photoStore.Create(np)
 		if err != nil {
 			formData["Message"] = "Could not upload photo"
+			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+			return
+		}
+		mimeType, err := handleModelReleaseUpload(r, pht.ID)
+		if err != nil {
+			formData["Message"] = "Could not upload model release form"
+			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+			return
+		}
+		nce := contest.NewContestEntry{
+			ContestID:        1,
+			PhotoID:          pht.ID,
+			Status:           "active",
+			UpdatedBy:        usr.Name,
+			SubjectName:      subject_name,
+			SubjectAge:       subject_age,
+			SubjectCountry:   subject_country,
+			SubjectOrigin:    subject_origin,
+			Location:         location,
+			ReleaseMimeType:  mimeType,
+			SubjectBiography: subject_biography,
+		}
+		_, err = contestStore.CreateContestEntry(nce)
+		if err != nil {
+			err = photoStore.Delete(pht.ID)
+			if err != nil {
+				fmt.Println("Could not delete: " + err.Error())
+			}
+			formData["Message"] = "Could not create contest entry"
 			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 			return
 		}

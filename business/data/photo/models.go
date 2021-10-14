@@ -17,8 +17,8 @@ type Photo struct {
 //NewPhoto - type fore creating a new photo
 type NewPhoto struct {
 	OwnerID     int    `json:"owner_id"`
-	Title       string `json:"title" validate:"required"`
-	Description string `json:"description"`
+	Title       string `json:"title" validate:"omitempty"`
+	Description string `json:"description" validate:"omitempty"`
 	UpdatedBy   string `json:"updated_by" validate:"required"`
 }
 

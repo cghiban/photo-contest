@@ -1,4 +1,40 @@
 <!DOCTYPE html>
+<!--For separate contest entry and photo upload form, uncomment and add new file-->
+<!--<html>
+    <head>
+    <title>Photo</title>
+    </head>
+    <body>
+    <h1>Photo Form</h1>
+    <form enctype="multipart/form-data" method="POST" action="/photo">
+        <div class="mb-3 row">
+            <div class="col-sm-3">
+                <label for="title" class="fw-bold">Title</label>
+            </div>
+            <div class="col-sm-9">
+                <input type="text" name="title" required>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-sm-3">
+                <label for="description" class="fw-bold">Description</label>
+            </div>
+            <div class="col-sm-9">
+                <input type="text" name="description" required>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-sm-3">
+                <label for="file" class="fw-bold">Upload Digital File</label>
+            </div>
+            <div class="col-sm-9">
+                <input type="file" accept="image/png,image/jpeg" name="file" required>
+            </div>
+        </div>
+        <button class="btn btn-primary">Upload Photo</button>
+    </form>
+    </body>
+</html>-->
 <html>
     <head>
     {{template "header_head" .}}
@@ -25,7 +61,7 @@
         </div>
         <div class="mb-3 row">
             <div class="col-sm-3">
-                <label for="sname" class="fw-bold">Subject's Name</label>
+                <label for="sname" class="fw-bold">Subject's Name(s)</label>
             </div>
             <div class="col-sm-9">
                 <input type="text" name="sname" required>
@@ -33,15 +69,15 @@
         </div>
         <div class="mb-3 row">
             <div class="col-sm-3">
-                <label for="sage" class="fw-bold">Subject's Age</label>
+                <label for="sage" class="fw-bold">Subject's Age(s)</label>
             </div>
             <div class="col-sm-9">
-                <input type="number" min="0" name="sage" required>
+                <input type="text" name="sage" required>
             </div>
         </div>
         <div class="mb-3 row">
             <div class="col-sm-3">
-                <label for="scountry" class="fw-bold">Subject's Country of Birth</label>
+                <label for="scountry" class="fw-bold">Subject's Countr(y/ies) of Birth</label>
             </div>
             <div class="col-sm-9">
                 <input type="text" name="scountry" required>
@@ -49,7 +85,7 @@
         </div>
         <div class="mb-3 row">
             <div class="col-sm-3">
-                <label for="sorigin" class="fw-bold">Subject's Ancestral Country of Origin (if born in US)</label>
+                <label for="sorigin" class="fw-bold">Subject's Ancestral Countr(y/ies) of Origin (if born in US)</label>
             </div>
             <div class="col-sm-9">
                 <input type="text" name="sorigin">
@@ -65,18 +101,11 @@
         </div>
         <div class="mb-3 row">
             <div class="col-sm-3">
-                <label for="title" class="fw-bold">Title</label>
+                <label for="sbiography" class="fw-bold">Descriptive Biography of Subject(s)
+                </label>
             </div>
             <div class="col-sm-9">
-                <input type="text" name="title" required>
-            </div>
-        </div>
-        <div class="mb-3 row">
-            <div class="col-sm-3">
-                <label for="description" class="fw-bold">Descriptive Biography of Subject</label>
-            </div>
-            <div class="col-sm-9">
-                <textarea name="description" maxlength="255" required></textarea>
+                <textarea name="sbiography" maxlength="255" required></textarea>
             </div>
         </div>
         <div class="mb-3 row">
@@ -92,7 +121,7 @@
                 <label for="release" class="fw-bold">Upload Model Release Form</label>
             </div>
             <div class="col-sm-9">
-                <input type="file" name="release" required>
+                <input type="file" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" name="release" required>
             </div>
         </div>
         <button class="btn btn-primary">Upload Submission</button>

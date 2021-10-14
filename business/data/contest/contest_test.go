@@ -110,10 +110,17 @@ func TestPhoto(t *testing.T) {
 		{
 			//-------------------------------------------------------------------------------
 			ncp := contest.NewContestEntry{
-				ContestID: c.ID,
-				PhotoID:   photos[0].ID,
-				Status:    "active",
-				UpdatedBy: "Gopher Tester",
+				ContestID:        c.ID,
+				PhotoID:          photos[0].ID,
+				Status:           "active",
+				UpdatedBy:        "Gopher Tester",
+				SubjectName:      "Daniel Jacobs",
+				SubjectAge:       "26",
+				SubjectCountry:   "US",
+				SubjectOrigin:    "Russia",
+				Location:         "Main Street",
+				ReleaseMimeType:  "application/pdf",
+				SubjectBiography: "A person",
 			}
 			cp, err = contestStore.CreateContestEntry(ncp)
 			if err != nil {
