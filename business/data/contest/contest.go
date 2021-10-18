@@ -129,19 +129,26 @@ func (s Store) CreateContestEntry(ncp NewContestEntry) (ContestEntry, error) {
 	now := time.Now().Truncate(time.Second)
 
 	cPhoto := ContestEntry{
-		ContestID: ncp.ContestID,
-		PhotoID:   ncp.PhotoID,
-		Status:    ncp.Status,
-		CreatedOn: now,
-		UpdatedOn: now,
-		UpdatedBy: ncp.UpdatedBy,
+		ContestID:        ncp.ContestID,
+		PhotoID:          ncp.PhotoID,
+		SubjectName:      ncp.SubjectName,
+		SubjectAge:       ncp.SubjectAge,
+		SubjectCountry:   ncp.SubjectCountry,
+		SubjectOrigin:    ncp.SubjectOrigin,
+		SubjectBiography: ncp.SubjectBiography,
+		Location:         ncp.Location,
+		ReleaseMimeType:  ncp.ReleaseMimeType,
+		Status:           ncp.Status,
+		CreatedOn:        now,
+		UpdatedOn:        now,
+		UpdatedBy:        ncp.UpdatedBy,
 	}
 
 	const query = `
 	INSERT INTO contest_entries
-		(contest_id, photo_id, status, created_on, updated_on, updated_by)
+		(contest_id, photo_id, sname, sage, scountry, sorigin, sbiography, location, release_mime_type, status, created_on, updated_on, updated_by)
 	VALUES
-		(:contest_id, :photo_id, :status, :created_on, :updated_on, :updated_by)`
+		(:contest_id, :photo_id, :sname, :sage, :scountry, :sorigin, :sbiography, :location, :release_mime_type, :status, :created_on, :updated_on, :updated_by)`
 
 	s.log.Printf("%s: %s", "contest.Create", database.Log(query, cPhoto))
 
@@ -168,7 +175,7 @@ func (s Store) QueryContestEntries(contestID int) ([]ContestEntry, error) {
 		ContestID: contestID,
 	}
 	const query = `
-	SELECT entry_id, contest_id, photo_id, status, created_on, updated_on, updated_by
+	SELECT entry_id, contest_id, photo_id, sname, sage, scountry, sorigin, sbiography, location, release_mime_type, status, created_on, updated_on, updated_by
 	FROM contest_entries
 	WHERE contest_id = :contest_id`
 
