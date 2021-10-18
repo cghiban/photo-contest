@@ -127,6 +127,15 @@ func TestPhoto(t *testing.T) {
 				t.Fatalf("\t%s\tTest %d:\tShould be able to create contest entry: %s.", tests.Failed, testID, err)
 			}
 			t.Logf("\t%s\tTest %d:\tShould be able to create contest entry.", tests.Success, testID)
+
+			rce, err := contestStore.QueryContestEntryByPhotoId(photos[0].ID)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to query contest entry by photo id %s: %s.", tests.Failed, testID, photos[0].ID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to query contest entry by photo ID %s.", tests.Success, testID, photos[0].ID)
+			if diff := cmp.Diff(cp, rce); diff != "" {
+				t.Fatalf("\t%s\tTest %d:\tShould get back the same contest entry. Diff:\n%s", tests.Failed, testID, diff)
+			}
 			//fmt.Printf("cp = %+v\n", cp)
 			//-------------------------------------------------------------------------------
 			cEntries, err := contestStore.QueryContestEntries(c.ID)

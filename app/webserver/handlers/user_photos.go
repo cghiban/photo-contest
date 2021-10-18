@@ -19,10 +19,18 @@ import (
 )
 
 type PhotoInfo struct {
-	FilePath    string
-	Title       string
-	Description string
-	PhotoId     string
+	FilePath string
+	/*Title          string
+	Description      string*/
+	Status           string
+	PhotoId          string
+	SubjectName      string
+	SubjectAge       string
+	SubjectCountry   string
+	SubjectOrigin    string
+	SubjectBiography string
+	Location         string
+	ReleaseMimeType  string
 }
 
 // UserPhotos - lists user photos (req auth)
@@ -30,12 +38,31 @@ func (s *Service) UserPhotos(rw http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
 		usr := r.Context().Value("user").(*user.AuthUser)
 		photoStore := photo.NewStore(s.log, s.db)
+		contestStore := contest.NewStore(s.log, s.db)
 		userPhotos, err := photoStore.QueryByOwnerID(usr.ID)
+		if err != nil {
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+			return
+		}
 		var thumbPhotos []PhotoInfo
 		for _, photo := range userPhotos {
 			if !photo.Deleted {
 				photoFile, _ := photoStore.QueryPhotoFile(photo.ID, "thumb")
-				photoInfo := PhotoInfo{FilePath: photoFile.FilePath, PhotoId: photo.ID, Title: photo.Title, Description: photo.Description}
+				contestEntry, _ := contestStore.QueryContestEntryByPhotoId(photo.ID)
+				photoInfo := PhotoInfo{
+					FilePath: photoFile.FilePath,
+					PhotoId:  photo.ID,
+					/*Title:          photo.Title,
+					Description:      photo.Description,*/
+					SubjectName:      contestEntry.SubjectName,
+					SubjectAge:       contestEntry.SubjectAge,
+					SubjectCountry:   contestEntry.SubjectCountry,
+					SubjectOrigin:    contestEntry.SubjectOrigin,
+					SubjectBiography: contestEntry.SubjectBiography,
+					Location:         contestEntry.Location,
+					ReleaseMimeType:  contestEntry.ReleaseMimeType,
+					Status:           contestEntry.Status,
+				}
 				thumbPhotos = append(thumbPhotos, photoInfo)
 			}
 		}
@@ -171,6 +198,17 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 		s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 	} else if r.Method == "POST" {
 		usr := r.Context().Value("user").(*user.AuthUser)
+		photoStore := photo.NewStore(s.log, s.db)
+		userPhotos, err := photoStore.QueryByOwnerID(usr.ID)
+		if err != nil {
+			http.Error(rw, err.Error(), http.StatusInternalServerError)
+			return
+		}
+		if len(userPhotos) >= 3 {
+			formData["Message"] = "There is a maximum of three submissions per user and you've already submitted three."
+			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+			return
+		}
 		r.ParseMultipartForm(10 << 20)
 		//title := strings.TrimSpace(r.Form.Get("title"))
 		//description := strings.TrimSpace(r.Form.Get("description"))
@@ -188,7 +226,6 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 			return
 		}
-		photoStore := photo.NewStore(s.log, s.db)
 		contestStore := contest.NewStore(s.log, s.db)
 		np := photo.NewPhoto{
 			OwnerID:     usr.ID,

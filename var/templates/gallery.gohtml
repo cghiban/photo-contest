@@ -29,14 +29,28 @@
         <a id="original" name="resize" href="javascript:resizeImage('original');">Original</a>
         <br>
         {{ range $photo := .Photos }}
-        <div style="display: inline-block">
+        <div style="display: inline-block; vertical-align: top;">
             <span style="width: 200px; text-align: center;">
                 <figure>
-                    <h2 style="word-wrap: break-word; max-width: 200px;">{{html $photo.Title}}</h2>
                     <a target="_blank" href="{{replaceEnd $photo.FilePath "-thumb.jpg" "-original.jpg"}}">
-                        <img alt="{{html $photo.Title}}" src="{{$photo.FilePath}}">
+                        <img alt="{{html $photo.SubjectName}}" src="{{$photo.FilePath}}">
                     </a>
-                    <figcaption>{{html $photo.Description}}</figcaption>
+                    <figcaption style="word-wrap: break-word; max-width: 200px;">
+                      <p><b>Subject's Name(s)</b><br>{{html $photo.SubjectName}}</p>
+                      <p><b>Subject's Age(s)</b><br>{{html $photo.SubjectAge}}</p>
+                      <p><b>Subject's Countr(y/ies) of Birth</b><br>{{html $photo.SubjectCountry}}</p>
+                      <p><b>Subject's Ancestral Countr(y/ies) of Origin (if born in US)</b><br>{{html $photo.SubjectOrigin}}</p>
+                      <p><b>Where in NYC photograph was taken</b><br>{{html $photo.Location}}</p>
+                      <p><b>Subject Biography</b><br>{{html $photo.SubjectBiography}}</p>
+                      <p><b>Status</b><br>{{$photo.Status}}</p>
+                      {{if eq $photo.ReleaseMimeType "application/pdf"}}
+                      <a href="/tmp/release-{{$photo.PhotoId}}.pdf">View Release Form PDF</a>
+                      {{else if eq $photo.ReleaseMimeType "application/msword"}}
+                      <a href="/tmp/release-{{$photo.PhotoId}}.doc">View Release Form Word Document</a>
+                      {{else}}
+                      <a href="/tmp/release-{{$photo.PhotoId}}.docx">View Release Form Word Document</a>
+                      {{end}}
+                    </figcaption>
                 </figure>
             <span>
         </div>
@@ -51,7 +65,7 @@
         document.getElementById(size).className = "active";
         for (const img of document.getElementsByTagName("img")) {
             img.src = img.src.replace(/-[^-]*$/, ("-" + size + ".jpg"));
-            img.parentNode.previousElementSibling.style.maxWidth = "";
+            setTimeout(function() { img.parentNode.nextElementSibling.style.maxWidth = "" + img.clientWidth + "px"}, 10);
         }
     }
     </script>

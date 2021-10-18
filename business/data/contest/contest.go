@@ -194,6 +194,31 @@ func (s Store) QueryContestEntries(contestID int) ([]ContestEntry, error) {
 	return cEntries, nil
 }
 
+// QueryContestEntrys - return the first contest entry for photo with given id
+func (s Store) QueryContestEntryByPhotoId(photoID string) (ContestEntry, error) {
+	data := struct {
+		PhotoID string `db:"photo_id"`
+	}{
+		PhotoID: photoID,
+	}
+	const query = `
+	SELECT entry_id, contest_id, photo_id, sname, sage, scountry, sorigin, sbiography, location, release_mime_type, status, created_on, updated_on, updated_by
+	FROM contest_entries
+	WHERE photo_id = :photo_id LIMIT 1`
+
+	s.log.Printf("%s %s", "contest.QueryContestEntryByPhotoId", database.Log(query, data))
+
+	var cEntry ContestEntry
+	if err := database.NamedQueryStruct(s.db, query, data, &cEntry); err != nil {
+		if err == database.ErrNotFound {
+			return ContestEntry{}, database.ErrNotFound
+		}
+		return ContestEntry{}, errors.Wrapf(err, "selecting contest entry by photo id %q", data.PhotoID)
+	}
+
+	return cEntry, nil
+}
+
 // CreateContestPhotoVote - add save the votes
 func (s Store) CreateContestPhotoVote(v ContestPhotoVote) error {
 
