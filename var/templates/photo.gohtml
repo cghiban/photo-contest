@@ -1,40 +1,4 @@
 <!DOCTYPE html>
-<!--For separate contest entry and photo upload form, uncomment and add new file-->
-<!--<html>
-    <head>
-    <title>Photo</title>
-    </head>
-    <body>
-    <h1>Photo Form</h1>
-    <form enctype="multipart/form-data" method="POST" action="/photo">
-        <div class="mb-3 row">
-            <div class="col-sm-3">
-                <label for="title" class="fw-bold">Title</label>
-            </div>
-            <div class="col-sm-9">
-                <input type="text" name="title" required>
-            </div>
-        </div>
-        <div class="mb-3 row">
-            <div class="col-sm-3">
-                <label for="description" class="fw-bold">Description</label>
-            </div>
-            <div class="col-sm-9">
-                <input type="text" name="description" required>
-            </div>
-        </div>
-        <div class="mb-3 row">
-            <div class="col-sm-3">
-                <label for="file" class="fw-bold">Upload Digital File</label>
-            </div>
-            <div class="col-sm-9">
-                <input type="file" accept="image/png,image/jpeg" name="file" required>
-            </div>
-        </div>
-        <button class="btn btn-primary">Upload Photo</button>
-    </form>
-    </body>
-</html>-->
 <html>
     <head>
     {{template "header_head" .}}
@@ -56,7 +20,7 @@
                 <label for="signature" class="fw-bold">Digital Signature</label>
             </div>
             <div class="col-sm-9">
-                <input type="text" name="signature" required>
+                <input type="text" name="signature" value="{{ .Signature }}" required>
             </div>
         </div>
         <div class="mb-3 row">
@@ -64,7 +28,7 @@
                 <label for="sname" class="fw-bold">Subject's Name(s)</label>
             </div>
             <div class="col-sm-9">
-                <input type="text" name="sname" required>
+                <input type="text" name="sname" value="{{ html .SubjectName }}" required>
             </div>
         </div>
         <div class="mb-3 row">
@@ -72,7 +36,7 @@
                 <label for="sage" class="fw-bold">Subject's Age(s)</label>
             </div>
             <div class="col-sm-9">
-                <input type="text" name="sage" required>
+                <input type="text" name="sage" value="{{ html .SubjectAge }}" required>
             </div>
         </div>
         <div class="mb-3 row">
@@ -80,7 +44,7 @@
                 <label for="scountry" class="fw-bold">Subject's Countr(y/ies) of Birth</label>
             </div>
             <div class="col-sm-9">
-                <input type="text" name="scountry" required>
+                <input type="text" name="scountry" value="{{ html .SubjectCountry }}" required>
             </div>
         </div>
         <div class="mb-3 row">
@@ -88,7 +52,7 @@
                 <label for="sorigin" class="fw-bold">Subject's Ancestral Countr(y/ies) of Origin (if born in US)</label>
             </div>
             <div class="col-sm-9">
-                <input type="text" name="sorigin">
+                <input type="text" name="sorigin" value="{{ html .SubjectOrigin }}">
             </div>
         </div>
         <div class="mb-3 row">
@@ -96,7 +60,7 @@
                 <label for="location" class="fw-bold">Where in NYC photograph was taken</label>
             </div>
             <div class="col-sm-9">
-                <input type="text" name="location" required>
+                <input type="text" name="location" value="{{ html .Location }}" required>
             </div>
         </div>
         <div class="mb-3 row">
@@ -105,7 +69,7 @@
                 </label>
             </div>
             <div class="col-sm-9">
-                <textarea name="sbiography" maxlength="255" required></textarea>
+                <textarea name="sbiography" maxlength="255" required>{{ html .SubjectBiography }}</textarea>
             </div>
         </div>
         <div class="mb-3 row">

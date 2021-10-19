@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"photo-contest/business/data/user"
-	"photo-contest/foundation/database"
 	"photo-contest/foundation/utils"
 	"sort"
 	"strconv"
@@ -90,13 +89,13 @@ func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
 			s.ExecuteTemplateWithBase(rw, formData, "register.gohtml")
 			return
 		}
+
 		s.log.Println("trying to find user w:", email, password)
 
 		userGroup := user.NewStore(s.log, s.db)
 
 		_, err = userGroup.QueryByEmail(email)
-		s.log.Println("from GetUser:", err)
-		if err != nil && err != database.ErrNotFound {
+		if err == nil {
 			formData["Message"] = "This email is already in use."
 			s.ExecuteTemplateWithBase(rw, formData, "register.gohtml")
 			return

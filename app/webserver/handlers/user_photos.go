@@ -189,8 +189,15 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 	// on GET display the form
 	// on POST handle file upload
 	formData := map[string]interface{}{
-		csrf.TemplateTag: csrf.TemplateField(r),
-		"User":           "Exists",
+		csrf.TemplateTag:   csrf.TemplateField(r),
+		"User":             "Exists",
+		"SubjectName":      "",
+		"SubjectAge":       "",
+		"SubjectCountry":   "",
+		"SubjectOrigin":    "",
+		"Location":         "",
+		"SubjectBiography": "",
+		"Signature":        "",
 	}
 
 	if r.Method == "GET" {
@@ -198,6 +205,22 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 		s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 	} else if r.Method == "POST" {
 		usr := r.Context().Value("user").(*user.AuthUser)
+		title := ""
+		description := ""
+		subject_name := strings.TrimSpace(r.Form.Get("sname"))
+		subject_age := strings.TrimSpace(r.Form.Get("sage"))
+		subject_country := strings.TrimSpace(r.Form.Get("scountry"))
+		subject_origin := strings.TrimSpace(r.Form.Get("sorigin"))
+		location := strings.TrimSpace(r.Form.Get("location"))
+		subject_biography := strings.TrimSpace(r.Form.Get("sbiography"))
+		signature := strings.TrimSpace(r.Form.Get("signature"))
+		formData["SubjectName"] = subject_name
+		formData["SubjectAge"] = subject_age
+		formData["SubjectCountry"] = subject_country
+		formData["SubjectOrigin"] = subject_origin
+		formData["Location"] = location
+		formData["SubjectBiography"] = subject_biography
+		formData["Signature"] = signature
 		photoStore := photo.NewStore(s.log, s.db)
 		userPhotos, err := photoStore.QueryByOwnerID(usr.ID)
 		if err != nil {
@@ -212,15 +235,6 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 		r.ParseMultipartForm(10 << 20)
 		//title := strings.TrimSpace(r.Form.Get("title"))
 		//description := strings.TrimSpace(r.Form.Get("description"))
-		title := ""
-		description := ""
-		subject_name := strings.TrimSpace(r.Form.Get("sname"))
-		subject_age := strings.TrimSpace(r.Form.Get("sage"))
-		subject_country := strings.TrimSpace(r.Form.Get("scountry"))
-		subject_origin := strings.TrimSpace(r.Form.Get("sorigin"))
-		location := strings.TrimSpace(r.Form.Get("location"))
-		subject_biography := strings.TrimSpace(r.Form.Get("sbiography"))
-		signature := strings.TrimSpace(r.Form.Get("signature"))
 		if usr.Name != signature {
 			formData["Message"] = "Digital Signature (" + signature + ") must exactly match the name in your account (" + usr.Name + "). If the name in your account is not a legal name, update your profile."
 			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")

@@ -8,5 +8,14 @@ for (const link of document.getElementsByClassName("nav-link")) {
     link.classList.add("active");
   }
 }
+const message = document.getElementById("message");
+const success_messages = ["Uploaded the image"];
+if (message) {
+  if (success_messages.includes(message.innerText)) {
+    message.className = "alert alert-success";
+  } else {
+    message.className = "alert alert-danger";
+  }
+}
 </script>
 {{end}}
