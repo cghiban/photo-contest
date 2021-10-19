@@ -128,3 +128,15 @@ ALTER TABLE contest_entries ADD COLUMN sorigin TEXT NOT NULL DEFAULT "";
 ALTER TABLE contest_entries ADD COLUMN location TEXT NOT NULL DEFAULT "";
 ALTER TABLE contest_entries ADD COLUMN sbiography TEXT NOT NULL DEFAULT "";
 ALTER TABLE contest_entries ADD COLUMN release_mime_type TEXT NOT NULL DEFAULT "application/pdf";
+
+-- Version: 1.8
+-- Description: Create table reset_password_email
+CREATE TABLE reset_password_email (
+    reset_id TEXT NOT NULL PRIMARY KEY, --uuid
+    user_id INTEGER NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT 1,
+    created_on DATETIME NOT NULL,
+    updated_on DATETIME NOT NULL,
+    updated_by TEXT NOT NULL,
+    FOREIGN KEY(user_id) REFERENCES auth_user(user_id)
+);

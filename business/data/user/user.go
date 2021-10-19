@@ -212,6 +212,87 @@ func (s Store) UpdatePass(user_id int, up UpdateAuthUserPass) (AuthUser, error) 
 
 }
 
+// Create - create a password reset entry
+func (s Store) CreatePasswordReset(nr NewResetPasswordEmail) (ResetPasswordEmail, error) {
+
+	if err := validate.Check(nr); err != nil {
+		return ResetPasswordEmail{}, errors.Wrap(err, "validating data")
+	}
+	now := time.Now().Truncate(time.Second)
+
+	rpe := ResetPasswordEmail{
+		ResetID:   validate.GenerateID(),
+		UserID:    nr.UserID,
+		CreatedOn: now,
+		UpdatedOn: now,
+		UpdatedBy: nr.UpdatedBy,
+	}
+
+	const query = `
+	INSERT INTO reset_password_email 
+		(reset_id, user_id, created_on, updated_on, updated_by)
+	VALUES 
+		(:reset_id, :user_id, :created_on, :updated_on, :updated_by)`
+
+	s.log.Printf("%s: %s", "user.CreatePasswordReset", database.Log(query, rpe))
+
+	_, err := s.db.NamedExec(query, rpe)
+	if err != nil {
+		return ResetPasswordEmail{}, errors.Wrap(err, "inserting reset_password_email")
+	}
+
+	return rpe, nil
+}
+
+// Create - create a password reset entry
+func (s Store) ExpirePasswordReset(er ExpireResetPasswordEmail) (ResetPasswordEmail, error) {
+
+	if err := validate.Check(er); err != nil {
+		return ResetPasswordEmail{}, errors.Wrap(err, "validating data")
+	}
+
+	now := time.Now().Truncate(time.Second)
+	rpe := ResetPasswordEmail{
+		ResetID:   er.ResetID,
+		UpdatedOn: now,
+	}
+
+	const query = `
+	UPDATE reset_password_email SET active = 0, updated_on = :updated_on
+		WHERE reset_id = :reset_id`
+
+	s.log.Printf("%s: %s", "user.ExpirePasswordReset", database.Log(query, rpe))
+
+	_, err := s.db.NamedExec(query, rpe)
+	if err != nil {
+		return ResetPasswordEmail{}, errors.Wrap(err, "expiring password reset")
+	}
+	return rpe, nil
+}
+
+func (s Store) QueryPasswordResetByID(reset_id string) (ResetPasswordEmail, error) {
+	data := struct {
+		ResetID string `db:"reset_id"`
+	}{
+		ResetID: reset_id,
+	}
+	const query = `
+	SELECT reset_id, user_id, active, created_on, updated_on, updated_by
+	FROM reset_password_email
+	WHERE reset_id = :reset_id AND active = 1 AND created_on >= datetime('now', '-24 hours')`
+
+	var pReset ResetPasswordEmail
+	if err := database.NamedQueryStruct(s.db, query, data, &pReset); err != nil {
+		if err == database.ErrNotFound {
+			return ResetPasswordEmail{}, database.ErrNotFound
+		}
+		return ResetPasswordEmail{}, errors.Wrapf(err, "selecting password reset %q", data.ResetID)
+	}
+
+	return pReset, nil
+
+}
+
 // Authenticate finds a user by their email and verifies their password. On
 // success it returns the AuthUser instance
 func (s Store) Authenticate(email, password string) (*AuthUser, error) {

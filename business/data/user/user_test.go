@@ -3,6 +3,7 @@ package user_test
 import (
 	"photo-contest/business/data/tests"
 	"photo-contest/business/data/user"
+	"photo-contest/foundation/database"
 	"testing"
 
 	"github.com/google/go-cmp/cmp"
@@ -82,6 +83,34 @@ func TestUser(t *testing.T) {
 			if usr.ID != updated_pass_user.ID {
 				t.Fatalf("\t%s\tTest %d:\tShould get back the same user id. %d != %d", tests.Failed, testID, usr.ID, updated_user.ID)
 			}
+			rpe := user.NewResetPasswordEmail{
+				UserID:    usr.ID,
+				UpdatedBy: usr.Name,
+			}
+			t.Logf("\t%s\tTest %d:\tShould have no password resets for user with ID.", tests.Success, testID)
+			password_reset_email, err := store.CreatePasswordReset(rpe)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to create password reset of user with ID: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to create password reset of user with ID.", tests.Success, testID)
+			pe, err := store.QueryPasswordResetByID(password_reset_email.ResetID)
+			if pe.UserID != usr.ID {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to retrieve password reset with ID: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to retrieve password reset with ID.", tests.Success, testID)
+			er := user.ExpireResetPasswordEmail{
+				ResetID: password_reset_email.ResetID,
+			}
+			_, err = store.ExpirePasswordReset(er)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to expire password reset with ID: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to expire password reset with ID.", tests.Success, testID)
+			pe, err = store.QueryPasswordResetByID(password_reset_email.ResetID)
+			if err != database.ErrNotFound {
+				t.Fatalf("\t%s\tTest %d:\tShould not be able to retrieve expired password reset with ID: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould not be able to retrieve expired password reset with ID.", tests.Success, testID)
 		}
 	}
 }

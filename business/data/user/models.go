@@ -59,3 +59,24 @@ type UpdateAuthUserPass struct {
 	Pass        string `json:"pass" validate:"required"`
 	PassConfirm string `json:"pass_confirm" validate:"eqfield=Pass"`
 }
+
+//ResetPasswordEmail - password reset type
+type ResetPasswordEmail struct {
+	ResetID   string    `db:"reset_id" json:"reset_id"`
+	UserID    int       `db:"user_id" json:"user_id"`
+	Active    bool      `db:"active" json:"active"`
+	CreatedOn time.Time `db:"created_on" json:"created_on"`
+	UpdatedOn time.Time `db:"updated_on" json:"updated_on"`
+	UpdatedBy string    `db:"updated_by" json:"updated_by"`
+}
+
+//NewResetPasswordEmail - struct for creating new password resets
+type NewResetPasswordEmail struct {
+	UserID    int    `db:"user_id" json:"user_id"`
+	UpdatedBy string `json:"updated_by" validate:"required"`
+}
+
+//ExpireResetPasswordEmail - struct for expiring password resets
+type ExpireResetPasswordEmail struct {
+	ResetID string `json:"reset_id" validate:"required"`
+}
