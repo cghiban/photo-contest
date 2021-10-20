@@ -225,7 +225,7 @@ func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
 		"ethnicity":       usr.Ethnicity,
 		"other_ethnicity": usr.OtherEthnicity,
 		csrf.TemplateTag:  csrf.TemplateField(r),
-		"User":            "Exists",
+		"User":            usr,
 		"states":          states,
 		"state_keys":      state_keys,
 		"ethnicities":     ethnicities,
@@ -328,7 +328,7 @@ func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
 
 	formData := map[string]interface{}{
 		csrf.TemplateTag: csrf.TemplateField(r),
-		"User":           "Exists",
+		"User":           usr,
 	}
 
 	if r.Method == "GET" {
@@ -433,6 +433,28 @@ func (a *Auth) RequireUser(next http.Handler) http.HandlerFunc {
 			// Whatever was set in the user key isn't a user, so we probably need to
 			// sign in.
 			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+		next.ServeHTTP(w, r)
+	}
+}
+
+func (a *Auth) RequireAdmin(next http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tmp := r.Context().Value("user")
+		if tmp == nil {
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+		usr, ok := tmp.(*user.AuthUser)
+		if !ok {
+			// Whatever was set in the user key isn't a user, so we probably need to
+			// sign in.
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+		if usr.PermissionLevel < 2 {
+			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
 		next.ServeHTTP(w, r)

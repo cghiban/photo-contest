@@ -74,6 +74,7 @@ func (s Store) Create(nu NewAuthUser) (AuthUser, error) {
 		return AuthUser{}, err
 	}
 	usr.ID = int(id)
+	usr.PermissionLevel = 1
 
 	return usr, nil
 }
@@ -90,7 +91,7 @@ func (s Store) QueryByEmail(email string) (AuthUser, error) {
 	}
 	const query = `
         SELECT
-			user_id, name, email, passw, created, street, city, state, zip, phone, age, gender, ethnicity, other_ethnicity
+			user_id, permission_level, name, email, passw, created, street, city, state, zip, phone, age, gender, ethnicity, other_ethnicity
 		FROM 
 			auth_user
 		WHERE email = :email`
@@ -119,7 +120,7 @@ func (s Store) QueryByID(user_id int) (AuthUser, error) {
 		UserID: user_id,
 	}
 	const query = `
-        SELECT user_id, name, email, passw, created, street, city, state, zip, phone, age, gender, ethnicity, other_ethnicity
+        SELECT user_id, permission_level, name, email, passw, created, street, city, state, zip, phone, age, gender, ethnicity, other_ethnicity
 		FROM auth_user
 		WHERE user_id = :user_id`
 

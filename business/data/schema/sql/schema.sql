@@ -140,3 +140,7 @@ CREATE TABLE reset_password_email (
     updated_by TEXT NOT NULL,
     FOREIGN KEY(user_id) REFERENCES auth_user(user_id)
 );
+
+-- Version: 1.9
+-- Description: Add permission_level to auth_user table for extra site access
+ALTER TABLE auth_user ADD COLUMN permission_level INT NOT NULL DEFAULT 1;

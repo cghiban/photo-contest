@@ -68,7 +68,7 @@ func (s *Service) UserPhotos(rw http.ResponseWriter, r *http.Request) {
 		}
 		formData := map[string]interface{}{
 			"Photos": thumbPhotos,
-			"User":   "Exists",
+			"User":   usr,
 		}
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
@@ -188,9 +188,11 @@ func makeThumbnail(id string, s string, pixels uint16, l *log.Logger) error {
 func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 	// on GET display the form
 	// on POST handle file upload
+	usr := r.Context().Value("user").(*user.AuthUser)
+	contestID := 1
 	formData := map[string]interface{}{
 		csrf.TemplateTag:   csrf.TemplateField(r),
-		"User":             "Exists",
+		"User":             usr,
 		"SubjectName":      "",
 		"SubjectAge":       "",
 		"SubjectCountry":   "",
@@ -260,7 +262,7 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 		nce := contest.NewContestEntry{
-			ContestID:        1,
+			ContestID:        contestID,
 			PhotoID:          pht.ID,
 			Status:           "active",
 			UpdatedBy:        usr.Name,

@@ -6,20 +6,21 @@ import (
 
 // AuthUser - user
 type AuthUser struct {
-	ID             int       `db:"user_id" json:"id"`
-	Name           string    `db:"name" json:"name"`
-	Email          string    `db:"email" json:"email"`
-	Pass           []byte    `db:"passw" json:"-"`
-	CreatedOn      time.Time `db:"created" json:"date_created"`
-	Street         string    `db:"street" json:"street"`
-	City           string    `db:"city" json:"city"`
-	State          string    `db:"state" json:"state"`
-	Zip            string    `db:"zip" json:"zip"`
-	Phone          string    `db:"phone" json:"phone"`
-	Age            int       `db:"age" json:"age"`
-	Gender         string    `db:"gender" json:"gender"`
-	Ethnicity      string    `db:"ethnicity" json:"ethnicity"`
-	OtherEthnicity string    `db:"other_ethnicity" json:"other_ethnicity"`
+	ID              int       `db:"user_id" json:"id"`
+	Name            string    `db:"name" json:"name"`
+	Email           string    `db:"email" json:"email"`
+	Pass            []byte    `db:"passw" json:"-"`
+	CreatedOn       time.Time `db:"created" json:"date_created"`
+	Street          string    `db:"street" json:"street"`
+	City            string    `db:"city" json:"city"`
+	State           string    `db:"state" json:"state"`
+	Zip             string    `db:"zip" json:"zip"`
+	Phone           string    `db:"phone" json:"phone"`
+	Age             int       `db:"age" json:"age"`
+	Gender          string    `db:"gender" json:"gender"`
+	Ethnicity       string    `db:"ethnicity" json:"ethnicity"`
+	OtherEthnicity  string    `db:"other_ethnicity" json:"other_ethnicity"`
+	PermissionLevel int       `db:"permission_level" json:"permission_level"`
 }
 
 // NewAuthUser - struct for creating new users
