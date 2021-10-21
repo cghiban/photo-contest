@@ -45,11 +45,11 @@ type ContestEntry struct {
 	UpdatedBy        string    `db:"updated_by" json:"updated_by"`
 }
 
-//NewContestEntry type for adding phtos to a content
+//NewContestEntry type for adding photos to a content
 type NewContestEntry struct {
 	ContestID        int    `json:"contest_id" validate:"required"`
 	PhotoID          string `json:"photo_id" validate:"required"`
-	Status           string `json:"status" validate:"required,oneof=active eliminated withdrawn flagged"`
+	Status           string `json:"status" validate:"required,oneof=active eliminated withdrawn flagged semifinal"`
 	UpdatedBy        string `json:"updated_by" validate:"required"`
 	SubjectName      string `json:"sname" validate:"required"`
 	SubjectAge       string `json:"sage" validate:"required"`
@@ -58,6 +58,12 @@ type NewContestEntry struct {
 	Location         string `json:"location" validate:"required"`
 	SubjectBiography string `json:"sbiography" validate:"required"`
 	ReleaseMimeType  string `json:"release_mime_type" validate:"required"`
+}
+
+//UpdateContestEntry type for changing the status of a contest
+type UpdateContestEntry struct {
+	EntryID int    `json:"entry_id" validate:"required"`
+	Status  string `json:"status" validate:"required,oneof=active eliminated withdrawn flagged semifinal"`
 }
 
 //ContestPhotoEntry - contest entry with photos and votes totals/scores

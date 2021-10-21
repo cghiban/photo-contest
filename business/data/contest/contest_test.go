@@ -148,6 +148,15 @@ func TestPhoto(t *testing.T) {
 			}
 			t.Logf("\t%s\tTest %d:\tShould get back the same contest entries.", tests.Success, testID)
 			//-------------------------------------------------------------------------------
+			uce := contest.UpdateContestEntry{
+				EntryID: rce.EntryID,
+				Status:  "eliminated",
+			}
+			_, err = contestStore.UpdateEntry(uce)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to update contest entry with id: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to update contest entry with ID.", tests.Success, testID)
 
 		}
 		testID++

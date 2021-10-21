@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    {{template "header_head" .}}
+    <title>Photo contest @ DNALC NYC</title>
+    </head>
+    <body>
+    {{template "header_body" .}}
+    <h1>Reset Password</h1>
+    <form method="POST" action="/resetpass">
+		{{ .csrfField }}
+        <div class="mb-3 row">
+            <div class="col-sm-2">
+                <label for="code" class="fw-bold">Code</label>
+            </div>
+            <div class="col-sm-10">
+                <input style="width: 360px;" type="text" name="code" value="{{.Code}}" required>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-sm-2">
+                <label for="password" class="fw-bold">New Password</label>
+            </div>
+            <div class="col-sm-10">
+                <input style="width: 360px;" type="password" name="password" required>
+            </div>
+        </div>
+        <div class="mb-3 row">
+            <div class="col-sm-2">
+                <label for="password_confirm" class="fw-bold">Confirm New Password</label>
+            </div>
+            <div class="col-sm-10">
+                <input style="width: 360px;" type="password" name="password_confirm" required>
+            </div>
+        </div>
+        <button class="btn btn-primary">Update Password</button>
+    </form>
+    {{template "footer" .}}
+    </body>
+</html>

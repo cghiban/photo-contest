@@ -150,11 +150,11 @@ func (s Store) CreateContestEntry(ncp NewContestEntry) (ContestEntry, error) {
 	VALUES
 		(:contest_id, :photo_id, :sname, :sage, :scountry, :sorigin, :sbiography, :location, :release_mime_type, :status, :created_on, :updated_on, :updated_by)`
 
-	s.log.Printf("%s: %s", "contest.Create", database.Log(query, cPhoto))
+	s.log.Printf("%s: %s", "contest.CreateContestEntry", database.Log(query, cPhoto))
 
 	res, err := s.db.NamedExec(query, cPhoto)
 	if err != nil {
-		return ContestEntry{}, errors.Wrap(err, "inserting contest")
+		return ContestEntry{}, errors.Wrap(err, "inserting contest entry")
 	}
 
 	id, err := res.LastInsertId()
@@ -164,6 +164,29 @@ func (s Store) CreateContestEntry(ncp NewContestEntry) (ContestEntry, error) {
 	cPhoto.EntryID = int(id)
 
 	return cPhoto, nil
+}
+
+func (s Store) UpdateEntry(uce UpdateContestEntry) (ContestEntry, error) {
+	if err := validate.Check(uce); err != nil {
+		return ContestEntry{}, errors.Wrap(err, "validating data")
+	}
+
+	ce := ContestEntry{
+		EntryID: uce.EntryID,
+		Status:  uce.Status,
+	}
+
+	const query = `
+	UPDATE contest_entries SET status = :status WHERE entry_id = :entry_id`
+
+	s.log.Printf("%s: %s", "contest.UpdateEntry", database.Log(query, ce))
+
+	_, err := s.db.NamedExec(query, ce)
+	if err != nil {
+		return ContestEntry{}, errors.Wrap(err, "updating contest entry")
+	}
+
+	return ce, nil
 }
 
 // QueryContestEntrys - return a list of entries

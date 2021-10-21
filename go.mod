@@ -18,6 +18,7 @@ require (
 	github.com/h2non/bimg v1.1.5 // indirect
 	github.com/jmoiron/sqlx v1.3.4
 	github.com/lib/pq v1.10.2 // indirect
+	github.com/mailgun/mailgun-go/v4 v4.5.3 // indirect
 	github.com/mattn/go-sqlite3 v1.14.6
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0 // indirect

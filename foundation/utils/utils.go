@@ -1,7 +1,15 @@
 package utils
 
 import (
+	"context"
+	"io/ioutil"
+	"log"
 	"math/rand"
+	"os"
+	"strings"
+	"time"
+
+	"github.com/mailgun/mailgun-go/v4"
 )
 
 func RandStringRunes(n int) string {
@@ -133,4 +141,46 @@ func InStringSlice(slice []string, item string) bool {
 		}
 	}
 	return false
+}
+
+func ReadFile(filePath string) (string, error) {
+	file, err := os.Open(filePath)
+	if err != nil {
+		log.Println(err)
+		return "", err
+	}
+	defer file.Close()
+
+	b, _ := ioutil.ReadAll(file)
+	return string(b), nil
+}
+
+func SendEmail(mg *mailgun.MailgunImpl, sender, subject, recipient, bodyText, bodyHtml, tag string) (string, string, error) {
+	message := mg.NewMessage(sender, subject, bodyText, recipient)
+	message.SetReplyTo(sender)
+	err := message.AddTag("Dev-Photo-Contest-" + tag)
+	if err != nil {
+		return "", "", err
+	}
+	if bodyHtml != "" {
+		message.SetHtml(bodyHtml)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+	defer cancel()
+
+	// Send the message with a 20 second timeout
+	// message, id, err
+	return mg.Send(ctx, message)
+
+}
+
+func SendResetEmail(mg *mailgun.MailgunImpl, email string, resetID string) (string, string, error) {
+	tag := "Password-Reset"
+	bodyText, err := ReadFile("email_templates/password_reset.txt")
+	if err != nil {
+		return "", "", err
+	}
+	bodyText = strings.ReplaceAll(bodyText, "<reset_code>", resetID)
+	bodyHtml := ""
+	return SendEmail(mg, "dnalc-it@cshl.edu", "[DNALC Photo Contest] Password Reset Requested", email, bodyText, bodyHtml, tag)
 }

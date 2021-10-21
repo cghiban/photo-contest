@@ -3,7 +3,11 @@
 <html>
     <head>
     {{template "header_head" .}}
+    {{if .FullContest}}
     <title>Gallery</title>
+    {{else}}
+    <title>My Submissions</title>
+    {{end}}
     <style>
     a.active {
       color: black;
@@ -15,9 +19,20 @@
     </head>
     <body>
     {{template "header_body" .}}
+    {{if .FullContest}}
     <h1>Photo Gallery</h1>
+    Status:&emsp;&emsp;&ensp;&nbsp;
+    {{if eq .Status ""}}All{{else}}<a href="/gallery">All</a>{{end}}&emsp;
+    {{if eq .Status "active"}}Active{{else}}<a href="/gallery?status=active">Active</a>{{end}}&emsp;
+    {{if eq .Status "eliminated"}}Eliminated{{else}}<a href="/gallery?status=eliminated">Eliminated</a>{{end}}&emsp;
+    {{if eq .Status "flagged"}}Flagged{{else}}<a href="/gallery?status=flagged">Flagged</a>{{end}}&emsp;
+    {{if eq .Status "semifinal"}}Semi-Final{{else}}<a href="/gallery?status=semifinal">Semi-Final</a>{{end}}&emsp;
+    <br>
+    {{else}}
+    <h1>My Submissions</h1>
+    {{end}}
     <div>
-        Switch size:
+        Switch size:&ensp;
         <a id="thumb" name="resize" class="active" href="javascript:resizeImage('thumb');">Thumbnail</a>
         &nbsp;
         <a id="small" name="resize" href="javascript:resizeImage('small');">Small</a>
@@ -40,7 +55,9 @@
                 <th>Status</th>
                 <th>Release Form</th>
             </tr>
-        {{ range $photo := .Photos }}
+            {{$fullContest := .FullContest}}
+            {{ range $photo := .Photos }}
+            {{if ne $photo.Status "withdrawn"}}
             <tr>
                 <td style="width: 200px; text-align: center;">
                   <a target="_blank" href="{{replaceEnd $photo.FilePath "-thumb.jpg" "-original.jpg"}}">
@@ -53,7 +70,18 @@
                 <td>{{html $photo.SubjectOrigin}}</td>
                 <td>{{html $photo.Location}}</td>
                 <td>{{html $photo.SubjectBiography}}</td>
-                <td>{{$photo.Status}}</td>
+                <td>
+                {{if $fullContest}}
+                <select id="status_{{$photo.EntryId}}" name="status">
+                  <option value="active"{{if eq $photo.Status "active"}} selected{{end}}>Active</option>
+                  <option value="eliminated"{{if eq $photo.Status "eliminated"}} selected{{end}}>Eliminated</option>
+                  <option value="flagged"{{if eq $photo.Status "flagged"}} selected{{end}}>Flagged</option>
+                  <option value="semifinal"{{if eq $photo.Status "semifinal"}} selected{{end}}>Semi-Final</option>
+                </select>
+                {{else}}
+                {{$photo.Status}}
+                {{end}}
+                </td>
                 <td>
                 {{if eq $photo.ReleaseMimeType "application/pdf"}}
                 <a href="/tmp/release-{{$photo.PhotoId}}.pdf">View PDF</a>
@@ -64,11 +92,31 @@
                 {{end}}
                 </td>
             </tr>
-        {{end}}
+            {{end}}
+            {{end}}
         </table>
     </div>
     {{template "footer" .}}
     <script>
+    {{if .CSRF}}
+    const csrf = "{{.CSRF}}";
+    {{end}}
+    const encodeFormData = (data) => {
+	    return new URLSearchParams(data);
+    }
+    async function postData(url, data) {
+	    const response = await fetch(url, {
+		    method: 'POST',
+		    mode: 'cors',
+		    cache: 'no-cache',
+		    credentials: 'same-origin',
+		    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+		    redirect: 'follow',
+		    referrerPolicy: 'no-referrer',
+		    body: encodeFormData(data)
+	    });
+	    return response.json();
+    }
     function resizeImage(size) {
         for (const resize of document.getElementsByName("resize")) {
             resize.removeAttribute("class");
@@ -79,6 +127,42 @@
             setTimeout(function() { img.parentNode.nextElementSibling.style.maxWidth = "" + img.clientWidth + "px"}, 10);
         }
     }
+    document.addEventListener("DOMContentLoaded", function() {
+        const params = new URLSearchParams(document.location.search.substring(1));
+        const statusFilter = params.get("status");
+        const statuses = document.getElementsByName("status");
+        for (let i = 0; i < statuses.length; i++) {
+            statuses[i].addEventListener("change", function(event) {
+                const eTarget = event.target;
+                const targetValue = eTarget.value;
+                const confirmation = confirm("Are you sure you want to change the status to " + targetValue + "?");
+                if (confirmation) {
+                    const entryId = parseInt(statuses[i].id.replace(/\D+/g,''));
+                    const p_data = {
+                        "gorilla.csrf.Token": csrf,
+					    "status": targetValue,
+					    "entryId": entryId,
+				    };
+                    postData("/update_entry_status", p_data).then(
+                        data => {
+                            if(data["status"] === "error") {
+                                alert("Error: " + message);
+                            }
+                        }
+                    );
+                    if (statusFilter) {
+                        const row = eTarget.parentNode.parentNode;
+                        row.parentNode.removeChild(row);
+                    } else {
+                        eTarget.querySelector("option[selected]").removeAttribute("selected");
+                        document.querySelector("#" + statuses[i].id + " option[value=" + targetValue + "]").setAttribute("selected", "");
+                    }
+                } else {
+                    statuses[i].value = eTarget.querySelector("option[selected]").value;
+                }
+            });
+        }
+    });
     </script>
     </body>
 </html>

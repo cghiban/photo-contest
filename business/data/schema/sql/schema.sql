@@ -69,7 +69,7 @@ CREATE TABLE contest_entries (
     entry_id INTEGER PRIMARY KEY AUTOINCREMENT,
     contest_id INTEGER NOT NULL DEFAULT 0,
     photo_id TEXT NOT NULL, --uuid
-    status TEXT NOT NULL, -- regex='^(active|eliminated|withdrawn|flagged)$')
+    status TEXT NOT NULL, -- regex='^(active|eliminated|withdrawn|flagged|semifinal)$')
     created_on DATETIME NOT NULL,
     updated_on DATETIME NOT NULL,
     updated_by TEXT NOT NULL,

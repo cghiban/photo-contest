@@ -31,6 +31,7 @@ type PhotoInfo struct {
 	SubjectBiography string
 	Location         string
 	ReleaseMimeType  string
+	EntryId          int
 }
 
 // UserPhotos - lists user photos (req auth)

@@ -322,6 +322,108 @@ func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (s *Service) UserForgotPassword(rw http.ResponseWriter, r *http.Request) {
+	formData := map[string]interface{}{
+		csrf.TemplateTag: csrf.TemplateField(r),
+	}
+	if r.Method == "GET" {
+		rw.Header().Add("Cache-Control", "no-cache")
+		s.ExecuteTemplateWithBase(rw, formData, "forgotpass.gohtml")
+	} else if r.Method == "POST" {
+		email := strings.TrimSpace(r.Form.Get("email"))
+		userStore := user.NewStore(s.log, s.db)
+		usr, err := userStore.QueryByEmail(email)
+		if err != nil {
+			s.ExecuteTemplateWithBase(rw, formData, "forgotpassredirect.gohtml")
+			return
+		}
+		nr := user.NewResetPasswordEmail{
+			UserID:    usr.ID,
+			UpdatedBy: usr.Name,
+		}
+		pr, err := userStore.CreatePasswordReset(nr)
+		if err != nil {
+			formData["Message"] = "Unable to create password reset"
+			s.ExecuteTemplateWithBase(rw, formData, "forgotpass.gohtml")
+			return
+		}
+		_, _, err = utils.SendResetEmail(s.mailgunServer, usr.Email, pr.ResetID)
+		if err != nil {
+			fmt.Println(usr.Email, err)
+			formData["message"] = "Unable to create password reset"
+			s.ExecuteTemplateWithBase(rw, formData, "forgotpass.gohtml")
+			return
+		}
+		s.ExecuteTemplateWithBase(rw, formData, "forgotpassredirect.gohtml")
+	}
+}
+
+func (s *Service) UserResetPassword(rw http.ResponseWriter, r *http.Request) {
+	formData := map[string]interface{}{
+		csrf.TemplateTag: csrf.TemplateField(r),
+	}
+	userStore := user.NewStore(s.log, s.db)
+	if r.Method == "GET" {
+		codes, ok := r.URL.Query()["c"]
+		code := ""
+		if ok && len(codes[0]) > 0 {
+			code = codes[0]
+		}
+		if code == "" {
+			http.NotFound(rw, r)
+			return
+		}
+		_, err := userStore.QueryPasswordResetByID(code)
+		if err != nil {
+			http.NotFound(rw, r)
+			return
+		}
+		formData["Code"] = code
+		rw.Header().Add("Cache-Control", "no-cache")
+		s.ExecuteTemplateWithBase(rw, formData, "resetpass.gohtml")
+	} else if r.Method == "POST" {
+		code := strings.TrimSpace(r.Form.Get("code"))
+		if code == "" {
+			fmt.Println("No code")
+			http.NotFound(rw, r)
+			return
+		}
+		re, err := userStore.QueryPasswordResetByID(code)
+		if err != nil {
+			fmt.Println(err)
+			http.NotFound(rw, r)
+			return
+		}
+		password := strings.TrimSpace(r.Form.Get("password"))
+		password_confirm := strings.TrimSpace(r.Form.Get("password_confirm"))
+		if password != password_confirm {
+			formData["Message"] = "New passwords must match"
+			s.ExecuteTemplateWithBase(rw, formData, "resetpass.gohtml")
+			return
+		}
+		s.log.Println("trying to update user password: ", re.UserID)
+
+		up := user.UpdateAuthUserPass{
+			Pass:        password,
+			PassConfirm: password_confirm,
+		}
+
+		_, err = userStore.UpdatePass(re.UserID, up)
+		if err != nil {
+			formData["Message"] = "Failed to update password"
+			s.ExecuteTemplateWithBase(rw, formData, "resetpass.gohtml")
+			return
+		}
+		er := user.ExpireResetPasswordEmail{
+			ResetID: re.ResetID,
+		}
+		// If reset fails to be expired, it just will remain active until 24 hours have passed
+		// Not a major deal, so no error checking needed
+		userStore.ExpirePasswordReset(er)
+		http.Redirect(rw, r, "/", http.StatusFound)
+	}
+}
+
 // UserUpdatePassword - allows profile to be updated
 func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
 	usr := r.Context().Value("user").(*user.AuthUser)
@@ -340,7 +442,11 @@ func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
 		old_password := strings.Trim(r.Form.Get("old_password"), " ")
 		password := strings.Trim(r.Form.Get("password"), " ")
 		password_confirm := strings.Trim(r.Form.Get("password_confirm"), " ")
-
+		if password != password_confirm {
+			formData["Message"] = "New passwords must match"
+			s.ExecuteTemplateWithBase(rw, formData, "password.gohtml")
+			return
+		}
 		userGroup := user.NewStore(s.log, s.db)
 		usr, err := userGroup.Authenticate(usr.Email, old_password)
 		if err != nil {
@@ -360,8 +466,7 @@ func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
 
 			_, err := userGroup.UpdatePass(usr.ID, up)
 			if err != nil {
-
-				formData["Message"] = err.Error()
+				formData["Message"] = "Failed to update password"
 				s.ExecuteTemplateWithBase(rw, formData, "password.gohtml")
 				return
 			}

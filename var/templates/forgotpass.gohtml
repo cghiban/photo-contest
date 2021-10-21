@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+    {{template "header_head" .}}
+    <title>Photo contest @ DNALC NYC</title>
+    </head>
+    <body>
+    {{template "header_body" .}}
+    <h1>Forgot Password</h1>
+    <p>Please enter your email. Soon after submiting this information, you will receive an email from us with a code so you can change your password.</p> 
+    <form method="POST" action="/forgotpass">
+		{{ .csrfField }}
+        <div class="mb-3 row">
+            <div class="col-sm-1">
+                <label for="email" class="fw-bold">Email</label>
+            </div>
+            <div class="col-sm-11">
+                <input type="email" name="email" required>
+            </div>
+        </div>
+        <button class="btn btn-primary">Submit</button>
+    </form>
+    {{template "footer" .}}
+    </body>
+</html>

@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
+	"os"
 	"photo-contest/business/data/user"
 	"strings"
 	"text/template"
@@ -10,14 +12,16 @@ import (
 
 	"github.com/gorilla/sessions"
 	"github.com/jmoiron/sqlx"
+	"github.com/mailgun/mailgun-go/v4"
 )
 
 // Service data struct
 type Service struct {
-	log     *log.Logger
-	db      *sqlx.DB
-	session *sessions.CookieStore
-	t       *template.Template
+	log           *log.Logger
+	db            *sqlx.DB
+	session       *sessions.CookieStore
+	t             *template.Template
+	mailgunServer *mailgun.MailgunImpl
 	//session *sqlitestore.SqliteStore
 }
 
@@ -59,7 +63,23 @@ func NewService(l *log.Logger, db *sqlx.DB, sessionKey string) *Service {
 		MaxAge:   7 * 86400,
 	}
 
-	return &Service{log: l, db: db, t: templates, session: sessStore}
+	f, err := os.Open("config.json")
+	if err != nil {
+		log.Fatalln(err)
+	}
+	defer f.Close()
+
+	var mgConfig struct {
+		MailgunAPIKey string `json:"mailgun_api_key"`
+		MailgunDomain string `json:"mailgun_domain"`
+	}
+	decoder := json.NewDecoder(f)
+	err = decoder.Decode(&mgConfig)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	mg := mailgun.NewMailgun(mgConfig.MailgunDomain, mgConfig.MailgunAPIKey)
+	return &Service{log: l, db: db, t: templates, session: sessStore, mailgunServer: mg}
 }
 
 func (s *Service) ExecuteTemplateWithBase(rw http.ResponseWriter, data interface{}, fileName string) {
