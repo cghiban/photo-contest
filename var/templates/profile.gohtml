@@ -14,7 +14,7 @@
                 <label for="name" class="fw-bold">Name</label>
             </div>
             <div class="col-sm-11">
-                <input type="text" name="name" value="{{ .name }}" required>
+                <input type="text" name="name" value="{{ html .name }}" required>
             </div>
         </div>
         <div class="mb-3 row">
@@ -22,7 +22,7 @@
                 <label for="email" class="fw-bold">Email Address</label>
             </div>
             <div class="col-sm-11">
-                <input type="email" name="email" value="{{ .email }}" required>
+                <input type="email" name="email" value="{{ html .email }}" required>
             </div>
         </div>
         <div class="mb-3 row">
@@ -30,7 +30,7 @@
                 <label for="street" class="fw-bold">Street</label>
             </div>
             <div class="col-sm-11">
-                <input type="text" name="street" value="{{ .street }}" required>
+                <input type="text" name="street" value="{{ html .street }}" required>
             </div>
         </div>
         <div class="mb-3 row">
@@ -38,7 +38,7 @@
                 <label for="city" class="fw-bold">City</label>
             </div>
             <div class="col-sm-11">
-                <input type="text" name="city" value="{{ .city }}" required>
+                <input type="text" name="city" value="{{ html .city }}" required>
             </div>
         </div>
         <div class="mb-3 row">
@@ -65,7 +65,7 @@
                 <label for="zip" class="fw-bold">Zip Code</label>
             </div>
             <div class="col-sm-11">
-                <input type="text" name="zip" value="{{ .zip }}" required>
+                <input type="text" name="zip" value="{{ html .zip }}" required>
             </div>
         </div>
         <div class="mb-3 row">
@@ -73,7 +73,7 @@
                 <label for="phone" class="fw-bold">Phone Number</label>
             </div>
             <div class="col-sm-11">
-                <input type="tel" name="phone" value="{{ .phone }}" required>
+                <input type="tel" name="phone" value="{{ html .phone }}" required>
             </div>
         </div>
         <div class="mb-3 row">
@@ -81,7 +81,7 @@
                 <label for="age" class="fw-bold">Age</label>
             </div>
             <div class="col-sm-11">
-                <input type="number" min="0" name="age" value="{{ .age }}" required>
+                <input type="number" min="0" name="age" value="{{ html .age }}" required>
             </div>
         </div>
         <div class="mb-3 row">
@@ -130,7 +130,7 @@
                 <label for="other_ethnicity" class="fw-bold">Other Ethnicity</label>
             </div>
             <div class="col-sm-11">
-                <input type="text" id="other_ethnicity" name="other_ethnicity" value="{{ .other_ethnicity }}">
+                <input type="text" id="other_ethnicity" name="other_ethnicity" value="{{ html .other_ethnicity }}">
             </div>
         </div>
         <button class="btn btn-primary">Update</button>

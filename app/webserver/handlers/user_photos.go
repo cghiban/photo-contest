@@ -77,7 +77,7 @@ func (s *Service) UserPhotos(rw http.ResponseWriter, r *http.Request) {
 		}
 
 		rw.Header().Add("Cache-Control", "no-cache")
-		s.ExecuteTemplateWithBase(rw, formData, "gallery.gohtml")
+		s.ExecuteTemplateWithBase(rw, formData, "submissions.gohtml")
 	}
 }
 

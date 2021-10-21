@@ -8,18 +8,9 @@
     {{else}}
     <title>My Submissions</title>
     {{end}}
-    <style>
-    a.active {
-      color: black;
-      text-decoration: none;
-      cursor: default;
-      pointer-events: none;
-    }
-    </style>
     </head>
     <body>
     {{template "header_body" .}}
-    {{if .FullContest}}
     <h1>Photo Gallery</h1>
     Status:&emsp;&emsp;&ensp;&nbsp;
     {{if eq .Status ""}}All{{else}}<a href="/gallery">All</a>{{end}}&emsp;
@@ -27,105 +18,24 @@
     {{if eq .Status "eliminated"}}Eliminated{{else}}<a href="/gallery?status=eliminated">Eliminated</a>{{end}}&emsp;
     {{if eq .Status "flagged"}}Flagged{{else}}<a href="/gallery?status=flagged">Flagged</a>{{end}}&emsp;
     {{if eq .Status "semifinal"}}Semi-Final{{else}}<a href="/gallery?status=semifinal">Semi-Final</a>{{end}}&emsp;
-    <br>
-    {{else}}
-    <h1>My Submissions</h1>
-    {{end}}
-    <div>
-        Switch size:&ensp;
-        <a id="thumb" name="resize" class="active" href="javascript:resizeImage('thumb');">Thumbnail</a>
-        &nbsp;
-        <a id="small" name="resize" href="javascript:resizeImage('small');">Small</a>
-        &nbsp;
-        <a id="medium" name="resize" href="javascript:resizeImage('medium');">Medium</a>
-        &nbsp;
-        <a id="large" name="resize" href="javascript:resizeImage('large');">Large</a>
-        &nbsp;
-        <a id="original" name="resize" href="javascript:resizeImage('original');">Original</a>
-        <br>
-        <table class="table">
-            <tr>
-                <th>Image</th>
-                <th>Subject's Name(s)</th>
-                <th>Subject's Age(s)</th>
-                <th>Subject's Countr(y/ies) of Birth</th>
-                <th>Subject's Ancestral Countr(y/ies) of Origin (if born in US)</th>
-                <th>Where in NYC photograph was taken</th>
-                <th>Subject Biography</th>
-                <th>Status</th>
-                <th>Release Form</th>
-            </tr>
-            {{$fullContest := .FullContest}}
-            {{ range $photo := .Photos }}
-            {{if ne $photo.Status "withdrawn"}}
-            <tr>
-                <td style="width: 200px; text-align: center;">
-                  <a target="_blank" href="{{replaceEnd $photo.FilePath "-thumb.jpg" "-original.jpg"}}">
-                    <img alt="{{html $photo.SubjectName}}" src="{{$photo.FilePath}}">
-                  </a>
-                </td>
-                <td>{{html $photo.SubjectName}}</td>
-                <td>{{html $photo.SubjectAge}}</td>
-                <td>{{html $photo.SubjectCountry}}</td>
-                <td>{{html $photo.SubjectOrigin}}</td>
-                <td>{{html $photo.Location}}</td>
-                <td>{{html $photo.SubjectBiography}}</td>
-                <td>
-                {{if $fullContest}}
-                <select id="status_{{$photo.EntryId}}" name="status">
-                  <option value="active"{{if eq $photo.Status "active"}} selected{{end}}>Active</option>
-                  <option value="eliminated"{{if eq $photo.Status "eliminated"}} selected{{end}}>Eliminated</option>
-                  <option value="flagged"{{if eq $photo.Status "flagged"}} selected{{end}}>Flagged</option>
-                  <option value="semifinal"{{if eq $photo.Status "semifinal"}} selected{{end}}>Semi-Final</option>
-                </select>
-                {{else}}
-                {{$photo.Status}}
-                {{end}}
-                </td>
-                <td>
-                {{if eq $photo.ReleaseMimeType "application/pdf"}}
-                <a href="/tmp/release-{{$photo.PhotoId}}.pdf">View PDF</a>
-                {{else if eq $photo.ReleaseMimeType "application/msword"}}
-                <a href="/tmp/release-{{$photo.PhotoId}}.doc">View Word Document</a>
-                {{else}}
-                <a href="/tmp/release-{{$photo.PhotoId}}.docx">View Word Document</a>
-                {{end}}
-                </td>
-            </tr>
-            {{end}}
-            {{end}}
-        </table>
-    </div>
-    {{template "footer" .}}
+    {{template "photo_gallery" . }}
     <script>
-    {{if .CSRF}}
     const csrf = "{{.CSRF}}";
-    {{end}}
     const encodeFormData = (data) => {
-	    return new URLSearchParams(data);
+        return new URLSearchParams(data);
     }
     async function postData(url, data) {
-	    const response = await fetch(url, {
-		    method: 'POST',
-		    mode: 'cors',
-		    cache: 'no-cache',
-		    credentials: 'same-origin',
-		    headers: {'Content-Type': 'application/x-www-form-urlencoded'},
-		    redirect: 'follow',
-		    referrerPolicy: 'no-referrer',
-		    body: encodeFormData(data)
-	    });
-	    return response.json();
-    }
-    function resizeImage(size) {
-        for (const resize of document.getElementsByName("resize")) {
-            resize.removeAttribute("class");
-        }
-        document.getElementById(size).className = "active";
-        for (const img of document.getElementsByTagName("img")) {
-            img.src = img.src.replace(/-[^-]*$/, ("-" + size + ".jpg"));
-            setTimeout(function() { img.parentNode.nextElementSibling.style.maxWidth = "" + img.clientWidth + "px"}, 10);
-        }
+        const response = await fetch(url, {
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            credentials: 'same-origin',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            redirect: 'follow',
+            referrerPolicy: 'no-referrer',
+            body: encodeFormData(data)
+        });
+        return response.json();
     }
     document.addEventListener("DOMContentLoaded", function() {
         const params = new URLSearchParams(document.location.search.substring(1));
@@ -140,9 +50,9 @@
                     const entryId = parseInt(statuses[i].id.replace(/\D+/g,''));
                     const p_data = {
                         "gorilla.csrf.Token": csrf,
-					    "status": targetValue,
-					    "entryId": entryId,
-				    };
+                        "status": targetValue,
+                        "entryId": entryId,
+                    };
                     postData("/update_entry_status", p_data).then(
                         data => {
                             if(data["status"] === "error") {
@@ -164,5 +74,6 @@
         }
     });
     </script>
+    {{template "footer" .}}
     </body>
 </html>
