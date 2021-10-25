@@ -370,12 +370,12 @@ func (s *Service) UserResetPassword(rw http.ResponseWriter, r *http.Request) {
 			code = codes[0]
 		}
 		if code == "" {
-			http.NotFound(rw, r)
+			s.NotFoundHandler(rw, r)
 			return
 		}
 		_, err := userStore.QueryPasswordResetByID(code)
 		if err != nil {
-			http.NotFound(rw, r)
+			s.NotFoundHandler(rw, r)
 			return
 		}
 		formData["Code"] = code
@@ -384,14 +384,12 @@ func (s *Service) UserResetPassword(rw http.ResponseWriter, r *http.Request) {
 	} else if r.Method == "POST" {
 		code := strings.TrimSpace(r.Form.Get("code"))
 		if code == "" {
-			fmt.Println("No code")
-			http.NotFound(rw, r)
+			s.NotFoundHandler(rw, r)
 			return
 		}
 		re, err := userStore.QueryPasswordResetByID(code)
 		if err != nil {
-			fmt.Println(err)
-			http.NotFound(rw, r)
+			s.NotFoundHandler(rw, r)
 			return
 		}
 		password := strings.TrimSpace(r.Form.Get("password"))

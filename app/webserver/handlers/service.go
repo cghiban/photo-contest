@@ -15,8 +15,14 @@ import (
 	"github.com/mailgun/mailgun-go/v4"
 )
 
+type Configuration struct {
+	MailgunAPIKey string `json:"mailgun_api_key"`
+	MailgunDomain string `json:"mailgun_domain"`
+}
+
 // Service data struct
 type Service struct {
+	C             Configuration
 	log           *log.Logger
 	db            *sqlx.DB
 	session       *sessions.CookieStore
@@ -68,18 +74,14 @@ func NewService(l *log.Logger, db *sqlx.DB, sessionKey string) *Service {
 		log.Fatalln(err)
 	}
 	defer f.Close()
-
-	var mgConfig struct {
-		MailgunAPIKey string `json:"mailgun_api_key"`
-		MailgunDomain string `json:"mailgun_domain"`
-	}
+	config := Configuration{}
 	decoder := json.NewDecoder(f)
-	err = decoder.Decode(&mgConfig)
+	err = decoder.Decode(&config)
 	if err != nil {
 		log.Fatalln(err)
 	}
-	mg := mailgun.NewMailgun(mgConfig.MailgunDomain, mgConfig.MailgunAPIKey)
-	return &Service{log: l, db: db, t: templates, session: sessStore, mailgunServer: mg}
+	mg := mailgun.NewMailgun(config.MailgunDomain, config.MailgunAPIKey)
+	return &Service{log: l, db: db, t: templates, session: sessStore, mailgunServer: mg, C: config}
 }
 
 func (s *Service) ExecuteTemplateWithBase(rw http.ResponseWriter, data interface{}, fileName string) {
@@ -92,6 +94,23 @@ func (s *Service) ExecuteTemplateWithBaseNoServerError(rw http.ResponseWriter, d
 	if err := s.t.ExecuteTemplate(rw, fileName, data); err != nil {
 		//http.Error(rw, err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func (s *Service) NotFoundHandler(rw http.ResponseWriter, r *http.Request) {
+	var usr *user.AuthUser
+	userV := r.Context().Value("user")
+	if userV != nil {
+		usr = userV.(*user.AuthUser)
+	}
+	data := struct {
+		User    *user.AuthUser
+		Message string
+	}{
+		User:    usr,
+		Message: "",
+	}
+	rw.WriteHeader(http.StatusNotFound)
+	s.ExecuteTemplateWithBase(rw, data, "404.gohtml")
 }
 
 // Index - about this site

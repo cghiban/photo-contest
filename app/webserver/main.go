@@ -119,6 +119,7 @@ func run(log *log.Logger) error {
 	authMw := handlers.NewAuth(service)
 
 	sm := mux.NewRouter()
+	sm.NotFoundHandler = web.WrapMiddleware(service.NotFoundHandler, authMw.UserViaSession)
 	sm.Handle("/", web.WrapMiddleware(service.Index, authMw.UserViaSession))
 	sm.Handle("/about", web.WrapMiddleware(service.About, authMw.UserViaSession))
 
