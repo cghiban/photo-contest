@@ -11,7 +11,7 @@
     </head>
     <body>
     {{template "header_body" .}}
-    <h1>Photo Gallery</h1>
+    <h1 align="center">Photo Gallery</h1>
     Status:&emsp;&emsp;&ensp;&nbsp;
     {{if eq .Status ""}}All{{else}}<a href="/gallery">All</a>{{end}}&emsp;
     {{if eq .Status "active"}}Active{{else}}<a href="/gallery?status=active">Active</a>{{end}}&emsp;

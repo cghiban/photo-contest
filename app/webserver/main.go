@@ -144,6 +144,7 @@ func run(log *log.Logger) error {
 	sm.PathPrefix("/tmp/").Handler(http.StripPrefix("/tmp/", http.FileServer(http.Dir("tmp/"))))
 
 	sm.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("var/static/"))))
+	sm.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("assets/"))))
 
 	sm.Handle("/favicon.ico", http.NotFoundHandler())
 

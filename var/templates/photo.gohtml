@@ -3,16 +3,21 @@
     <head>
     {{template "header_head" .}}
     <title>Photo</title>
+    <style>
+    input, textarea {
+        width: 100%;
+    }
+    </style>
     </head>
     <body>
     {{template "header_body" .}}
-    <h1>Entry Form</h1>
-    <h5><b>Use Rights</b></h5>
-    <div class="col-sm-6">
+    <h1 align="center">Entry Form</h1>
+    <h5 class="mt-3" align="center"><b>Use Rights</b></h5>
+    <div class="col-sm-9" style="margin: 0 auto;left: 0;right: 0;position: relative;">
     <p>I certify that each submitted photograph is my own creative property.
     Each submitted photograph may be used in the exhibition and for marketing and promotional purposes by <i>Cold Spring Harbor Laboratory</i>, <i>DNA Learning Center</i>, and <i>DNA Learning Center NYC</i>.
-    This may include use in any publications, printed materials, advertisements, exhibitions, or electronic media.<p>
-    </div>
+    This may include use in any publications, printed materials, advertisements, exhibitions, or electronic media.</p><p>
+    </p></div>
     <form enctype="multipart/form-data" method="POST" action="/entry">
         {{ .csrfField }}
         <div class="mb-3 row">
@@ -20,15 +25,19 @@
                 <label for="signature" class="fw-bold">Digital Signature</label>
             </div>
             <div class="col-sm-9">
-                <input type="text" name="signature" value="{{ .Signature }}" required>
+                <input type="text" name="signature" value="{{ .Signature }}" required="">
             </div>
         </div>
+        
+		<div class="mb-3">
+		    <h5><b>Who is in the photo?</b></h5>
+		</div>
         <div class="mb-3 row">
             <div class="col-sm-3">
                 <label for="sname" class="fw-bold">Subject's Name(s)</label>
             </div>
             <div class="col-sm-9">
-                <input type="text" name="sname" value="{{ html .SubjectName }}" required>
+                <input type="text" name="sname" value="{{ html .SubjectName }}" required="">
             </div>
         </div>
         <div class="mb-3 row">
@@ -36,7 +45,7 @@
                 <label for="sage" class="fw-bold">Subject's Age(s)</label>
             </div>
             <div class="col-sm-9">
-                <input type="text" name="sage" value="{{ html .SubjectAge }}" required>
+                <input type="text" name="sage" value="{{ html .SubjectAge }}" required="">
             </div>
         </div>
         <div class="mb-3 row">
@@ -44,7 +53,7 @@
                 <label for="scountry" class="fw-bold">Subject's Countr(y/ies) of Birth</label>
             </div>
             <div class="col-sm-9">
-                <input type="text" name="scountry" value="{{ html .SubjectCountry }}" required>
+                <input type="text" name="scountry" value="{{ html .SubjectCountry }}" required="">
             </div>
         </div>
         <div class="mb-3 row">
@@ -57,10 +66,10 @@
         </div>
         <div class="mb-3 row">
             <div class="col-sm-3">
-                <label for="location" class="fw-bold">Where in NYC photograph was taken</label>
+                <label for="location" class="fw-bold">Where in NYC was photograph taken?</label>
             </div>
             <div class="col-sm-9">
-                <input type="text" name="location" value="{{ html .Location }}" required>
+                <input type="text" name="location" value="{{ html .Location }}" required="">
             </div>
         </div>
         <div class="mb-3 row">
@@ -69,7 +78,7 @@
                 </label>
             </div>
             <div class="col-sm-9">
-                <textarea name="sbiography" maxlength="255" required>{{ html .SubjectBiography }}</textarea>
+                <textarea name="sbiography" maxlength="500" required="">{{ html .SubjectBiography }}</textarea>
             </div>
         </div>
         <div class="mb-3 row">
@@ -77,7 +86,7 @@
                 <label for="file" class="fw-bold">Upload Digital File</label>
             </div>
             <div class="col-sm-9">
-                <input type="file" accept="image/png,image/jpeg" name="file" required>
+                <input type="file" accept="image/png,image/jpeg" name="file" required="">
             </div>
         </div>
         <div class="mb-3 row">
@@ -85,7 +94,7 @@
                 <label for="release" class="fw-bold">Upload Model Release Form</label>
             </div>
             <div class="col-sm-9">
-                <input type="file" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" name="release" required>
+                <input type="file" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" name="release" required="">
             </div>
         </div>
         <button class="btn btn-primary">Upload Submission</button>

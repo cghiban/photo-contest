@@ -1,9 +1,10 @@
 {{define "header_body"}}
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <div class="container-fluid">
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-          <span class="navbar-toggler-icon"></span>
-        </button>
+      <div class="container-fluid" >
+		  <div><a class="nav-link" href="https://dnalc.cshl.edu"><img src="./assets/logo-cshl-dnalc.svg" style="min-width: 250px; "></a></div>
+        	<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          	<span class="navbar-toggler-icon"></span>
+        	</button>
         <div class="collapse navbar-collapse" id="navbarNav">
           <ul class="navbar-nav">
             <li class="nav-item">
@@ -48,8 +49,9 @@
         </div>
       </div>
     </nav>
-    <div id="content" class="ms-2 mt-2">
+    <div class="ms-2 mt-2" >
+      <div style="margin-left: auto; margin-right: auto; max-width: 1200px; display: block;">
     {{if .Message}}
-    <div id="message" class="alert alert-danger">{{.Message}}</div>
+        <div id="message" class="alert alert-danger">{{.Message}}</div>
     {{end}}
 {{end}}
