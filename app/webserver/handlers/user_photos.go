@@ -123,9 +123,9 @@ func handleModelReleaseUpload(r *http.Request, photoID string) (string, error) {
 	}
 	defer file.Close()
 	modelReleaseTypes := map[string]bool{
-		"application/pdf":    true,
-		"application/msword": true,
-		"application/vnd.openxmlformats-officedocument.wordprocessingml.document": true,
+		"application/pdf": true,
+		"image/jpeg":      true,
+		"image/png":       true,
 	}
 	mimeType := fileInfo.Header["Content-Type"][0]
 	if !modelReleaseTypes[mimeType] {
@@ -134,11 +134,11 @@ func handleModelReleaseUpload(r *http.Request, photoID string) (string, error) {
 
 	// copy all of the contents of our uploaded file into a
 	// new file
-	extension := "docx"
-	if mimeType == "application/pdf" {
-		extension = "pdf"
-	} else if mimeType == "application/msword" {
-		extension = "doc"
+	extension := "pdf"
+	if mimeType == "image/png" {
+		extension = "png"
+	} else if mimeType == "image/jpeg" {
+		extension = "jpg"
 	}
 	new_file, err := os.Create(fmt.Sprintf("tmp/release-%s.%s", photoID, extension))
 	if err != nil {
@@ -225,7 +225,7 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 		formData["SubjectBiography"] = subject_biography
 		formData["Signature"] = signature
 		photoStore := photo.NewStore(s.log, s.db)
-		userPhotos, err := photoStore.QueryByOwnerID(usr.ID)
+		/*userPhotos, err := photoStore.QueryByOwnerID(usr.ID)
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
 			return
@@ -234,12 +234,17 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 			formData["Message"] = "There is a maximum of three submissions per user and you've already submitted three."
 			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 			return
-		}
+		}*/
 		r.ParseMultipartForm(10 << 20)
 		//title := strings.TrimSpace(r.Form.Get("title"))
 		//description := strings.TrimSpace(r.Form.Get("description"))
 		if usr.Name != signature {
 			formData["Message"] = "Digital Signature (" + signature + ") must exactly match the name in your account (" + usr.Name + "). If the name in your account is not a legal name, update your profile."
+			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+			return
+		}
+		if len(subject_biography) < 250 || len(subject_biography) > 500 {
+			formData["Message"] = "Biography must be between 250 and 500 characters."
 			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 			return
 		}

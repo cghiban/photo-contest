@@ -55,8 +55,12 @@
                 <a href="/tmp/release-{{$photo.PhotoId}}.pdf">View PDF</a>
                 {{else if eq $photo.ReleaseMimeType "application/msword"}}
                 <a href="/tmp/release-{{$photo.PhotoId}}.doc">View Word Document</a>
-                {{else}}
+                {{else if eq $photo.ReleaseMimeType "application/vnd.openxmlformats-officedocument.wordprocessingml.document"}}
                 <a href="/tmp/release-{{$photo.PhotoId}}.docx">View Word Document</a>
+                {{else if eq $photo.ReleaseMimeType "image/jpeg"}}
+                <a href="/tmp/release-{{$photo.PhotoId}}.jpg">View Image</a>
+                {{else if eq $photo.ReleaseMimeType "image/png"}}
+                <a href="/tmp/release-{{$photo.PhotoId}}.png">View Image</a>
                 {{end}}
                 </td>
             </tr>
@@ -71,8 +75,9 @@
         }
         document.getElementById(size).className = "active";
         for (const img of document.getElementsByTagName("img")) {
-            img.src = img.src.replace(/-[^-]*$/, ("-" + size + ".jpg"));
-            setTimeout(function() { img.parentNode.nextElementSibling.style.maxWidth = "" + img.clientWidth + "px"}, 10);
+            if (img.src.indexOf("/tmp/") != -1) {
+                img.src = img.src.replace(/-[^-]*$/, ("-" + size + ".jpg"));
+            }
         }
     }
     </script>

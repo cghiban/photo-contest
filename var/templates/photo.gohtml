@@ -78,7 +78,7 @@
                 </label>
             </div>
             <div class="col-sm-9">
-                <textarea name="sbiography" maxlength="500" required="">{{ html .SubjectBiography }}</textarea>
+                <textarea name="sbiography" minlength="250" maxlength="500" required="">{{ html .SubjectBiography }}</textarea>
             </div>
         </div>
         <div class="mb-3 row">
@@ -94,7 +94,7 @@
                 <label for="release" class="fw-bold">Upload Model Release Form</label>
             </div>
             <div class="col-sm-9">
-                <input type="file" accept="application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" name="release" required="">
+                <input type="file" accept="application/pdf,image/jpeg,image/png" name="release" required="">
             </div>
         </div>
         <button class="btn btn-primary">Upload Submission</button>
