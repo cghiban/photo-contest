@@ -189,6 +189,35 @@ func (s Store) UpdateEntry(uce UpdateContestEntry) (ContestEntry, error) {
 	return ce, nil
 }
 
+func (s Store) FullyUpdateEntry(fuce FullyUpdateContestEntry) (ContestEntry, error) {
+	if err := validate.Check(fuce); err != nil {
+		return ContestEntry{}, errors.Wrap(err, "validating data")
+	}
+
+	ce := ContestEntry{
+		EntryID:          fuce.EntryID,
+		SubjectName:      fuce.SubjectName,
+		SubjectAge:       fuce.SubjectAge,
+		SubjectCountry:   fuce.SubjectCountry,
+		SubjectOrigin:    fuce.SubjectOrigin,
+		SubjectBiography: fuce.SubjectBiography,
+		Location:         fuce.Location,
+		UpdatedBy:        fuce.UpdatedBy,
+	}
+
+	const query = `
+	UPDATE contest_entries SET sname = :sname, sage = :sage, scountry = :scountry, sorigin = :sorigin, sbiography = :sbiography, location = :location, updated_by = :updated_by WHERE entry_id = :entry_id`
+
+	s.log.Printf("%s: %s", "contest.FullyUpdateEntry", database.Log(query, ce))
+
+	_, err := s.db.NamedExec(query, ce)
+	if err != nil {
+		return ContestEntry{}, errors.Wrap(err, "fully updating contest entry")
+	}
+
+	return ce, nil
+}
+
 // QueryContestEntrys - return a list of entries
 func (s Store) QueryContestEntries(contestID int) ([]ContestEntry, error) {
 

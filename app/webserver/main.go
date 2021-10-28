@@ -141,6 +141,7 @@ func run(log *log.Logger) error {
 	userRouter.Handle("/submissions", web.WrapMiddleware(service.UserPhotos, authMw.UserViaSession, authMw.RequireUser))
 	userRouter.Handle("/gallery", web.WrapMiddleware(service.ContestPhotos, authMw.UserViaSession, authMw.RequireUser, authMw.RequireAdmin))
 	userRouter.Handle("/update_entry_status", web.WrapMiddleware(service.ContestEntryUpdateStatus, authMw.UserViaSession, authMw.RequireUser, authMw.RequireAdmin))
+	userRouter.Handle("/withdraw_entry", web.WrapMiddleware(service.UserWithdrawPhoto, authMw.UserViaSession, authMw.RequireUser))
 	sm.PathPrefix("/tmp/").Handler(http.StripPrefix("/tmp/", http.FileServer(http.Dir("tmp/"))))
 
 	sm.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("var/static/"))))

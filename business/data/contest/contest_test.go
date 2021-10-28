@@ -147,6 +147,22 @@ func TestPhoto(t *testing.T) {
 				t.Fatalf("\t%s\tTest %d:\tShould get back the same contest entries. Diff:\n%s", tests.Failed, testID, diff)
 			}
 			t.Logf("\t%s\tTest %d:\tShould get back the same contest entries.", tests.Success, testID)
+			//--------------------------------------------------------------------------------
+			fuce := contest.FullyUpdateContestEntry{
+				EntryID:          rce.EntryID,
+				SubjectName:      "Cornel Ghiban",
+				SubjectAge:       "40",
+				SubjectCountry:   "Romania",
+				SubjectOrigin:    "",
+				Location:         "Regeneron DNALC",
+				SubjectBiography: "1111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
+				UpdatedBy:        "Gopher Tester",
+			}
+			_, err = contestStore.FullyUpdateEntry(fuce)
+			if err != nil {
+				t.Fatalf("\t%s\tTest %d:\tShould be able to fully update contest entry with id: %s.", tests.Failed, testID, err)
+			}
+			t.Logf("\t%s\tTest %d:\tShould be able to fully update contest entry with ID.", tests.Success, testID)
 			//-------------------------------------------------------------------------------
 			uce := contest.UpdateContestEntry{
 				EntryID: rce.EntryID,
@@ -157,7 +173,6 @@ func TestPhoto(t *testing.T) {
 				t.Fatalf("\t%s\tTest %d:\tShould be able to update contest entry with id: %s.", tests.Failed, testID, err)
 			}
 			t.Logf("\t%s\tTest %d:\tShould be able to update contest entry with ID.", tests.Success, testID)
-
 		}
 		testID++
 		t.Logf("\tTest %d:\tWhen handling contest entry votes.", testID)

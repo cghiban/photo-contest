@@ -60,10 +60,22 @@ type NewContestEntry struct {
 	ReleaseMimeType  string `json:"release_mime_type" validate:"required"`
 }
 
-//UpdateContestEntry type for changing the status of a contest
+//UpdateContestEntry type for changing the status of a contest entry
 type UpdateContestEntry struct {
 	EntryID int    `json:"entry_id" validate:"required"`
 	Status  string `json:"status" validate:"required,oneof=active eliminated withdrawn flagged semifinal"`
+}
+
+//FullyUpdateContestEntry type for updating a contest entry
+type FullyUpdateContestEntry struct {
+	EntryID          int    `json:"entry_id" validate:"required"`
+	UpdatedBy        string `json:"updated_by" validate:"required"`
+	SubjectName      string `json:"sname" validate:"required"`
+	SubjectAge       string `json:"sage" validate:"required"`
+	SubjectCountry   string `json:"scountry" validate:"required"`
+	SubjectOrigin    string `json:"sorigin" validate:"omitempty"`
+	Location         string `json:"location" validate:"required"`
+	SubjectBiography string `json:"sbiography" validate:"required"`
 }
 
 //ContestPhotoEntry - contest entry with photos and votes totals/scores

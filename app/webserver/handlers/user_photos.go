@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"strings"
@@ -189,9 +190,15 @@ func makeThumbnail(id string, s string, pixels uint16, l *log.Logger) error {
 func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 	// on GET display the form
 	// on POST handle file upload
+	photoStore := photo.NewStore(s.log, s.db)
+	contestStore := contest.NewStore(s.log, s.db)
 	usr := r.Context().Value("user").(*user.AuthUser)
+	ids, ok := r.URL.Query()["id"]
+	id := ""
+	if ok && len(ids[0]) > 0 {
+		id = ids[0]
+	}
 	contestID := 1
-	realName := usr.Name
 	formData := map[string]interface{}{
 		csrf.TemplateTag:   csrf.TemplateField(r),
 		"User":             usr,
@@ -202,9 +209,33 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 		"Location":         "",
 		"SubjectBiography": "",
 		"Signature":        "",
-		"RealName":         realName,
+		"RealName":         usr.Name,
+		"Edit":             0,
+		"ID":               id,
 	}
-
+	var photoTemplate photo.Photo
+	if id != "" {
+		photo, err := photoStore.QueryByID(id)
+		if err == nil {
+			if photo.OwnerID == usr.ID {
+				photoTemplate = photo
+			}
+		}
+	}
+	var contestEntry contest.ContestEntry
+	if photoTemplate.ID != "" {
+		contestEntry, _ = contestStore.QueryContestEntryByPhotoId(photoTemplate.ID)
+	}
+	if contestEntry.Status == "active" {
+		formData["SubjectName"] = contestEntry.SubjectName
+		formData["SubjectAge"] = contestEntry.SubjectAge
+		formData["SubjectCountry"] = contestEntry.SubjectCountry
+		formData["SubjectOrigin"] = contestEntry.SubjectOrigin
+		formData["Location"] = contestEntry.Location
+		formData["SubjectBiography"] = contestEntry.SubjectBiography
+		formData["Signature"] = usr.Name
+		formData["Edit"] = 1
+	}
 	if r.Method == "GET" {
 		rw.Header().Add("Cache-Control", "no-cache")
 		s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
@@ -226,29 +257,6 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 		formData["Location"] = location
 		formData["SubjectBiography"] = subject_biography
 		formData["Signature"] = signature
-		photoStore := photo.NewStore(s.log, s.db)
-		contestStore := contest.NewStore(s.log, s.db)
-		userPhotos, err := photoStore.QueryByOwnerID(usr.ID)
-		if err != nil {
-			http.Error(rw, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		userSubmittedPhotos := 0
-		for _, photo := range userPhotos {
-			ce, err := contestStore.QueryContestEntryByPhotoId(photo.ID)
-			if err != nil {
-				userSubmittedPhotos = userSubmittedPhotos + 1
-				continue
-			}
-			if ce.Status != "withdrawn" {
-				userSubmittedPhotos = userSubmittedPhotos + 1
-			}
-		}
-		if userSubmittedPhotos >= 3 {
-			formData["Message"] = "There is a maximum of three submissions per user and you've already submitted three."
-			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
-			return
-		}
 		r.ParseMultipartForm(10 << 20)
 		//title := strings.TrimSpace(r.Form.Get("title"))
 		//description := strings.TrimSpace(r.Form.Get("description"))
@@ -262,84 +270,94 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 			return
 		}
-		np := photo.NewPhoto{
-			OwnerID:     usr.ID,
-			Title:       title,
-			Description: description,
-			UpdatedBy:   usr.Name,
-		}
-		pht, err := photoStore.Create(np)
-		if err != nil {
-			formData["Message"] = "Could not upload photo"
-			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
-			return
-		}
-		mimeType, err := handleModelReleaseUpload(r, pht.ID)
-		if err != nil {
-			formData["Message"] = "Could not upload model release form"
-			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
-			return
-		}
-		nce := contest.NewContestEntry{
-			ContestID:        contestID,
-			PhotoID:          pht.ID,
-			Status:           "active",
-			UpdatedBy:        usr.Name,
-			SubjectName:      subject_name,
-			SubjectAge:       subject_age,
-			SubjectCountry:   subject_country,
-			SubjectOrigin:    subject_origin,
-			Location:         location,
-			ReleaseMimeType:  mimeType,
-			SubjectBiography: subject_biography,
-		}
-		_, err = contestStore.CreateContestEntry(nce)
-		if err != nil {
-			err = photoStore.Delete(pht.ID)
-			if err != nil {
-				fmt.Println("Could not delete: " + err.Error())
+		if formData["Edit"] == 1 {
+			fuce := contest.FullyUpdateContestEntry{
+				EntryID:          contestEntry.EntryID,
+				UpdatedBy:        usr.Name,
+				SubjectName:      subject_name,
+				SubjectAge:       subject_age,
+				SubjectCountry:   subject_country,
+				SubjectOrigin:    subject_origin,
+				Location:         location,
+				SubjectBiography: subject_biography,
 			}
-			formData["Message"] = "Could not create contest entry"
-			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
-			return
-		}
-		npf := photo.NewPhotoFile{
-			PhotoID:   pht.ID,
-			FilePath:  fmt.Sprintf("/tmp/photo-%s-original.jpg", pht.ID),
-			Size:      "original",
-			UpdatedBy: usr.Name,
-		}
-		_, err = photoStore.CreateFile(npf)
-		if err != nil {
-			err = photoStore.Delete(pht.ID)
+			_, err := contestStore.FullyUpdateEntry(fuce)
 			if err != nil {
-				fmt.Println("Could not delete: " + err.Error())
+				formData["Message"] = "Unable to update entry."
+				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+				return
 			}
-			formData["Message"] = "Could not upload photo"
-			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
-			return
-		}
-		err = handleFileUpload(r, pht.ID)
-		if err != nil {
-			err = photoStore.Delete(pht.ID)
+			formData["Message"] = "Updated the contest entry"
+		} else {
+			userPhotos, err := photoStore.QueryByOwnerID(usr.ID)
 			if err != nil {
-				fmt.Println("Could not delete: " + err.Error())
-			} else {
-				fmt.Println("Deleted?")
+				http.Error(rw, err.Error(), http.StatusInternalServerError)
+				return
 			}
-			formData["Message"] = "Could not upload photo"
-			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
-			return
-		}
-		photoSizes := []string{"thumb", "small", "medium", "large"}
-		for _, size := range photoSizes {
+			userSubmittedPhotos := 0
+			for _, photo := range userPhotos {
+				ce, err := contestStore.QueryContestEntryByPhotoId(photo.ID)
+				if err != nil {
+					userSubmittedPhotos = userSubmittedPhotos + 1
+					continue
+				}
+				if ce.Status != "withdrawn" {
+					userSubmittedPhotos = userSubmittedPhotos + 1
+				}
+			}
+			if userSubmittedPhotos >= 3 {
+				formData["Message"] = "There is a maximum of three submissions per user and you've already submitted three."
+				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+				return
+			}
+			np := photo.NewPhoto{
+				OwnerID:     usr.ID,
+				Title:       title,
+				Description: description,
+				UpdatedBy:   usr.Name,
+			}
+			pht, err := photoStore.Create(np)
+			if err != nil {
+				formData["Message"] = "Could not upload photo"
+				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+				return
+			}
+			mimeType, err := handleModelReleaseUpload(r, pht.ID)
+			if err != nil {
+				formData["Message"] = "Could not upload model release form"
+				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+				return
+			}
+			nce := contest.NewContestEntry{
+				ContestID:        contestID,
+				PhotoID:          pht.ID,
+				Status:           "active",
+				UpdatedBy:        usr.Name,
+				SubjectName:      subject_name,
+				SubjectAge:       subject_age,
+				SubjectCountry:   subject_country,
+				SubjectOrigin:    subject_origin,
+				Location:         location,
+				ReleaseMimeType:  mimeType,
+				SubjectBiography: subject_biography,
+			}
+			_, err = contestStore.CreateContestEntry(nce)
+			if err != nil {
+				err = photoStore.Delete(pht.ID)
+				if err != nil {
+					fmt.Println("Could not delete: " + err.Error())
+				}
+				formData["Message"] = "Could not create contest entry"
+				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+				return
+			}
 			npf := photo.NewPhotoFile{
 				PhotoID:   pht.ID,
-				FilePath:  fmt.Sprintf("/tmp/photo-%s-%s.jpg", pht.ID, size),
-				Size:      size,
+				FilePath:  fmt.Sprintf("/tmp/photo-%s-original.jpg", pht.ID),
+				Size:      "original",
 				UpdatedBy: usr.Name,
 			}
-			phf, err := photoStore.CreateFile(npf)
+			_, err = photoStore.CreateFile(npf)
 			if err != nil {
 				err = photoStore.Delete(pht.ID)
 				if err != nil {
@@ -349,18 +367,80 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 				return
 			}
-			err = makeThumbnail(pht.ID, size, phf.Width, s.log)
+			err = handleFileUpload(r, pht.ID)
 			if err != nil {
 				err = photoStore.Delete(pht.ID)
 				if err != nil {
 					fmt.Println("Could not delete: " + err.Error())
+				} else {
+					fmt.Println("Deleted?")
 				}
 				formData["Message"] = "Could not upload photo"
 				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 				return
 			}
+			photoSizes := []string{"thumb", "small", "medium", "large"}
+			for _, size := range photoSizes {
+				npf := photo.NewPhotoFile{
+					PhotoID:   pht.ID,
+					FilePath:  fmt.Sprintf("/tmp/photo-%s-%s.jpg", pht.ID, size),
+					Size:      size,
+					UpdatedBy: usr.Name,
+				}
+				phf, err := photoStore.CreateFile(npf)
+				if err != nil {
+					err = photoStore.Delete(pht.ID)
+					if err != nil {
+						fmt.Println("Could not delete: " + err.Error())
+					}
+					formData["Message"] = "Could not upload photo"
+					s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+					return
+				}
+				err = makeThumbnail(pht.ID, size, phf.Width, s.log)
+				if err != nil {
+					err = photoStore.Delete(pht.ID)
+					if err != nil {
+						fmt.Println("Could not delete: " + err.Error())
+					}
+					formData["Message"] = "Could not upload photo"
+					s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+					return
+				}
+			}
+			formData["Message"] = "Uploaded the image"
 		}
-		formData["Message"] = "Uploaded the image"
 		s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 	}
+}
+
+func (s *Service) UserWithdrawPhoto(rw http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		rw.WriteHeader(http.StatusForbidden)
+		rw.Header().Set("Content-Type", "application/json")
+		return
+	}
+	jsonEnc := json.NewEncoder(rw)
+	response := map[string]string{
+		"status":  "error",
+		"message": "",
+	}
+	contestStore := contest.NewStore(s.log, s.db)
+	photoId := r.Form.Get("photoId")
+	entry, err := contestStore.QueryContestEntryByPhotoId(photoId)
+	if err != nil {
+		response["message"] = err.Error()
+		jsonEnc.Encode(response)
+		return
+	}
+	uce := contest.UpdateContestEntry{
+		EntryID: entry.EntryID,
+		Status:  "withdrawn",
+	}
+	_, err = contestStore.UpdateEntry(uce)
+	if err != nil {
+		response["message"] = err.Error()
+	}
+	response["status"] = "success"
+	jsonEnc.Encode(response)
 }
