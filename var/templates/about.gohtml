@@ -6,16 +6,49 @@
     </head>
     <body>
     {{template "header_body" .}}
-    <h1 align="center">About</h1>
+  <div style="margin-left: auto; margin-right: auto; max-width: 1200px; display: block;">
     <h5 align="center"><b><i>All the World in New York</i> Photography Contest</b></h5>
-    <div>
-        <ul style="color: red;">
-            <li>Deadline for Submission: midnight, December 31, 2021.</li>
-            <li>Use one form to submit a maximum of three entries. You can save your work between sessions.</li>
-            <li>Each entry must include a signed Model Release Form.</li>
-            <li>Subject biography is important and will be considered by judges</li>
-        </ul>
+    <h2 class="mt-3" align="center">Guidelines</h1>
+    <div class="col-sm-9 mt-3" style="margin-left: auto; margin-right: auto; max-width: 1200px; display: block;">
+      <p>Please read the following rules before submitting your photos. By entering this competition, you understand and agree to abide by the following:</p>
+      <ol>
+        <li>The competition is open to photographers of any experience level, age 18 and up.</li>
+        <li>There is limit of <strong>three entries per artist</strong>.</li>
+        <li>There is <strong>no entry fee</strong>.</li>
+        <li>Photographers must certify that each submitted photograph is their own creative property. Copyright to the photographs remain with the photographer.</li>
+        <li>By entering this competition, the photographer grants that each submitted photograph and related text may be used in the exhibition and for marketing and promotional purposes by <em>Cold Spring Harbor Laboratory (CSHL)</em>, <em>DNA Learning Center (DNALC)</em>, and <em>DNA Learning Center NYC (DNALC NYC)</em> at City Tech. This may include use in publications, printed materials, advertisements, exhibitions, signage, and electronic media. Photographer's name will be included with his/her/their respective images(s).</li>
+        <li>Each submitted photograph must be in <strong>digital format with the following specifications</strong>:</li>
+          <ul>
+            <li>File format: JPG that is a maximum 2000 pixels on longest side at 72 DPI, 10 MB or less. </li>
+            <li>Image file names: The files must be titled with the photographer's last name and a sequential image number: LastName-FirstInitial-Image#.jpg (Example: Jones-S-Image1.jpg).</li>
+            <li>No information identifying the artist (name, stamp, logo, etc.) can appear in the image.</li>
+          </ul>
+        <li>Each photograph <strong>must include an accompanying biography of the individual(s) depicted in the photograph</strong> that tells the subject's story or reflects their heritage from another part of the world. This brief text should be a minimum of 250 characters including spaces, and a maximum of 500 characters (approximately 50–100 words).</li>
+        <li>Each individual included in an image must sign a <a href="./assets/All-the-World-in-NY-Photo-Release.pdf">Photo Release Form</a>. If the subject is under 18, their parent/guardian must also sign the form. The completed form is uploaded with the image submission.</li>
+        <li>Digital image manipulation (e.g. Photoshop) is allowed.</li>
+		<li>Photos that include nudity or inappropriate, offensive, violent, or unlawful content will not be considered.</li>
+		<li>Photographers whose images are selected for exhibition will be notified by email.</li>
+        <li>Photographs selected for exhibition must be provided as a digital file at the highest resolution available; ideally, at least 3000 pixels on the longest side at 300 dpi. The <em>CSHL DNALC</em> will arrange for printing and framing/mounting. </li>
+        <li><em>All the  World in New York</em> is a permanent exhibition with no set closing date.</li>
+        <li>This call for entries is competitive, and there  is no guarantee of inclusion in the exhibition.</li>
+        <li>Awards will be issued following receipt of the high-resolution image file. </li>
+        <li>Photographers will be invited to any opening  events (TBD).</li>
+        <li>Schedule:</li>
+          <ul>
+            <li>December 31, 2021: <strong>Submission deadline</strong>; entries due by 11:59 pm EST</li>
+            <li>January 28, 2022: Jury review completed </li>
+            <li>February 4, 2022: Photographers of selected images notified </li>
+            <li>February 11, 2022: High-resolution image file due (on or before)</li>
+          </ul>
+      </ol>
     </div>
+    {{if not .User}}
+    <div align="center">
+      <p><a class="btn btn-primary btn-lg" href="./register" role="button">Register</a> or <a class="btn btn-primary btn-lg" href="./login" role="button" >Log in</a>
+      </p>
+    </div>
+    {{end}}
+  </div>
     {{template "footer" .}}
     </body>
 </html>

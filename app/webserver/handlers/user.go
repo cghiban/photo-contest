@@ -52,8 +52,8 @@ func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
 			s.ExecuteTemplateWithBase(rw, formData, "register.gohtml")
 			return
 		}
-		if age < 0 || age > 255 {
-			formData["Message"] = "Age must be a positive number."
+		if age < 18 || age > 255 {
+			formData["Message"] = "You must be 18 or older to use this site."
 			s.ExecuteTemplateWithBase(rw, formData, "register.gohtml")
 			return
 		}
@@ -254,8 +254,8 @@ func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
 			s.ExecuteTemplateWithBase(rw, formData, "profile.gohtml")
 			return
 		}
-		if age < 0 || age > 255 {
-			formData["Message"] = "Age must be a positive number."
+		if age < 18 || age > 255 {
+			formData["Message"] = "You must be 18 or older to use this site."
 			s.ExecuteTemplateWithBase(rw, formData, "profile.gohtml")
 			return
 		}

@@ -6,63 +6,65 @@
     </head>
     <body>
     {{template "header_body" .}}
-    <h1 align="center">Sign Up</h1>
-    <form method="POST" action="/register">
-		{{ .csrfField }}
-        <div class="mb-3 row">
-            <div class="col-sm-1">
+    <div class="p-5" style="margin-left: auto; margin-right: auto; max-width: 800px; display: block; border: 1px solid #000; padding">
+    <h1 align="center">Register</h1>
+    <h4 align="center">for the <em>All the World in NY</em> Photography Competition</h4>
+    <form method="POST" action="./register">
+	{{ .csrfField }}
+        <div class="mb-3 mt-5 row">
+            <div class="col-sm-3">
                 <label for="name" class="fw-bold">Name</label>
             </div>
-            <div class="col-sm-11">
-                <input type="text" name="name" required>
+            <div class="col-sm-9">
+                <input type="text" name="name" required="">
             </div>
         </div>
         <div class="mb-3 row">
-            <div class="col-sm-1">
+            <div class="col-sm-3">
                 <label for="email" class="fw-bold">Email Address</label>
             </div>
-            <div class="col-sm-11">
-                <input type="email" name="email" required>
+            <div class="col-sm-9">
+                <input type="email" name="email" required="">
             </div>
         </div>
         <div class="mb-3 row">
-            <div class="col-sm-1">
+            <div class="col-sm-3">
                 <label for="password" class="fw-bold">Password</label>
             </div>
-            <div class="col-sm-11">
-                <input type="password" name="password" required>
+            <div class="col-sm-9">
+                <input type="password" name="password" required="">
             </div>
         </div>
         <div class="mb-3 row">
-            <div class="col-sm-1">
+            <div class="col-sm-3">
                 <label for="password_confirm" class="fw-bold">Confirm Password</label>
             </div>
-            <div class="col-sm-11">
-                <input type="password" name="password_confirm" required>
+            <div class="col-sm-9">
+                <input type="password" name="password_confirm" required="">
             </div>
         </div>
         <div class="mb-3 row">
-            <div class="col-sm-1">
+            <div class="col-sm-3">
                 <label for="street" class="fw-bold">Street</label>
             </div>
-            <div class="col-sm-11">
-                <input type="text" name="street" required>
+            <div class="col-sm-9">
+                <input type="text" name="street" required="">
             </div>
         </div>
         <div class="mb-3 row">
-            <div class="col-sm-1">
+            <div class="col-sm-3">
                 <label for="city" class="fw-bold">City</label>
             </div>
-            <div class="col-sm-11">
-                <input type="text" name="city" required>
+            <div class="col-sm-9">
+                <input type="text" name="city" required="">
             </div>
         </div>
         <div class="mb-3 row">
-            <div class="col-sm-1">
+            <div class="col-sm-3">
                 <label for="state" class="fw-bold">State</label>
             </div>
-            <div class="col-sm-11" style="max-width: 247px;">
-                <select class="form-select" name="state" required>
+            <div class="col-sm-9" style="max-width: 247px;">
+                <select class="form-select" name="state" required="">
                     {{$states := .states}}
                     <option value="">--Select a State--</option>
                     {{range $key := .state_keys}}
@@ -72,34 +74,34 @@
             </div>
         </div>
         <div class="mb-3 row">
-            <div class="col-sm-1">
+            <div class="col-sm-3">
                 <label for="zip" class="fw-bold">Zip Code</label>
             </div>
-            <div class="col-sm-11">
-                <input type="text" name="zip" required>
+            <div class="col-sm-9">
+                <input type="text" name="zip" required="">
             </div>
         </div>
         <div class="mb-3 row">
-            <div class="col-sm-1">
+            <div class="col-sm-3">
                 <label for="phone" class="fw-bold">Phone Number</label>
             </div>
-            <div class="col-sm-11">
-                <input type="tel" name="phone" required>
+            <div class="col-sm-9">
+                <input type="tel" name="phone" required="">
             </div>
         </div>
         <div class="mb-3 row">
-            <div class="col-sm-1">
+            <div class="col-sm-3">
                 <label for="age" class="fw-bold">Age</label>
             </div>
-            <div class="col-sm-11">
-                <input type="number" min="0" name="age" required>
+            <div class="col-sm-9">
+                <input type="number" min="18" name="age" required>
             </div>
         </div>
         <div class="mb-3 row">
-            <div class="col-sm-1">
+            <div class="col-sm-3">
                 <label for="gender" class="fw-bold">Gender</label>
             </div>
-            <div class="col-sm-11">
+            <div class="col-sm-9">
                 {{$genders := .genders}}
                 {{range $key := .gender_keys}}
                 <div class="form-check form-check-inline">
@@ -112,10 +114,10 @@
         <div class="mb-3">
             <label for="ethnicity" class="fw-bold">Ethnicity or race (Select all that apply)</label>
             <div class="row">
-                <div class="col-sm-1">
+                <div class="col-sm-3">
                     &nbsp;
                 </div>
-                <div class="col-sm-11">
+                <div class="col-sm-9">
                     {{$ethnicities := .ethnicities}}
                     {{range $key := .ethnicity_keys}}
                     <div class="form-check">
@@ -127,17 +129,18 @@
             </div>
         </div>
         <div id="other_ethnicity_div" class="d-none mb-3 row">
-            <div class="col-sm-1">
+            <div class="col-sm-3">
                 <label for="other_ethnicity" class="fw-bold">Other Ethnicity</label>
             </div>
-            <div class="col-sm-11">
+            <div class="col-sm-9">
                 <input type="text" id="other_ethnicity" name="other_ethnicity">
             </div>
         </div>
         <button type="submit" class="btn btn-primary">Submit</button>
     </form>
 
-    <div>Already have an account? <a href="/login">Login</a>.</div>
+    <div>Already have an account? <a href="./login">Login</a>.</div>
+    </div>
     {{template "footer" .}}
     <script>
         window.addEventListener('DOMContentLoaded', function() {

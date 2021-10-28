@@ -191,6 +191,7 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 	// on POST handle file upload
 	usr := r.Context().Value("user").(*user.AuthUser)
 	contestID := 1
+	realName := usr.Name
 	formData := map[string]interface{}{
 		csrf.TemplateTag:   csrf.TemplateField(r),
 		"User":             usr,
@@ -201,6 +202,7 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 		"Location":         "",
 		"SubjectBiography": "",
 		"Signature":        "",
+		"RealName":         realName,
 	}
 
 	if r.Method == "GET" {
@@ -225,16 +227,28 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 		formData["SubjectBiography"] = subject_biography
 		formData["Signature"] = signature
 		photoStore := photo.NewStore(s.log, s.db)
-		/*userPhotos, err := photoStore.QueryByOwnerID(usr.ID)
+		contestStore := contest.NewStore(s.log, s.db)
+		userPhotos, err := photoStore.QueryByOwnerID(usr.ID)
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
 			return
 		}
-		if len(userPhotos) >= 3 {
+		userSubmittedPhotos := 0
+		for _, photo := range userPhotos {
+			ce, err := contestStore.QueryContestEntryByPhotoId(photo.ID)
+			if err != nil {
+				userSubmittedPhotos = userSubmittedPhotos + 1
+				continue
+			}
+			if ce.Status != "withdrawn" {
+				userSubmittedPhotos = userSubmittedPhotos + 1
+			}
+		}
+		if userSubmittedPhotos >= 3 {
 			formData["Message"] = "There is a maximum of three submissions per user and you've already submitted three."
 			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 			return
-		}*/
+		}
 		r.ParseMultipartForm(10 << 20)
 		//title := strings.TrimSpace(r.Form.Get("title"))
 		//description := strings.TrimSpace(r.Form.Get("description"))
@@ -248,7 +262,6 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 			s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 			return
 		}
-		contestStore := contest.NewStore(s.log, s.db)
 		np := photo.NewPhoto{
 			OwnerID:     usr.ID,
 			Title:       title,

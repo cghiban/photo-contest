@@ -11,14 +11,15 @@
     </head>
     <body>
     {{template "header_body" .}}
+    <div class="p-5" style="margin-left: auto; margin-right: auto; max-width: 1200px; display: block; border: 1px solid #000; padding">
     <h1 align="center">Entry Form</h1>
-    <h5 class="mt-3" align="center"><b>Use Rights</b></h5>
-    <div class="col-sm-9" style="margin: 0 auto;left: 0;right: 0;position: relative;">
+    <h5 class="mt-3"><b>Use Rights</b></h5>
+    <div class="col-sm-10">
     <p>I certify that each submitted photograph is my own creative property.
     Each submitted photograph may be used in the exhibition and for marketing and promotional purposes by <i>Cold Spring Harbor Laboratory</i>, <i>DNA Learning Center</i>, and <i>DNA Learning Center NYC</i>.
-    This may include use in any publications, printed materials, advertisements, exhibitions, or electronic media.</p><p>
+    This may include use in any publications, printed materials, advertisements, exhibitions, and electronic media.
     </p></div>
-    <form enctype="multipart/form-data" method="POST" action="/entry">
+    <form enctype="multipart/form-data" method="POST" action="./entry">
         {{ .csrfField }}
         <div class="mb-3 row">
             <div class="col-sm-3">
@@ -28,16 +29,17 @@
                 <input type="text" name="signature" value="{{ .Signature }}" required="">
             </div>
         </div>
-        
-		<div class="mb-3">
-		    <h5><b>Who is in the photo?</b></h5>
-		</div>
+        <div class="mb-3 mt-5 row" style="border-top: 1px solid #000;">
+        <div class="mb-3 mt-3">
+	    <h5><b>Who is in the photo?</b></h5>
+	</div>
         <div class="mb-3 row">
             <div class="col-sm-3">
                 <label for="sname" class="fw-bold">Subject's Name(s)</label>
             </div>
             <div class="col-sm-9">
                 <input type="text" name="sname" value="{{ html .SubjectName }}" required="">
+                <p><small>List left to right and separate by comma if multiple people are included in the image.</small></p>
             </div>
         </div>
         <div class="mb-3 row">
@@ -46,6 +48,7 @@
             </div>
             <div class="col-sm-9">
                 <input type="text" name="sage" value="{{ html .SubjectAge }}" required="">
+                <p><small>List left to right and separate by comma if multiple people are included in the image.</small></p>
             </div>
         </div>
         <div class="mb-3 row">
@@ -54,6 +57,7 @@
             </div>
             <div class="col-sm-9">
                 <input type="text" name="scountry" value="{{ html .SubjectCountry }}" required="">
+                <p><small>List left to right and separate by comma if multiple people are included in the image.</small></p>
             </div>
         </div>
         <div class="mb-3 row">
@@ -62,6 +66,7 @@
             </div>
             <div class="col-sm-9">
                 <input type="text" name="sorigin" value="{{ html .SubjectOrigin }}">
+                <p><small>List left to right and separate by comma if multiple people are included in the image</small></p>
             </div>
         </div>
         <div class="mb-3 row">
@@ -76,6 +81,7 @@
             <div class="col-sm-3">
                 <label for="sbiography" class="fw-bold">Descriptive Biography of Subject(s)
                 </label>
+                <p><small>Characters with spaces: 250 minimum, 500 maximum</small></p>
             </div>
             <div class="col-sm-9">
                 <textarea name="sbiography" minlength="250" maxlength="500" required="">{{ html .SubjectBiography }}</textarea>
@@ -84,21 +90,26 @@
         <div class="mb-3 row">
             <div class="col-sm-3">
                 <label for="file" class="fw-bold">Upload Digital File</label>
-            </div>
+			</div>
             <div class="col-sm-9">
                 <input type="file" accept="image/png,image/jpeg" name="file" required="">
+				<p><small>2000 pixels on longest side at 72 DPI, 10 MB or less, file name Lastname-FirstInitial-Image#.jpg</small></p>
             </div>
         </div>
         <div class="mb-3 row">
             <div class="col-sm-3">
-                <label for="release" class="fw-bold">Upload Model Release Form</label>
+                <label for="release" class="fw-bold">Upload Photo Release Form</label>
             </div>
             <div class="col-sm-9">
                 <input type="file" accept="application/pdf,image/jpeg,image/png" name="release" required="">
+				<p><small>PDF, jpg, and png files allowed.</small></p>
             </div>
         </div>
-        <button class="btn btn-primary">Upload Submission</button>
+        <div align="center">
+          <button class="btn btn-primary">Submit Entry</button>
+        </div>
     </form>
+    </div>
     {{template "footer" .}}
     </body>
 </html>

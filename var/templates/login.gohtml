@@ -6,28 +6,34 @@
     </head>
     <body>
     {{template "header_body" .}}
+    <div class="p-5" style="margin-left: auto; margin-right: auto; max-width: 600px; display: block; border: 1px solid #000; padding">
     <h1 align="center">Login</h1>
-    <form method="POST" action="/login">
+    <h4 align="center">to submit photos to the <em>All the World in NY</em> Photography Competition</h4>
+    <form method="POST" action="./login">
         {{ .csrfField }}
-        <div class="mb-3 row">
-            <div class="col-sm-1">
+        <div class="mb-3 mt-5 row">
+            <div class="col-sm-4">
                 <label for="email" class="fw-bold">Email Address</label>
             </div>
-            <div class="col-sm-11">
-                <input type="email" name="email" required>
+            <div class="col-sm-8">
+                <input type="email" name="email" required="">
             </div>
         </div>
         <div class="mb-3 row">
-            <div class="col-sm-1">
+            <div class="col-sm-4">
                 <label for="password" class="fw-bold">Password</label>
             </div>
-            <div class="col-sm-11">
-                <input type="password" name="password" required>
+            <div class="col-sm-8">
+                <input type="password" name="password" required="">
             </div>
         </div>
-        <button class="btn btn-primary">Submit</button>
+        <div align="center">
+          <button class="btn btn-primary">Submit</button>
+        </div>
     </form>
-    <div>Don't have an account? <a href="/register">Register</a> to submit photos.</div>
+    <div class="mt-3">Forgot your password? <a href="./forgotpass">Reset Password</a></div>
+    <div class="mt-3">Don't have an account? <a href="./register">Register</a> to submit photos.</div>
+    </div>
     {{template "footer" .}}
     </body>
 </html>
