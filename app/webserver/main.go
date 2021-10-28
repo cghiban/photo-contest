@@ -121,7 +121,7 @@ func run(log *log.Logger) error {
 	sm := mux.NewRouter()
 	sm.NotFoundHandler = web.WrapMiddleware(service.NotFoundHandler, authMw.UserViaSession)
 	sm.Handle("/", web.WrapMiddleware(service.Index, authMw.UserViaSession))
-	sm.Handle("/about", web.WrapMiddleware(service.About, authMw.UserViaSession))
+	sm.Handle("/guidelines", web.WrapMiddleware(service.About, authMw.UserViaSession))
 
 	sm.Handle("/settings", web.WrapMiddleware(service.Settings, authMw.UserViaSession, authMw.RequireUser))
 	//sm.Handle("/updategroup/{id:[0-9]+}", web.WrapMiddleware(service.UpdateGroup, authMw.UserViaSession, authMw.RequireUser)).Methods("POST").HeadersRegexp("Content-Type", "application/json")
