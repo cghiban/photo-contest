@@ -118,11 +118,13 @@ func imageTooBig(photoID string) bool {
 	// Read the image from its location
 	buffer, err := bimg.Read(file)
 	if err != nil {
+		fmt.Println("Image too big check; Buffer: " + err.Error())
 		return false
 	}
 	// Check image size
 	size, err := bimg.NewImage(buffer).Size()
 	if err != nil {
+		fmt.Println("Image too big check; Size: " + err.Error())
 		return false
 	}
 	// Make sure the image is not too large
@@ -344,21 +346,8 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 				return
 			}
-			if imageTooBig(pht.ID) {
-				err = photoStore.Delete(pht.ID)
-				if err != nil {
-					fmt.Println("Could not delete: " + err.Error())
-				}
-				formData["Message"] = "Image must be no more than 2000 pixels along any dimension"
-				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
-				return
-			}
 			mimeType, err := handleModelReleaseUpload(r, pht.ID)
 			if err != nil {
-				err = photoStore.Delete(pht.ID)
-				if err != nil {
-					fmt.Println("Could not delete: " + err.Error())
-				}
 				formData["Message"] = "Could not upload model release form"
 				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 				return
@@ -411,6 +400,15 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 					fmt.Println("Deleted?")
 				}
 				formData["Message"] = "Could not upload photo"
+				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+				return
+			}
+			if imageTooBig(pht.ID) {
+				err = photoStore.Delete(pht.ID)
+				if err != nil {
+					fmt.Println("Could not delete: " + err.Error())
+				}
+				formData["Message"] = "Image must be no more than 2000 pixels along any dimension"
 				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 				return
 			}
