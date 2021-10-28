@@ -124,10 +124,10 @@
                         "status": targetValue,
                         "entryId": entryId,
                     };
-                    postData("/update_entry_status", p_data).then(
+                    postData("./update_entry_status", p_data).then(
                         data => {
                             if(data["status"] === "error") {
-                                alert("Error: " + message);
+                                alert("Error: " + data["message"]);
                             }
                         }
                     );

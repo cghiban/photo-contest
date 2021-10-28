@@ -2,7 +2,7 @@
 <html>
     <head>
     {{template "header_head" .}}
-    <title>Photo</title>
+    <title>Entry Form</title>
     <style>
     input, textarea {
         width: 100%;
@@ -12,21 +12,30 @@
     <body>
     {{template "header_body" .}}
     <div class="p-5" style="margin-left: auto; margin-right: auto; max-width: 1200px; display: block; border: 1px solid #000; padding">
+    {{if .Edit}}
+    <h1 align="center">Update Entry</h1>
+    {{else}}
     <h1 align="center">Entry Form</h1>
+    {{end}}
     <h5 class="mt-3"><b>Use Rights</b></h5>
     <div class="col-sm-10">
     <p>I certify that each submitted photograph is my own creative property.
     Each submitted photograph may be used in the exhibition and for marketing and promotional purposes by <i>Cold Spring Harbor Laboratory</i>, <i>DNA Learning Center</i>, and <i>DNA Learning Center NYC</i>.
     This may include use in any publications, printed materials, advertisements, exhibitions, and electronic media.
     </p></div>
-    <form enctype="multipart/form-data" method="POST" action="./entry">
+    {{if .Edit}}
+    <form enctype="multipart/form-data" method="POST" action="./entry?id={{.ID}}" onsubmit="return validateForm()">
+    {{else}}
+    <form enctype="multipart/form-data" method="POST" action="./entry" onsubmit="return validateForm()">
+    {{end}}
+        <input type="hidden" id="full_name" name="full_name" value="{{.RealName}}">
         {{ .csrfField }}
         <div class="mb-3 row">
             <div class="col-sm-3">
                 <label for="signature" class="fw-bold">Digital Signature</label>
             </div>
             <div class="col-sm-9">
-                <input type="text" name="signature" value="{{ .Signature }}" required="">
+                <input type="text" id="signature" name="signature" value="{{ .Signature }}" required="">
             </div>
         </div>
         <div class="mb-3 mt-5 row" style="border-top: 1px solid #000;">
@@ -87,6 +96,7 @@
                 <textarea name="sbiography" minlength="250" maxlength="500" required="">{{ html .SubjectBiography }}</textarea>
             </div>
         </div>
+        {{if not .Edit}}
         <div class="mb-3 row">
             <div class="col-sm-3">
                 <label for="file" class="fw-bold">Upload Digital File</label>
@@ -105,11 +115,38 @@
 				<p><small>PDF, jpg, and png files allowed.</small></p>
             </div>
         </div>
+        {{end}}
         <div align="center">
-          <button class="btn btn-primary">Submit Entry</button>
+          {{if .Edit}}
+          <button id="submit" class="btn btn-primary" onclick="hideMessage()">Update Entry</button>
+          {{else}}
+          <button id="submit" class="btn btn-primary" onclick="hideMessage()">Submit Entry</button>
+          {{end}}
         </div>
     </form>
     </div>
+    <script>
+    function hideMessage() {
+      const message = document.getElementById("message");
+      if (message) {
+        message.parentNode.removeChild(message);
+      }
+    }
+    function validateForm() {
+      const full_name = document.getElementById("full_name").value;
+      const signature_field = document.getElementById("signature");
+      console.log(signature_field.value);
+      console.log(full_name);
+      if (full_name != signature_field.value) {
+          signature.setCustomValidity('Must be the same as the name in your profile.');
+          signature.reportValidity();
+          return false;
+      } else {
+          signature.setCustomValidity('');
+          return true;
+      }
+    }
+    </script>
     {{template "footer" .}}
     </body>
 </html>

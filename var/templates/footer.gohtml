@@ -9,7 +9,7 @@ for (const link of document.getElementsByClassName("nav-link")) {
   }
 }
 const message = document.getElementById("message");
-const success_messages = ["Uploaded the image"];
+const success_messages = ["Uploaded the image", "Updated the contest entry"];
 if (message) {
   if (success_messages.includes(message.innerText)) {
     message.className = "alert alert-success";
