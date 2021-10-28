@@ -71,6 +71,7 @@ func (s *Service) UserPhotos(rw http.ResponseWriter, r *http.Request) {
 		formData := map[string]interface{}{
 			"Photos": thumbPhotos,
 			"User":   usr,
+			"CSRF":   csrf.Token(r),
 		}
 		if err != nil {
 			http.Error(rw, err.Error(), http.StatusInternalServerError)
@@ -420,16 +421,29 @@ func (s *Service) UserWithdrawPhoto(rw http.ResponseWriter, r *http.Request) {
 		rw.Header().Set("Content-Type", "application/json")
 		return
 	}
+	usr := r.Context().Value("user").(*user.AuthUser)
 	jsonEnc := json.NewEncoder(rw)
 	response := map[string]string{
 		"status":  "error",
 		"message": "",
 	}
+	photoStore := photo.NewStore(s.log, s.db)
 	contestStore := contest.NewStore(s.log, s.db)
 	photoId := r.Form.Get("photoId")
+	photo, err := photoStore.QueryByID(photoId)
+	if err != nil {
+		response["message"] = "No photo found"
+		jsonEnc.Encode(response)
+		return
+	}
+	if photo.OwnerID != usr.ID {
+		response["message"] = "No photo found"
+		jsonEnc.Encode(response)
+		return
+	}
 	entry, err := contestStore.QueryContestEntryByPhotoId(photoId)
 	if err != nil {
-		response["message"] = err.Error()
+		response["message"] = "No contest entry found"
 		jsonEnc.Encode(response)
 		return
 	}
@@ -439,7 +453,9 @@ func (s *Service) UserWithdrawPhoto(rw http.ResponseWriter, r *http.Request) {
 	}
 	_, err = contestStore.UpdateEntry(uce)
 	if err != nil {
-		response["message"] = err.Error()
+		response["message"] = "Can't withdraw contest entry"
+		jsonEnc.Encode(response)
+		return
 	}
 	response["status"] = "success"
 	jsonEnc.Encode(response)
