@@ -86,7 +86,7 @@ func (s *Service) UserPhotos(rw http.ResponseWriter, r *http.Request) {
 func handleFileUpload(r *http.Request, photoID string) error {
 	// Parse our multipart form, 10 << 20 specifies a maximum
 	// upload of 10 MB files.
-	r.ParseMultipartForm(10 << 20)
+	r.ParseMultipartForm(11 << 20)
 	// FormFile returns the first file for the given key `file`
 	// it also returns the FileHeader so we can get the Filename,
 	// the Header and the size of the file
@@ -110,6 +110,27 @@ func handleFileUpload(r *http.Request, photoID string) error {
 	}
 	_, err = io.Copy(new_file, file)
 	return err
+}
+
+func imageTooBig(photoID string) bool {
+	// Get the full path to the full size image and the full path to the location to save the thumbnail
+	file := fmt.Sprintf("tmp/photo-%s-original.jpg", photoID)
+	// Read the image from its location
+	buffer, err := bimg.Read(file)
+	if err != nil {
+		return false
+	}
+	// Check image size
+	size, err := bimg.NewImage(buffer).Size()
+	if err != nil {
+		return false
+	}
+	// Make sure the image is not too large
+	if size.Width > 2000 || size.Height > 2000 {
+		return true
+	}
+	// Write the thumbnail to the proper location
+	return false
 }
 
 func handleModelReleaseUpload(r *http.Request, photoID string) (string, error) {
@@ -323,8 +344,21 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 				return
 			}
+			if imageTooBig(pht.ID) {
+				err = photoStore.Delete(pht.ID)
+				if err != nil {
+					fmt.Println("Could not delete: " + err.Error())
+				}
+				formData["Message"] = "Image must be no more than 2000 pixels along any dimension"
+				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
+				return
+			}
 			mimeType, err := handleModelReleaseUpload(r, pht.ID)
 			if err != nil {
+				err = photoStore.Delete(pht.ID)
+				if err != nil {
+					fmt.Println("Could not delete: " + err.Error())
+				}
 				formData["Message"] = "Could not upload model release form"
 				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 				return
