@@ -126,6 +126,7 @@
     </form>
     </div>
     <script>
+    var valid = true;
     function hideMessage() {
       const message = document.getElementById("message");
       if (message) {
@@ -135,16 +136,14 @@
     function validateForm() {
       const full_name = document.getElementById("full_name").value;
       const signature_field = document.getElementById("signature");
-      console.log(signature_field.value);
-      console.log(full_name);
       if (full_name != signature_field.value) {
-          signature.setCustomValidity('Must be the same as the name in your profile.');
-          signature.reportValidity();
+          signature_field.setCustomValidity('Must be the same as the name in your profile.');
+          signature_field.reportValidity();
           return false;
       } else {
-          signature.setCustomValidity('');
-          return true;
+        signature_field.setCustomValidity('');
       }
+      return true;
     }
     </script>
     {{template "footer" .}}

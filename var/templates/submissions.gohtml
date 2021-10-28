@@ -62,9 +62,10 @@
                 {{end}}
                 </p>
                 {{if eq $photo.Status "active"}}
-                <a href="./entry?id={{$photo.PhotoId}}">Edit Photo Information</a>
-                &emsp;
-                <button id="{{$photo.PhotoId}}" class="btn btn-link" onclick="withdrawPhoto(this)">Withdraw Photo</a>
+                <div class="row">
+                  <div class="col-sm-4"><a class="btn btn-link" href="./entry?id={{$photo.PhotoId}}">Edit Photo Information</a></div>
+                  <div class="col-sm-4"><button id="{{$photo.PhotoId}}" class="btn btn-link" onclick="withdrawPhoto(this)">Withdraw Photo</a></div>
+                </div>
                 {{end}}
             </div>
             {{end}}
