@@ -14,6 +14,11 @@
 		  <h1 align="center"><em>All the World in New  York</em> Photography Competition</h1>
 			<h2 align="center"><strong>Call for Entries </strong></h2>
 		  <h3 align="center">40 $500 Prizes!</h3>
+{{if .User}}
+			<div align="center">
+			<a class="btn btn-primary btn-lg" href="./entry" role="button">Submit entries</a> or <a class="btn btn-primary btn-lg" href="./submissions" role="button" >View Submissions</a>
+			</div>
+{{end}}
 		  <p style="font-size: 1.2rem; margin-top:30px;">We invite you to submit your best portraits to <em>All the World in New York, </em>which explores the racial and cultural diversity of  America's immigrant city. Photographs should tell a story or reflect the heritage of  New Yorkers with origins from another part of the world. </p>
 		  <p>Selected photographs will be displayed at <em>DNA Learning Center NYC</em>, on the campus of the New York City College of Technology in downtown Brooklyn. They will become part of a permanent exhibition, <em>What DNA Says about Our Past and Future</em>. The portraits of New Yorkers will illustrate migrations that have mixed people and their DNA throughout history.</p>
 			<p><strong>Photographs</strong> and <strong>subject biographies</strong> will be judged &ldquo;blind,&rdquo;  without submitter&rsquo;s name. The judging panel will be chaired by Jeanne  Moutoussamy-Ashe, a celebrated photographer and public health advocate. The photographers of the top 40 photographs will each receive a<em> $500 award.</em></p>
@@ -28,11 +33,7 @@
 		  
 		  <p>Visit <a href="./guidelines">Guidelines</a> for call for entry details. </p>
 		  
-{{ if .User }}
-			<div align="center">
-			<a class="btn btn-primary btn-lg" href="./entry" role="button">Submit entries</a> or <a class="btn btn-primary btn-lg" href="./submissions" role="button" >View Submissions</a>
-			</div>
-{{else}}
+{{ if not .User }}
 			<div align="center">
 			<a class="btn btn-primary btn-lg" href="./register" role="button">Register</a> or <a class="btn btn-primary btn-lg" href="./login" role="button" >Log in</a>
 			</div>

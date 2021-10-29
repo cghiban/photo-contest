@@ -35,10 +35,10 @@
             </div//-->
             {{ range $photo := .Photos }}
             {{if ne $photo.Status "withdrawn"}}
-            <div class="col col-sm-4">
+            <div class="col col-lg-4">
                 <p>
                   <a target="_blank" href=".{{replaceEnd $photo.FilePath "-thumb.jpg" "-original.jpg"}}">
-                    <img style="height: auto; width: 100%;" alt="{{html $photo.SubjectName}}" src=".{{replaceEnd $photo.FilePath "-thumb.jpg" "-original.jpg"}}">
+                    <img style="height: auto; max-width: 100%; min-width: 300px;" alt="{{html $photo.SubjectName}}" src=".{{replaceEnd $photo.FilePath "-thumb.jpg" "-original.jpg"}}">
                   </a>
                 </p>
                 <p class="sname">Name(s): <b>{{html $photo.SubjectName}}</b></p>
