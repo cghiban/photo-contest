@@ -37,27 +37,29 @@ func (s *Service) ContestPhotos(rw http.ResponseWriter, r *http.Request) {
 	}
 	var thumbPhotos []PhotoInfo
 	for _, contestEntry := range contestEntries {
-		photo, err := photoStore.QueryByID(contestEntry.PhotoID)
-		if err == nil {
-			if !photo.Deleted {
-				if statusFilter == "" || contestEntry.Status == statusFilter {
-					photoFile, _ := photoStore.QueryPhotoFile(photo.ID, "thumb")
-					photoInfo := PhotoInfo{
-						FilePath: photoFile.FilePath,
-						PhotoId:  photo.ID,
-						/*Title:          photo.Title,
-						Descristringsption:      photo.Description,*/
-						EntryId:          contestEntry.EntryID,
-						SubjectName:      contestEntry.SubjectName,
-						SubjectAge:       contestEntry.SubjectAge,
-						SubjectCountry:   contestEntry.SubjectCountry,
-						SubjectOrigin:    contestEntry.SubjectOrigin,
-						SubjectBiography: contestEntry.SubjectBiography,
-						Location:         contestEntry.Location,
-						ReleaseMimeType:  contestEntry.ReleaseMimeType,
-						Status:           contestEntry.Status,
+		if contestEntry.Status != "withdrawn" {
+			photo, err := photoStore.QueryByID(contestEntry.PhotoID)
+			if err == nil {
+				if !photo.Deleted {
+					if statusFilter == "" || contestEntry.Status == statusFilter {
+						photoFile, _ := photoStore.QueryPhotoFile(photo.ID, "thumb")
+						photoInfo := PhotoInfo{
+							FilePath: photoFile.FilePath,
+							PhotoId:  photo.ID,
+							/*Title:          photo.Title,
+							Descristringsption:      photo.Description,*/
+							EntryId:          contestEntry.EntryID,
+							SubjectName:      contestEntry.SubjectName,
+							SubjectAge:       contestEntry.SubjectAge,
+							SubjectCountry:   contestEntry.SubjectCountry,
+							SubjectOrigin:    contestEntry.SubjectOrigin,
+							SubjectBiography: contestEntry.SubjectBiography,
+							Location:         contestEntry.Location,
+							ReleaseMimeType:  contestEntry.ReleaseMimeType,
+							Status:           contestEntry.Status,
+						}
+						thumbPhotos = append(thumbPhotos, photoInfo)
 					}
-					thumbPhotos = append(thumbPhotos, photoInfo)
 				}
 			}
 		}
