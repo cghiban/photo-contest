@@ -13,6 +13,8 @@ import (
 	"github.com/gorilla/csrf"
 )
 
+const urlStart string = ""
+
 // UserSignUp - handles user signup
 func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
 	states := utils.USStates()
@@ -127,7 +129,7 @@ func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
 			http.Error(rw, "Unable to sign user up", http.StatusInternalServerError)
 			return
 		} else {
-			http.Redirect(rw, r, "/login", http.StatusFound)
+			http.Redirect(rw, r, urlStart+"/login", http.StatusFound)
 		}
 	}
 }
@@ -172,8 +174,8 @@ func (s *Service) UserLogIn(rw http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			s.log.Println("all's good. will be redirecting to / now..")
-			http.Redirect(rw, r, "/", http.StatusFound)
+			s.log.Println("all's good. will be redirecting to " + urlStart + "/ now..")
+			http.Redirect(rw, r, urlStart+"/", http.StatusFound)
 			return
 		}
 
@@ -199,7 +201,7 @@ func (s *Service) UserLogOut(rw http.ResponseWriter, r *http.Request) {
 		http.Error(rw, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(rw, r, "/", http.StatusFound)
+	http.Redirect(rw, r, urlStart+"/", http.StatusFound)
 }
 
 // UserUpdateProfile - allows profile to be updated
@@ -318,7 +320,7 @@ func (s *Service) UserUpdateProfile(rw http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		http.Redirect(rw, r, "/profile", http.StatusFound)
+		http.Redirect(rw, r, urlStart+"/profile", http.StatusFound)
 	}
 }
 
@@ -418,7 +420,7 @@ func (s *Service) UserResetPassword(rw http.ResponseWriter, r *http.Request) {
 		// If reset fails to be expired, it just will remain active until 24 hours have passed
 		// Not a major deal, so no error checking needed
 		userStore.ExpirePasswordReset(er)
-		http.Redirect(rw, r, "/", http.StatusFound)
+		http.Redirect(rw, r, urlStart+"/", http.StatusFound)
 	}
 }
 
@@ -469,7 +471,7 @@ func (s *Service) UserUpdatePassword(rw http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			http.Redirect(rw, r, "/", http.StatusFound)
+			http.Redirect(rw, r, urlStart+"/", http.StatusFound)
 		}
 	}
 }
@@ -529,13 +531,13 @@ func (a *Auth) RequireUser(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tmp := r.Context().Value("user")
 		if tmp == nil {
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, urlStart+"/login", http.StatusFound)
 			return
 		}
 		if _, ok := tmp.(*user.AuthUser); !ok {
 			// Whatever was set in the user key isn't a user, so we probably need to
 			// sign in.
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, urlStart+"/login", http.StatusFound)
 			return
 		}
 		next.ServeHTTP(w, r)
@@ -546,18 +548,18 @@ func (a *Auth) RequireAdmin(next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		tmp := r.Context().Value("user")
 		if tmp == nil {
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, urlStart+"/login", http.StatusFound)
 			return
 		}
 		usr, ok := tmp.(*user.AuthUser)
 		if !ok {
 			// Whatever was set in the user key isn't a user, so we probably need to
 			// sign in.
-			http.Redirect(w, r, "/login", http.StatusFound)
+			http.Redirect(w, r, urlStart+"/login", http.StatusFound)
 			return
 		}
 		if usr.PermissionLevel < 2 {
-			http.Redirect(w, r, "/", http.StatusFound)
+			http.Redirect(w, r, urlStart+"/", http.StatusFound)
 			return
 		}
 		next.ServeHTTP(w, r)

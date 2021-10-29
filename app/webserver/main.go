@@ -117,35 +117,35 @@ func run(log *log.Logger) error {
 
 	// auth midleware...
 	authMw := handlers.NewAuth(service)
-
+	const urlStart string = ""
 	sm := mux.NewRouter()
 	sm.NotFoundHandler = web.WrapMiddleware(service.NotFoundHandler, authMw.UserViaSession)
-	sm.Handle("/", web.WrapMiddleware(service.Index, authMw.UserViaSession))
-	sm.Handle("/guidelines", web.WrapMiddleware(service.About, authMw.UserViaSession))
+	sm.Handle(urlStart+"/", web.WrapMiddleware(service.Index, authMw.UserViaSession))
+	sm.Handle(urlStart+"/guidelines", web.WrapMiddleware(service.About, authMw.UserViaSession))
 
-	sm.Handle("/settings", web.WrapMiddleware(service.Settings, authMw.UserViaSession, authMw.RequireUser))
+	//sm.Handle("/settings", web.WrapMiddleware(service.Settings, authMw.UserViaSession, authMw.RequireUser))
 	//sm.Handle("/updategroup/{id:[0-9]+}", web.WrapMiddleware(service.UpdateGroup, authMw.UserViaSession, authMw.RequireUser)).Methods("POST").HeadersRegexp("Content-Type", "application/json")
 
 	// TODO make sure we set Secure to true for production
 	csrfMiddleware := csrf.Protect([]byte(cfg.Web.CsrfKey), csrf.Secure(cfg.Web.CsrfSecure))
 	userRouter := sm.Methods("POST", "GET").Subrouter()
 	userRouter.Use(csrfMiddleware)
-	userRouter.HandleFunc("/register", service.UserSignUp)
-	userRouter.HandleFunc("/login", service.UserLogIn)
-	userRouter.HandleFunc("/logout", service.UserLogOut)
-	userRouter.HandleFunc("/forgotpass", service.UserForgotPassword)
-	userRouter.HandleFunc("/resetpass", service.UserResetPassword)
-	userRouter.Handle("/profile", web.WrapMiddleware(service.UserUpdateProfile, authMw.UserViaSession, authMw.RequireUser))
-	userRouter.Handle("/password", web.WrapMiddleware(service.UserUpdatePassword, authMw.UserViaSession, authMw.RequireUser))
-	userRouter.Handle("/entry", web.WrapMiddleware(service.UserPhotoUpload, authMw.UserViaSession, authMw.RequireUser))
-	userRouter.Handle("/submissions", web.WrapMiddleware(service.UserPhotos, authMw.UserViaSession, authMw.RequireUser))
-	userRouter.Handle("/gallery", web.WrapMiddleware(service.ContestPhotos, authMw.UserViaSession, authMw.RequireUser, authMw.RequireAdmin))
-	userRouter.Handle("/update_entry_status", web.WrapMiddleware(service.ContestEntryUpdateStatus, authMw.UserViaSession, authMw.RequireUser, authMw.RequireAdmin))
-	userRouter.Handle("/withdraw_entry", web.WrapMiddleware(service.UserWithdrawPhoto, authMw.UserViaSession, authMw.RequireUser))
-	sm.PathPrefix("/tmp/").Handler(http.StripPrefix("/tmp/", http.FileServer(http.Dir("tmp/"))))
+	userRouter.HandleFunc(urlStart+"/register", service.UserSignUp)
+	userRouter.HandleFunc(urlStart+"/login", service.UserLogIn)
+	userRouter.HandleFunc(urlStart+"/logout", service.UserLogOut)
+	userRouter.HandleFunc(urlStart+"/forgotpass", service.UserForgotPassword)
+	userRouter.HandleFunc(urlStart+"/resetpass", service.UserResetPassword)
+	userRouter.Handle(urlStart+"/profile", web.WrapMiddleware(service.UserUpdateProfile, authMw.UserViaSession, authMw.RequireUser))
+	userRouter.Handle(urlStart+"/password", web.WrapMiddleware(service.UserUpdatePassword, authMw.UserViaSession, authMw.RequireUser))
+	userRouter.Handle(urlStart+"/entry", web.WrapMiddleware(service.UserPhotoUpload, authMw.UserViaSession, authMw.RequireUser))
+	userRouter.Handle(urlStart+"/submissions", web.WrapMiddleware(service.UserPhotos, authMw.UserViaSession, authMw.RequireUser))
+	userRouter.Handle(urlStart+"/gallery", web.WrapMiddleware(service.ContestPhotos, authMw.UserViaSession, authMw.RequireUser, authMw.RequireAdmin))
+	userRouter.Handle(urlStart+"/update_entry_status", web.WrapMiddleware(service.ContestEntryUpdateStatus, authMw.UserViaSession, authMw.RequireUser, authMw.RequireAdmin))
+	userRouter.Handle(urlStart+"/withdraw_entry", web.WrapMiddleware(service.UserWithdrawPhoto, authMw.UserViaSession, authMw.RequireUser))
+	sm.PathPrefix(urlStart + "/tmp/").Handler(http.StripPrefix(urlStart+"/tmp/", http.FileServer(http.Dir("tmp/"))))
 
-	sm.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("var/static/"))))
-	sm.PathPrefix("/assets/").Handler(http.StripPrefix("/assets/", http.FileServer(http.Dir("assets/"))))
+	//sm.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("var/static/"))))
+	sm.PathPrefix(urlStart + "/assets/").Handler(http.StripPrefix(urlStart+"/assets/", http.FileServer(http.Dir("assets/"))))
 
 	sm.Handle("/favicon.ico", http.NotFoundHandler())
 
