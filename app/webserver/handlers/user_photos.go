@@ -441,7 +441,10 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 					return
 				}
 			}
-			formData["Message"] = "Uploaded the image"
+			if userSubmittedPhotos == 2 {
+				formData["Message"] = "Uploaded a total of three images"
+			}
+			formData["Message"] = "Uploaded the image. Clear form or edit form to submit additional entries."
 		}
 		s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 	}
