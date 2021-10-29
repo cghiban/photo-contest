@@ -311,7 +311,7 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 				return
 			}
-			formData["Message"] = "Updated the contest entry"
+			http.Redirect(rw, r, urlStart+"/submissions", http.StatusFound)
 		} else {
 			userPhotos, err := photoStore.QueryByOwnerID(usr.ID)
 			if err != nil {
@@ -442,7 +442,7 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 				}
 			}
 			if userSubmittedPhotos == 2 {
-				formData["Message"] = "Uploaded a total of three images"
+				http.Redirect(rw, r, urlStart+"/submissions", http.StatusFound)
 			} else {
 				formData["Message"] = "Uploaded the image. Clear form or edit form to submit additional entries."
 			}
