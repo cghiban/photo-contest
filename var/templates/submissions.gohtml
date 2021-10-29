@@ -34,7 +34,6 @@
                 <p id="release_label"><b>Photo Release</b></p>
             </div//-->
             {{ range $photo := .Photos }}
-            {{if ne $photo.Status "withdrawn"}}
             <div class="col col-lg-4">
                 <p>
                   <a target="_blank" href=".{{replaceEnd $photo.FilePath "-thumb.jpg" "-original.jpg"}}">
@@ -68,7 +67,6 @@
                 </div>
                 {{end}}
             </div>
-            {{end}}
             {{end}}
         </div>
     </div>
