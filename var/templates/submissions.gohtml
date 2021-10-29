@@ -10,29 +10,10 @@
     <!--<div style="margin-left: auto; margin-right: auto; max-width: 1200px; display: block;">-->
     <h1 align="center">My Submissions</h1>
     <div>
-        <!--Switch size:&ensp;
-        <a id="thumb" name="resize" class="active" href="javascript:resizeImage('thumb');">Thumbnail</a>
-        &nbsp;
-        <a id="small" name="resize" href="javascript:resizeImage('small');">Small</a>
-        &nbsp;
-        <a id="medium" name="resize" href="javascript:resizeImage('medium');">Medium</a>
-        &nbsp;
-        <a id="large" name="resize" href="javascript:resizeImage('large');">Large</a>
-        &nbsp;
-        <a id="original" name="resize" href="javascript:resizeImage('original');">Original</a>
-        <br>-->
         <div class="row mt-5" >
-            <!--div class="col col-sm-3">
-                <p id="image_label" style="height: 200px;"><b>Image<b></p>
-                <p id="sname_label"><b>Name(s)</b></p>
-                <p id="sage_label"><b>Age(s)</b></p>
-                <p id="scountry_label"><b>Countr(y/ies) of Birth</b></p>
-                <p id="sorigin_label"><b>Ancestral Countr(y/ies) of Origin (if born in US)</b></p>
-                <p id="location_label"><b><th>Where in NYC photograph was taken</b></p>
-                <p id="sbiography_label"><b>Biography</b></p>
-                <p id="status_label"></b>Status</b></p>
-                <p id="release_label"><b>Photo Release</b></p>
-            </div//-->
+            {{ if eq (len .Photos) 0 }}
+            <p>You have no submissions. <a href="./entry">Create a new one.</a></p>
+            {{ end }}
             {{ range $photo := .Photos }}
             <div class="col col-lg-4">
                 <p>
@@ -89,20 +70,6 @@
         });
         return response.json();
     }
-    /*function resizeImage(size) {
-        for (const resize of document.getElementsByName("resize")) {
-            resize.removeAttribute("class");
-        }
-        document.getElementById(size).className = "active";
-        for (const img of document.getElementsByTagName("img")) {
-            if (img.src.indexOf("/tmp/") != -1) {
-                img.src = img.src.replace(/-[^-]*$/, ("-" + size + ".jpg"));
-                setTimeout(function () {
-                  document.getElementById("image_label").style.height = "" + img.clientHeight + "px";
-                }, 30);
-            }
-        }
-    }*/
     function withdrawPhoto(withdrawButton) {
       const photoId = withdrawButton.id;
       const confirmation = confirm("Are you sure you want to withdraw the image?");
@@ -122,20 +89,6 @@
         );
       }
     }
-    /*function changeHeight(itemClass) {
-      const itemLabel = document.getElementById(itemClass + "_label");
-      const items = document.getElementsByClassName(itemClass);
-      const labelHeight = itemLabel.clientHeight;
-      for (const item of items) {
-        item.style.height = "" + labelHeight + "px";
-      }
-    }
-    document.addEventListener("DOMContentLoaded", function () {
-      const labels = ["sname", "sage", "scountry", "sorigin", "location", "sbiography", "status", "release"];
-      for (const label of labels) {
-        changeHeight(label);
-      }
-    });*/
     </script>
     {{template "footer" .}}
     </body>
