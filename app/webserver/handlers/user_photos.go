@@ -325,7 +325,7 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 					userSubmittedPhotos = userSubmittedPhotos + 1
 					continue
 				}
-				if ce.Status != "withdrawn" {
+				if ce.Status != "withdrawn" && !photo.Deleted {
 					userSubmittedPhotos = userSubmittedPhotos + 1
 				}
 			}
