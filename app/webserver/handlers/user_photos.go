@@ -51,21 +51,23 @@ func (s *Service) UserPhotos(rw http.ResponseWriter, r *http.Request) {
 			if !photo.Deleted {
 				photoFile, _ := photoStore.QueryPhotoFile(photo.ID, "thumb")
 				contestEntry, _ := contestStore.QueryContestEntryByPhotoId(photo.ID)
-				photoInfo := PhotoInfo{
-					FilePath: photoFile.FilePath,
-					PhotoId:  photo.ID,
-					/*Title:          photo.Title,
-					Description:      photo.Description,*/
-					SubjectName:      contestEntry.SubjectName,
-					SubjectAge:       contestEntry.SubjectAge,
-					SubjectCountry:   contestEntry.SubjectCountry,
-					SubjectOrigin:    contestEntry.SubjectOrigin,
-					SubjectBiography: contestEntry.SubjectBiography,
-					Location:         contestEntry.Location,
-					ReleaseMimeType:  contestEntry.ReleaseMimeType,
-					Status:           contestEntry.Status,
+				if contestEntry.Status != "" && contestEntry.Status != "withdrawn" {
+					photoInfo := PhotoInfo{
+						FilePath: photoFile.FilePath,
+						PhotoId:  photo.ID,
+						/*Title:          photo.Title,
+						Description:      photo.Description,*/
+						SubjectName:      contestEntry.SubjectName,
+						SubjectAge:       contestEntry.SubjectAge,
+						SubjectCountry:   contestEntry.SubjectCountry,
+						SubjectOrigin:    contestEntry.SubjectOrigin,
+						SubjectBiography: contestEntry.SubjectBiography,
+						Location:         contestEntry.Location,
+						ReleaseMimeType:  contestEntry.ReleaseMimeType,
+						Status:           contestEntry.Status,
+					}
+					thumbPhotos = append(thumbPhotos, photoInfo)
 				}
-				thumbPhotos = append(thumbPhotos, photoInfo)
 			}
 		}
 		formData := map[string]interface{}{
