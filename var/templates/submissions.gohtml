@@ -21,7 +21,7 @@
         &nbsp;
         <a id="original" name="resize" href="javascript:resizeImage('original');">Original</a>
         <br>-->
-        <div class="row">
+        <div class="row mt-5" >
             <!--div class="col col-sm-3">
                 <p id="image_label" style="height: 200px;"><b>Image<b></p>
                 <p id="sname_label"><b>Name(s)</b></p>
@@ -124,7 +124,7 @@
         );
       }
     }
-    function changeHeight(itemClass) {
+    /*function changeHeight(itemClass) {
       const itemLabel = document.getElementById(itemClass + "_label");
       const items = document.getElementsByClassName(itemClass);
       const labelHeight = itemLabel.clientHeight;
@@ -137,7 +137,7 @@
       for (const label of labels) {
         changeHeight(label);
       }
-    });
+    });*/
     </script>
     {{template "footer" .}}
     </body>

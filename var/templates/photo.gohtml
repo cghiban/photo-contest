@@ -24,9 +24,9 @@
     This may include use in any publications, printed materials, advertisements, exhibitions, and electronic media.
     </p></div>
     {{if .Edit}}
-    <form enctype="multipart/form-data" method="POST" action="./entry?id={{.ID}}" onsubmit="return validateForm()">
+    <form id="form" enctype="multipart/form-data" method="POST" action="./entry?id={{.ID}}" onsubmit="return validateForm()">
     {{else}}
-    <form enctype="multipart/form-data" method="POST" action="./entry" onsubmit="return validateForm()">
+    <form id="form" enctype="multipart/form-data" method="POST" action="./entry" onsubmit="return validateForm()">
     {{end}}
         <input type="hidden" id="full_name" name="full_name" value="{{.RealName}}">
         {{ .csrfField }}
@@ -35,7 +35,7 @@
                 <label for="signature" class="fw-bold">Digital Signature</label>
             </div>
             <div class="col-sm-9">
-                <input type="text" id="signature" name="signature" value="{{ .Signature }}" required="">
+                <input oninput="clearCustomValidity()" type="text" id="signature" name="signature" value="{{ .Signature }}" required="">
             </div>
         </div>
         <div class="mb-3 mt-5 row" style="border-top: 1px solid #000;">
@@ -93,7 +93,7 @@
                 <p><small>Characters with spaces: 250 minimum, 500 maximum</small></p>
             </div>
             <div class="col-sm-9">
-                <textarea name="sbiography" minlength="250" maxlength="500" required="">{{ html .SubjectBiography }}</textarea>
+                <textarea oninput="showBioValidity();" id="sbiography" name="sbiography" minlength="250" maxlength="500" required="">{{ html .SubjectBiography }}</textarea>
             </div>
         </div>
         {{if not .Edit}}
@@ -108,7 +108,7 @@
         </div>
         <div class="mb-3 row">
             <div class="col-sm-3">
-                <label for="release" class="fw-bold">Upload Photo Release Form</label>
+                <label for="release" class="fw-bold">Upload <a target="_blank" href="./assets/All-the-World-in-NY-Photo-Release.pdf">Photo Release Form</a></label>
             </div>
             <div class="col-sm-9">
                 <input type="file" accept="application/pdf,image/jpeg,image/png" name="release" required="">
@@ -120,13 +120,28 @@
           {{if .Edit}}
           <button id="submit" class="btn btn-primary" onclick="hideMessage()">Update Entry</button>
           {{else}}
-          <button id="submit" class="btn btn-primary" onclick="hideMessage()">Submit Entry</button>
+          <button id="submit" class="btn btn-primary" onclick="hideMessage()">Submit Entry</button>&emsp;
+          <button type="button" id="clear" class="btn btn-primary" onclick="clearForm()">Clear Form</button>
           {{end}}
         </div>
     </form>
     </div>
     <script>
-    var valid = true;
+    function showBioValidity() {
+      document.getElementById("sbiography").reportValidity();
+    }
+    function clearForm() {
+      const form = document.getElementById("form");
+      var allTextInputs = form.querySelectorAll("input[type='text']");
+      Array.from(allTextInputs ).forEach( function( el ) {
+        el.value = "";
+      });
+      document.getElementById("sbiography").value = "";
+    }
+    function clearCustomValidity() {
+      const signature_field = document.getElementById("signature");
+      signature_field.setCustomValidity('');
+    }
     function hideMessage() {
       const message = document.getElementById("message");
       if (message) {
@@ -140,8 +155,6 @@
           signature_field.setCustomValidity('Must be the same as the name in your profile.');
           signature_field.reportValidity();
           return false;
-      } else {
-        signature_field.setCustomValidity('');
       }
       return true;
     }

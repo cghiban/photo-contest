@@ -28,7 +28,11 @@
 		  
 		  <p>Visit <a href="./guidelines">Guidelines</a> for call for entry details. </p>
 		  
-{{ if not .User }}
+{{ if .User }}
+			<div align="center">
+			<a class="btn btn-primary btn-lg" href="./entry" role="button">Submit entries</a> or <a class="btn btn-primary btn-lg" href="./submissions" role="button" >View Submissions</a>
+			</div>
+{{else}}
 			<div align="center">
 			<a class="btn btn-primary btn-lg" href="./register" role="button">Register</a> or <a class="btn btn-primary btn-lg" href="./login" role="button" >Log in</a>
 			</div>
