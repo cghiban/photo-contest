@@ -40,7 +40,7 @@ func run(log *log.Logger) error {
 			BindAddress  string        `conf:"default:0.0.0.0:8080"`
 			SessionKey   string        `conf:"default:abc123XYZ"`
 			CsrfKey      string        `conf:"default:abcqwertxyz"`
-			CsrfSecure   bool          `conf:"default:false"`
+			CsrfSecure   bool          `conf:"default:true"`
 			IdleTimeout  time.Duration `conf:"default:5s"`
 			ReadTimeout  time.Duration `conf:"default:5s"`
 			WriteTimeout time.Duration `conf:"default:5s"`
