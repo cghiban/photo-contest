@@ -117,7 +117,7 @@ func run(log *log.Logger) error {
 
 	// auth midleware...
 	authMw := handlers.NewAuth(service)
-	const urlStart string = ""
+	const urlStart string = "/photo"
 	sm := mux.NewRouter()
 	sm.NotFoundHandler = web.WrapMiddleware(service.NotFoundHandler, authMw.UserViaSession)
 	sm.Handle(urlStart+"/", web.WrapMiddleware(service.Index, authMw.UserViaSession))

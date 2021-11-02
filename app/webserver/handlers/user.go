@@ -13,7 +13,7 @@ import (
 	"github.com/gorilla/csrf"
 )
 
-const urlStart string = ""
+const urlStart string = "/photo"
 
 // UserSignUp - handles user signup
 func (s *Service) UserSignUp(rw http.ResponseWriter, r *http.Request) {
