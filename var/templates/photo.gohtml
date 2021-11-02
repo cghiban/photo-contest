@@ -17,7 +17,11 @@
     {{else}}
     <h1 align="center">Entry Form</h1>
     {{end}}
-    <h5 class="mt-3"><b>Use Rights</b></h5>
+    <div align="center">
+		<p class="small">REMINDER: A completed, signed photo release is required for each subject:
+		<a target="_blank" href="./assets/All-the-World-in-NY-Photo-Release.pdf" >Download photo release form</a></p>
+	</div>
+	<h5 class="mt-3"><b>Use Rights</b></h5>
     <div class="col-sm-10">
     <p>I certify that each submitted photograph is my own creative property.
     Each submitted photograph may be used in the exhibition and for marketing and promotional purposes by <i>Cold Spring Harbor Laboratory</i>, <i>DNA Learning Center</i>, and <i>DNA Learning Center NYC</i>.
@@ -94,6 +98,7 @@
             </div>
             <div class="col-sm-9">
                 <textarea oninput="showBioValidity();" id="sbiography" name="sbiography" minlength="250" maxlength="500" required="">{{ html .SubjectBiography }}</textarea>
+				<p><small>Prompt stops when 250 character minimum is reached; typing is disabled when 500 character maximum is reached.</small></p>
             </div>
         </div>
         {{if not .Edit}}
@@ -108,7 +113,7 @@
         </div>
         <div class="mb-3 row">
             <div class="col-sm-3">
-                <label for="release" class="fw-bold">Upload <a target="_blank" href="./assets/All-the-World-in-NY-Photo-Release.pdf">Photo Release Form</a></label>
+                <label for="release" class="fw-bold">Upload Photo Release Form</label>
             </div>
             <div class="col-sm-9">
                 <input type="file" accept="application/pdf,image/jpeg,image/png" name="release" required="">

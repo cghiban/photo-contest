@@ -10,12 +10,12 @@
     <!--<div style="margin-left: auto; margin-right: auto; max-width: 1200px; display: block;">-->
     <h1 align="center">My Submissions</h1>
     <div>
-        <div class="row mt-5" >
-            {{ if eq (len .Photos) 0 }}
-            <p>You have no submissions. <a href="./entry">Create a new one.</a></p>
+        <div class="row mt-3" >
+            {{ if lt (len .Photos) 3 }}
+            <h4 align="center">You have {{len .Photos}} photo entry(ies). <a class="btn btn-primary btn-lg" href="./entry">ADD an entry</a></h4>
             {{ end }}
             {{ range $photo := .Photos }}
-            <div class="col col-lg-4">
+            <div class="col col-lg-4 mt-5">
                 <p>
                   <a target="_blank" href=".{{replaceEnd $photo.FilePath "-thumb.jpg" "-original.jpg"}}">
                     <img style="height: auto; max-width: 100%; min-width: 300px;" alt="{{html $photo.SubjectName}}" src=".{{replaceEnd $photo.FilePath "-thumb.jpg" "-original.jpg"}}">
@@ -43,8 +43,8 @@
                 </p>
                 {{if eq $photo.Status "active"}}
                 <div class="row">
-                  <div class="col-sm-4"><a class="btn btn-link" href="./entry?id={{$photo.PhotoId}}">Edit Photo Information</a></div>
-                  <div class="col-sm-4"><button id="{{$photo.PhotoId}}" class="btn btn-link" onclick="withdrawPhoto(this)">Withdraw Photo</a></div>
+                  <div class="col-sm-6"><a class="btn btn-primary btn-sm" href="./entry?id={{$photo.PhotoId}}">EDIT Entry</a></div>
+                  <div class="col-sm-6"><button id="{{$photo.PhotoId}}" class="btn btn-primary btn-sm" onclick="withdrawPhoto(this)">WITHDRAW Entry</a></div>
                 </div>
                 {{end}}
             </div>
@@ -72,7 +72,7 @@
     }
     function withdrawPhoto(withdrawButton) {
       const photoId = withdrawButton.id;
-      const confirmation = confirm("Are you sure you want to withdraw the image?");
+      const confirmation = confirm("Are you sure you want to delete this entry? This cannot be undone.");
       if (confirmation) {
         const p_data = {
           "gorilla.csrf.Token": csrf,
