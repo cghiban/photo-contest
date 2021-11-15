@@ -158,7 +158,7 @@ func ReadFile(filePath string) (string, error) {
 func SendEmail(mg *mailgun.MailgunImpl, sender, subject, recipient, bodyText, bodyHtml, tag string) (string, string, error) {
 	message := mg.NewMessage(sender, subject, bodyText, recipient)
 	message.SetReplyTo(sender)
-	err := message.AddTag("Dev-Photo-Contest-" + tag)
+	err := message.AddTag("Photo-Contest-" + tag)
 	if err != nil {
 		return "", "", err
 	}
