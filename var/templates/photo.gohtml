@@ -12,6 +12,7 @@
     <body>
     {{template "header_body" .}}
     <div class="p-5" style="margin-left: auto; margin-right: auto; max-width: 1200px; display: block; border: 1px solid #000; padding">
+	<h5 align="center"><b><i>All the World in New York City</i> Photography Contest</b></h5>
     {{if .Edit}}
     <h1 align="center">Update Entry</h1>
     {{else}}
@@ -19,13 +20,11 @@
     {{end}}
     <div align="center">
 		<p class="small">REMINDER: A completed, signed photo release is required for each subject:
-		<a target="_blank" href="./assets/All-the-World-in-NY-Photo-Release.pdf" >Download photo release form</a></p>
+		<a target="_blank" href="./assets/All-the-World-in-NY-City-Photo-Release.pdf" >Download photo release form</a></p>
 	</div>
-	<h5 class="mt-3"><b>Use Rights</b></h5>
+	<h5 class="mt-3"><b>Use Rights Agreement</b></h5>
     <div class="col-sm-10">
-    <p>I certify that each submitted photograph is my own creative property.
-    Each submitted photograph may be used in the exhibition and for marketing and promotional purposes by <i>Cold Spring Harbor Laboratory</i>, <i>DNA Learning Center</i>, and <i>DNA Learning Center NYC</i>.
-    This may include use in any publications, printed materials, advertisements, exhibitions, and electronic media.
+    <p>I hereby grant to Cold Spring Harbor Laboratory (“CSHL”) a license to reproduce, distribute, create derivative works of, publicly display and otherwise use (including in printed or electronic media) the photograph submitted by me to the CSHL DNA Learning Center’s “<i>All the World in New York City</i>” Photography Contest (collectively, “Licensed Photo”).  I warrant that I own all rights necessary to grant this license to CSHL, that no permission is required from any other party for CSHL to use the Licensed Photo, and that the Licensed Photo does not infringe the copyright or other proprietary or other right of any person.  I will indemnify CSHL against any liability, damage, loss or expense that CSHL may incur based on its use of the Licensed Photo as permitted.
     </p></div>
     {{if .Edit}}
     <form id="form" enctype="multipart/form-data" method="POST" action="./entry?id={{.ID}}" onsubmit="return validateForm()">
@@ -117,7 +116,7 @@
             </div>
             <div class="col-sm-9">
                 <input type="file" accept="application/pdf,image/jpeg,image/png" name="release" required="">
-				<p><small>PDF, jpg, and png files allowed.</small></p>
+				<p><small>PDF, jpg, and png files allowed. For images with multiple subjects combine each release into one, multi-page file.</small></p>
             </div>
         </div>
         {{end}}
@@ -129,6 +128,7 @@
           <button type="button" id="clear" class="btn btn-primary" onclick="clearForm()">Clear Form</button>
           {{end}}
         </div>
+      </div>
     </form>
     </div>
     <script>

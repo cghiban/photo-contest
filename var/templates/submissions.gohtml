@@ -8,7 +8,8 @@
     {{template "header_body" .}}
     <div class="p-5" style="margin-left: auto; margin-right: auto; max-width: 1200px; display: block; border: 1px solid #000; padding">
     <!--<div style="margin-left: auto; margin-right: auto; max-width: 1200px; display: block;">-->
-    <h1 align="center">My Submissions</h1>
+    <h5 align="center"><b><i>All the World in New York City</i> Photography Contest</b></h5>
+	<h1 align="center">My Submissions</h1>
     <div>
         <div class="row mt-3" >
             {{ if lt (len .Photos) 3 }}
@@ -28,7 +29,7 @@
                 <p class="location">Photo taken: <b>{{html $photo.Location}}</b></p>
                 <p class="sbiography">Biography: {{html $photo.SubjectBiography}}</p>
                 <p class="status">Status: <b>{{$photo.Status}}</b></p>
-                <p class="release">Photo Release:  
+                <p class="release">Photo Release(s):  
                 {{if eq $photo.ReleaseMimeType "application/pdf"}}
                 <a href="./tmp/release-{{$photo.PhotoId}}.pdf">View PDF</a>
                 {{else if eq $photo.ReleaseMimeType "application/msword"}}
