@@ -85,7 +85,7 @@ func (s *Service) UserPhotos(rw http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func handleFileUpload(r *http.Request, photoID string) error {
+func handleFileUpload(r *http.Request, photoID string) (string, error) {
 	// Parse our multipart form, 10 << 20 specifies a maximum
 	// upload of 10 MB files.
 	r.ParseMultipartForm(11 << 20)
@@ -94,24 +94,24 @@ func handleFileUpload(r *http.Request, photoID string) error {
 	// the Header and the size of the file
 	file, fileInfo, err := r.FormFile("file")
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer file.Close()
 	fmt.Printf("Uploaded File: %+v\n", fileInfo.Filename)
 	fmt.Printf("File Size: %+v\n", fileInfo.Size)
 	fmt.Printf("Content Type: %+v\n", fileInfo.Header["Content-Type"][0])
 	if fileInfo.Header["Content-Type"][0] != "image/jpeg" && fileInfo.Header["Content-Type"][0] != "image/png" {
-		return fmt.Errorf("Invalid Content Type: %s", fileInfo.Header["Content-Type"][0])
+		return "", fmt.Errorf("Invalid Content Type: %s", fileInfo.Header["Content-Type"][0])
 	}
 
 	// copy all of the contents of our uploaded file into a
 	// new file
 	new_file, err := os.Create(fmt.Sprintf("tmp/photo-%s-original.jpg", photoID))
 	if err != nil {
-		return err
+		return "", err
 	}
 	_, err = io.Copy(new_file, file)
-	return err
+	return fileInfo.Filename, err
 }
 
 func imageTooBig(photoID string) bool {
@@ -393,7 +393,12 @@ func (s *Service) UserPhotoUpload(rw http.ResponseWriter, r *http.Request) {
 				s.ExecuteTemplateWithBase(rw, formData, "photo.gohtml")
 				return
 			}
-			err = handleFileUpload(r, pht.ID)
+			filename, err := handleFileUpload(r, pht.ID)
+			up := photo.UpdatePhoto{
+				Title:     &filename,
+				UpdatedBy: &usr.Name,
+			}
+			photoStore.Update(pht.ID, up)
 			if err != nil {
 				err = photoStore.Delete(pht.ID)
 				if err != nil {
