@@ -6,40 +6,54 @@
     </head>
     <body>
     {{template "header_body" .}}
-    <div style="margin-left: auto; margin-right: auto; max-width: 1200px; display: block;">
+    <div style="margin-left: auto; margin-right: auto; margin-bottom: 20px; max-width: 1200px; display: block; background-image: url(./assets/circle.png); background-repeat:no-repeat; background-size: contain;">
       <img src="./assets/giga-color-curvy.jpg" class="img-fluid" style="min-width: 250px; margin-top: -.5rem" alt="Super wide-angle, aerial image of NYC. Photograph by Jonathan D. Woods and Michael Franz for TIME; Stitching: Gavin D. Farrell; Compositing: Meghan P. Farrell; Color: Claudio Palmisano/10b"><br>
-<br>
-
+		<br>
 		
-		  <h1 align="center"><em>All the World in New  York City</em></br>
-		  Photography Competition</h1>
+		  <h1 align="center" style="color: #903000; "><strong><em>All the World in New York City</em></strong></h1>
+		  <h1 align="center">Photography Competition</h1>
 			<h2 align="center"><strong>Call for Entries </strong></h2>
-		  <h3 align="center">40 $500 Prizes!</h3>
+		  <h3 align="center">Forty $500 Prizes!</h3>
 {{if .User}}
 			<div align="center">
 			<a class="btn btn-primary btn-lg" href="./entry" role="button">Submit entries</a> or <a class="btn btn-primary btn-lg" href="./submissions" role="button" >View Submissions</a>
 			</div>
 {{end}}
-		  <p style="font-size: 1.3rem; margin-top:30px;">We invite you to submit your best portraits to <em>All the World in New York City</em>, which explores the racial and cultural diversity of  America's immigrant city. Photographs should tell a story or reflect the heritage of  New Yorkers with origins from another part of the world. </p>
-		  <p style="font-size: 1.1rem;">Selected photographs will be displayed at <em>DNA Learning Center NYC</em>, on the campus of the New York City College of Technology in downtown Brooklyn. They will become part of a permanent exhibition, <em>What DNA Says about Our Past and Future</em>. The portraits of New Yorkers will illustrate migrations that have mixed people and their DNA throughout history.</p>
-			<p style="font-size: 1.1rem;"><strong>Photographs</strong> and <strong>subject biographies</strong> will be judged &ldquo;blind,&rdquo;  without submitter&rsquo;s name. The judging panel will be chaired by Jeanne  Moutoussamy-Ashe, a celebrated photographer and public health advocate. The photographers of the top 40 photographs will each receive a<em> $500 award.</em></p>
+		<div class="row mt-3" style="border-top: 1px #000 solid;" align="center">  
+			<p style="font-size: 1.3rem; margin-top:30px;"  ><strong>We invite you to submit your best portraits to <em>All the World in New York City</em>.</strong><!--, which explores the racial and cultural diversity of  America's immigrant city //--> </p>
+		<div class="col col-md-6 col-12 mt-3" style="padding-right:35px;">
+			<!--h5><strong>About</strong></h5//-->
+			<p style="font-size: 1.25rem;" align="right">
+				Cold Spring Harbor Laboratory has opened a new science center, <em>DNA Learning Center NYC</em>, on the campus of the New York City College of Technology in Downtown Brooklyn. Biology lab experiences offered at the center help students and the public see themselves as scientists. </p>
+<p style="font-size: 1.25rem;" align="right"><em>What DNA Says About Our Past and Future</em>, a permanent museum exhibition under development, will present a hopeful message of genetics in our lives. The DNA of any two people is 99.9% identical; racial and ethnic differences acquired as we peopled the globe are, indeed, only “skin deep.”</p>
+<p style="font-size: 1.25rem;" align="right">A gallery within the exhibition—<em>All the World in New York City</em>—will feature photographs of the many races, cultures, and ethnicities represented by the people living today in New York, America’s traditional immigrant city. All of these people are closely related by their common DNA past.
+
+			</p>
+		</div>
+		<div class="col col-md-6 col-12 mt-3" align="left" style="padding-left:30px;">
+			
+		<p style="font-size: 1.3rem; " ><strong>Photographs should tell a story or reflect the heritage of New Yorkers with origins from another part of the world.</strong> The portraits of New Yorkers will illustrate migrations that have mixed people and their DNA throughout history.</p>
+		  <!--p style="font-size: 1.1rem;">Selected photographs will be displayed at <em>DNA Learning Center NYC</em>, on the campus of the New York City College of Technology in downtown Brooklyn. They will become part of a permanent exhibition, <em>What DNA Says about Our Past and Future</em>. The portraits of New Yorkers will illustrate migrations that have mixed people and their DNA throughout history.</p //-->
+			<p style="font-size: 1.1rem;">The judging panel will be chaired by <strong><a href="http://jeannemoutoussamy-ashe.com/">Jeanne Moutoussamy-Ashe</a></strong>, a celebrated photographer and public health advocate. <strong>Photographs</strong> and <strong>subject biographies</strong> will be judged &ldquo;blind,&rdquo;  without submitter&rsquo;s name. The photographers of the top 40 photographs will each receive a<em> $500 award.</em></p>
 		  <p style="font-size: 1.1rem;">There is <strong>no entry fee</strong>. A maximum of three photos may be submitted per photographer. Entries are welcome from anyone age 18 and older. </p>
 		  <ul>		    
 		    <li>Register/Log in to submit a<strong> maximum of three entries</strong>. Submissions are saved between sessions.</li>
 			<li>The <strong>subject biography</strong> (approximately 100 words) is important and will be considered in judging.</li>
 		    <li>Each entry must include a signed <a href="./assets/All-the-World-in-NY-City-Photo-Release.pdf">Photo Release Form</a>.</li>
-			<li>Deadline  for submission: <strong>January 31, 2022</strong>  (11:59 pm EST)</li>
+			<li>Deadline  for submission: <strong>January 31, 2022</strong> (11:59 pm EST)</li>
 
 	      </ul>
-		  
-		  <p>Visit <a href="./guidelines">Guidelines</a> or call for entry details. </p>
-		  
+		 
+		  <p>Visit <a href="./guidelines">Guidelines</a> for call for entry details. </p>
+		<p>&nbsp;</p>
+		  </div>
 {{ if not .User }}
 			<div align="center">
 			<a class="btn btn-primary btn-lg" href="./register" role="button">Register</a> or <a class="btn btn-primary btn-lg" href="./login" role="button" >Log in</a>
 			</div>
 {{ end }}
     </div>
+		</div>
     {{template "footer" .}}
     </body>
 </html>
